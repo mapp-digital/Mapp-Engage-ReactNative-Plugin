@@ -8,6 +8,7 @@
   },
   "dependencies": {
     "react": "16.8.3",
+    "reinput": "^2.5.3",
     "react-native": "0.59.8"
   },
   "devDependencies": {
