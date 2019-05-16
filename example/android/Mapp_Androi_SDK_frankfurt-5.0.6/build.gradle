@@ -1,0 +1,2 @@
+configurations.maybeCreate("default")
+artifacts.add("default", file('Mapp_Androi_SDK_frankfurt-5.0.6.aar'))

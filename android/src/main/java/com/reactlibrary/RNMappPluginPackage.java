@@ -10,6 +10,10 @@ import com.facebook.react.bridge.NativeModule;
 import com.facebook.react.bridge.ReactApplicationContext;
 import com.facebook.react.uimanager.ViewManager;
 import com.facebook.react.bridge.JavaScriptModule;
+/**
+ * Created by Aleksandar Marinkovic on 2019-05-15.
+ * Copyright (c) 2019 MAPP.
+ */
 public class RNMappPluginPackage implements ReactPackage {
     @Override
     public List<NativeModule> createNativeModules(ReactApplicationContext reactContext) {
