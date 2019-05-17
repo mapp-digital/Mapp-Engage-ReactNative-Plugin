@@ -126,6 +126,12 @@ public class RNMappPluginModule extends ReactContextBaseJavaModule {
 
     }
 
+    @ReactMethod
+    public void isPushEnabled(Promise promise) {
+        promise.resolve(Appoxee.instance().isPushEnabled());
+    }
+
+
 
     @ReactMethod
     public void isReady(Promise promise) {
@@ -151,13 +157,13 @@ public class RNMappPluginModule extends ReactContextBaseJavaModule {
     }
 
     @ReactMethod
-    public void setAttribute(String key, boolean value) {
+    public void setAttributeBoolean(String key, Boolean value) {
         Appoxee.instance().setAttribute(key, value);
 
     }
 
     @ReactMethod
-    public void setAttribute(String key, int value) {
+    public void setAttributeInt(String key, Integer value) {
         Appoxee.instance().setAttribute(key, value);
 
     }
@@ -207,7 +213,7 @@ public class RNMappPluginModule extends ReactContextBaseJavaModule {
 
 
     @ReactMethod
-    public void lockScreenOrientation(int orientation) {
+    public void lockScreenOrientation(Integer orientation) {
         Appoxee.setOrientation(Objects.requireNonNull(reactContext.getCurrentActivity()).getApplication(), orientation);
     }
 
@@ -269,28 +275,28 @@ public class RNMappPluginModule extends ReactContextBaseJavaModule {
     }
 
     @ReactMethod
-    public void inAppMarkAsRead(int templateId, String eventId) {
+    public void inAppMarkAsRead(Integer templateId, String eventId) {
         Appoxee.instance().triggerStatistcs((reactContext.getCurrentActivity()), getInAppStatisticsRequestObject(templateId,
                 eventId,
                 InAppStatistics.INBOX_INBOX_MESSAGE_READ_KEY, null, null, null));
     }
 
     @ReactMethod
-    public void inAppMarkAsUnRead(int templateId, String eventId) {
+    public void inAppMarkAsUnRead(Integer templateId, String eventId) {
         Appoxee.instance().triggerStatistcs((reactContext.getCurrentActivity()), getInAppStatisticsRequestObject(templateId,
                 eventId,
                 InAppStatistics.INBOX_INBOX_MESSAGE_UNREAD_KEY, null, null, null));
     }
 
     @ReactMethod
-    public void inAppMarkAsDeleted(int templateId, String eventId) {
+    public void inAppMarkAsDeleted(Integer templateId, String eventId) {
         Appoxee.instance().triggerStatistcs((reactContext.getCurrentActivity()), getInAppStatisticsRequestObject(templateId,
                 eventId,
                 InAppStatistics.INBOX_INBOX_MESSAGE_DELETED_KEY, null, null, null));
     }
 
     @ReactMethod
-    public void triggerStatistic(int templateId, String originalEventId,
+    public void triggerStatistic(Integer templateId, String originalEventId,
                                  String trackingKey, Long displayMillis,
                                  String reason, String link) {
         Appoxee.instance()
@@ -304,10 +310,6 @@ public class RNMappPluginModule extends ReactContextBaseJavaModule {
 
     }
 
-    @ReactMethod
-    public void isPushEnabled(Promise promise) {
-        promise.resolve(Appoxee.instance().isPushEnabled());
-    }
 
     @ReactMethod
     public void addAndroidListener(String eventName) {

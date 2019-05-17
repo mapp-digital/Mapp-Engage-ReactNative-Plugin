@@ -46,7 +46,7 @@ dependencies {
             {
                 exclude group: 'com.android.support'
             }
-    implementation "com.google.firebase:firebase-core:${safeExtGet('firebaseCoreVersion', '16.0.9')}"
+//    implementation "com.google.firebase:firebase-core:${safeExtGet('firebaseCoreVersion', '16.0.9')}"
     implementation project(path: ':Mapp_Androi_SDK_frankfurt-5.0.6')
 }
   

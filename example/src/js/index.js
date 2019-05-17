@@ -1,5 +1,9 @@
+module.exports = {
 
-exports.MappEventEmitter = require('./MappEventEmitter.js');
-
-
-exports.Mapp = require('./Mapp.js');
+    get Mapp() {
+        return require('./Mapp.js');
+    },
+    get MappEventEmitter() {
+        return require('./MappEventEmitter.js');
+    },
+};

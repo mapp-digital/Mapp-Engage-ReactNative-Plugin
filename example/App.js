@@ -14,10 +14,13 @@ import {
     Platform,
     ScrollView,
     ImageBackground,
-    SafeAreaView
+    SafeAreaView,
+    Alert
 } from 'react-native';
 import MappButton from './src/components/MappButton'
 import MappInputText from './src/components/MappInputText'
+
+import {MappEventEmitter, Mapp} from './src/js'
 
 const instructions = Platform.select({
     ios: 'Press Cmd+R to reload,\n' + 'Cmd+D or shake for dev menu',
@@ -40,6 +43,12 @@ export default class App extends Component<Props> {
         setTags: '',
         defaultError: false,
         defaultErrorMessage: '',
+    }
+
+    constructor (props) {
+        super(props);
+      //  Mapp.engage("5c59a56fd39ce9.45048743","1028993954364","https://jamie-test.shortest-route.com","263176","55")
+
     }
 
     handleTextChange = (type) => (text) => {
@@ -76,46 +85,46 @@ export default class App extends Component<Props> {
                             />
                             <MappButton
                                 text={"Get Device Alias"}
-                                onPress={this.setAlias}/>
+                                onPress={this.getAlias}/>
                             <MappButton
                                 text={"Device Information"}
-                                onPress={this.setAlias}/>
+                                onPress={this.getDevice}/>
                             <MappButton
                                 text={"Is Puh Enabled"}
-                                onPress={this.setAlias}/>
+                                onPress={this.isPushEnabled}/>
                             <MappButton
                                 text={"Opt in"}
-                                onPress={this.setAlias}/>
+                                onPress={this.optIn}/>
                             <MappButton
                                 text={"Opt out"}
-                                onPress={this.setAlias}/>
+                                onPress={this.optOut}/>
                             <MappButton
                                 text={"Start Geo"}
-                                onPress={this.setAlias}/>
+                                onPress={this.startGeo}/>
                             <MappButton
                                 text={"Stop Geo"}
-                                onPress={this.setAlias}/>
+                                onPress={this.stopGeo}/>
                             <MappButton
                                 text={"Fetch inbox messages"}
-                                onPress={this.setAlias}/>
+                                onPress={this.fetchInbox}/>
                             <MappButton
                                 text={"In App: App Open"}
-                                onPress={this.setAlias}/>
+                                onPress={this.appOpenEvent}/>
                             <MappButton
                                 text={"In App: App Feedback"}
-                                onPress={this.setAlias}/>
+                                onPress={this.appFeedbackEvent}/>
                             <MappButton
                                 text={"In App: App Discount"}
-                                onPress={this.setAlias}/>
+                                onPress={this.appDiscountEvent}/>
                             <MappButton
                                 text={"In App: App Promo"}
-                                onPress={this.setAlias}/>
+                                onPress={this.appPromoEvent}/>
                             <MappButton
                                 text={"Fetch Multiple Messages"}
-                                onPress={this.setAlias}/>
+                                onPress={this.fetchMultipleMessages}/>
                             <MappButton
                                 text={"Get Tags"}
-                                onPress={this.setAlias}/>
+                                onPress={this.getTags}/>
 
                             <MappInputText
                                 maxLength={255}
@@ -129,7 +138,7 @@ export default class App extends Component<Props> {
                             />
                             <MappButton
                                 text={"Set Tags"}
-                                onPress={this.setAlias}/>
+                                onPress={this.setTagsEvent}/>
 
                             <MappInputText
                                 maxLength={255}
@@ -143,20 +152,20 @@ export default class App extends Component<Props> {
                             />
                             <MappButton
                                 text={"Remove Tag"}
-                                onPress={this.setAlias}/>
+                                onPress={this.removeTagEvent}/>
                             <MappInputText
                                 maxLength={255}
                                 label="Set Attribute"
                                 autoCorrect={false}
                                 autoCapitalize="none"
-                                value={state.setAttribute}
-                                onChangeText={this.handleTextChange('setAttribute')}
+                                value={state.addAttribute}
+                                onChangeText={this.handleTextChange('addAttribute')}
                                 error={state.defaultError}
                                 errorMessage={state.defaultErrorMessage}
                             />
                             <MappButton
                                 text={"Set Attribute"}
-                                onPress={this.setAlias}/>
+                                onPress={this.setAttributeEvent}/>
                             <MappInputText
                                 maxLength={255}
                                 label="Get Attribute"
@@ -169,7 +178,7 @@ export default class App extends Component<Props> {
                             />
                             <MappButton
                                 text={"Get Attribute"}
-                                onPress={this.setAlias}/>
+                                onPress={this.getAttributeEvent}/>
                             <MappInputText
                                 maxLength={255}
                                 label="Remove Attribute"
@@ -182,13 +191,13 @@ export default class App extends Component<Props> {
                             />
                             <MappButton
                                 text={"Remove Attribute"}
-                                onPress={this.setAlias}/>
+                                onPress={this.removeAttributeEvent}/>
                             <MappButton
                                 text={"Remove Badge Number"}
-                                onPress={this.setAlias}/>
+                                onPress={this.removeBadgeNumberEvent}/>
                             <MappButton
                                 text={"Lock Orientation"}
-                                onPress={this.setAlias}/>
+                                onPress={this.lockOrientationEvent}/>
                         </View>
                     </ImageBackground>
                 </ScrollView>
@@ -197,8 +206,90 @@ export default class App extends Component<Props> {
     }
 
     setAlias = () => {
+        Mapp.setAlias(this.state.alias)
+    };
 
-    }
+    getAlias = () => {
+        Mapp.getAlias().then((data) => {
+            Alert.alert(data)
+        });
+
+    };
+
+    getDevice = () => {
+        Mapp.getDeviceInfo().then((data) => {
+            Alert.alert(data)
+        });
+    };
+
+    optIn = () => {
+        Mapp.setPushEnabled(true)
+    };
+
+    optOut = () => {
+        Mapp.setPushEnabled(false)
+    };
+    startGeo = () => {
+        Mapp.startGeoFencing()
+    };
+    stopGeo = () => {
+        Mapp.stopGeoFencing()
+    };
+    fetchInbox = () => {
+        Mapp.fetchInboxMessage().then((data) => {
+            Alert.alert(data)
+        });
+    };
+    appOpenEvent = () => {
+        Mapp.triggerInApp("app_open")
+    };
+    appFeedbackEvent = () => {
+        Mapp.triggerInApp("app_feedback")
+    };
+    appDiscountEvent = () => {
+        Mapp.triggerInApp("app_discount")
+    };
+    appPromoEvent = () => {
+        Mapp.triggerInApp("app_promo")
+    };
+    fetchMultipleMessages = () => {
+
+        Mapp.fetchInboxMessage().then((data) => {
+            Alert.alert(data)
+        });
+    };
+
+    getTags = () => {
+        Mapp.getTags().then((data) => {
+            Alert.alert(data)
+        });
+    };
+
+    setTagsEvent = () => {
+        Mapp.addTag(this.state.setTags)
+    };
+
+    removeTagEvent = () => {
+        Mapp.removeTag(this.state.removeTags)
+    };
+    setAttributeEvent = () => {
+        Mapp.setAttributeString("test",this.state.addAttribute)
+    };
+    getAttributeEvent = () => {
+        Mapp.getAttributeStringValue("test").then((data) => {
+            Alert.alert(data)
+        });
+    };
+    removeAttributeEvent = () => {
+        Mapp.removeAttribute("test");
+    };
+    removeBadgeNumberEvent = () => {
+        Mapp.removeBadgeNumber();
+    };
+    lockOrientationEvent = () => {
+     //TODO
+    };
+
 }
 
 const styles = StyleSheet.create({
