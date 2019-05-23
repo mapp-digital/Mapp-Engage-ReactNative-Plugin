@@ -4,36 +4,34 @@
 import {
     NativeModules,
     Platform,
-    NativeEventEmitter
 } from 'react-native';
 
 import CustomEvent from './CustomEvent.js'
 
 import MappEventEmitter from './MappEventEmitter.js'
-const { RNMappPluginModule } = NativeModules;
+
+const {RNMappPluginModule} = NativeModules;
 const EventEmitter = new MappEventEmitter();
 
-const PUSH_RECEIVED_EVENT = "PUSH_RECEIVED_EVENT";
+const PUSH_RECEIVED_EVENT = "PushNotificationEvent";
+const MappIntentEvent = "MappIntentEve";
 
 /**
  * @private
  */
 function convertEventEnum(type: EventName): ?string {
     if (type === 'notificationResponse') {
-        return NOTIFICATION_RESPONSE_EVENT;
-
+        return PUSH_RECEIVED_EVENT;
+    }
+    else if (type === 'deepLink') {
+        return MappIntentEvent;
     }
     throw new Error("Invalid event name: " + type);
 }
 
 export type EventName = $Enum<{
     notificationResponse: string,
-    pushReceived: string,
-    register: string,
-    deepLink: string,
-    notificationOptInStatus: string,
-    inboxUpdated: string,
-    showInbox: string
+    deepLink: string
 }>;
 
 export class Mapp {
@@ -74,7 +72,7 @@ export class Mapp {
      */
 
     static engage(sdkKey: string, googleProjectId: string, cepURL: string, appID: string, tenantID: string) {
-        return RNMappPluginModule.engage(sdkKey,googleProjectId,cepURL,appID,tenantID);
+        return RNMappPluginModule.engage(sdkKey, googleProjectId, cepURL, appID, tenantID);
     }
 
     /**
@@ -110,40 +108,40 @@ export class Mapp {
     /**
      * Enables user notifications.
      */
-    static setPushEnabled( optIn:boolean){
+    static setPushEnabled(optIn: boolean) {
         return RNMappPluginModule.setPushEnabled(optIn);
     }
-    
+
 
     /**
      * Set Custom Attribute
      *
      */
-    static setAttributeString(key:string,value :string){
-        return RNMappPluginModule.setAttribute(key,value);
+    static setAttributeString(key: string, value: string) {
+        return RNMappPluginModule.setAttribute(key, value);
     }
 
     /**
      * Set Custom Attribute
      *
      */
-    static setAttributeInt(key:string,value :boolean){
-        return RNMappPluginModule.setAttributeInt(key,value);
+    static setAttributeInt(key: string, value: boolean) {
+        return RNMappPluginModule.setAttributeInt(key, value);
     }
 
     /**
      * Set Custom Attribute
      *
      */
-    static setAttributeBoolean(key:string,value :number){
-        return RNMappPluginModule.setAttributeBoolean(key,value);
+    static setAttributeBoolean(key: string, value: number) {
+        return RNMappPluginModule.setAttributeBoolean(key, value);
     }
 
     /**
      * Remove Custom Attribute
      *
      */
-    static removeAttribute(key:string){
+    static removeAttribute(key: string) {
         return RNMappPluginModule.removeAttribute(key);
     }
 
@@ -166,14 +164,10 @@ export class Mapp {
         RNMappPluginModule.addTag(tag);
     }
 
-    /**
-     * Removes a  tag.
-     *
-     * @param {string} tag A channel tag.
-     */
-    static removeTag(tag: string) {
-        RNMappPluginModule.removeTag(tag);
-    }
+
+    // static removeTags(tag: string) {
+    //     RNMappPluginModule.removeTag(tag);
+    // }
 
     /**
      * Gets the channel tags.
@@ -183,7 +177,6 @@ export class Mapp {
     static getTags(): Promise<Array<string>> {
         return RNMappPluginModule.getTags();
     }
-
 
 
     static getDeviceInfo(): Promise<Object> {
@@ -223,26 +216,25 @@ export class Mapp {
         return RNMappPluginModule.triggerInApp(value);
     }
 
-    static inAppMarkAsRead(templateId: number,eventId: string) {
-        return RNMappPluginModule.inAppMarkAsRead(templateId,eventId);
+    static inAppMarkAsRead(templateId: number, eventId: string) {
+        return RNMappPluginModule.inAppMarkAsRead(templateId, eventId);
     }
 
-    static inAppMarkAsUnRead(templateId: number,eventId: string) {
-        return RNMappPluginModule.inAppMarkAsUnRead(templateId,eventId);
+    static inAppMarkAsUnRead(templateId: number, eventId: string) {
+        return RNMappPluginModule.inAppMarkAsUnRead(templateId, eventId);
     }
 
-    static inAppMarkAsDeleted(templateId: number,eventId: string) {
-        return RNMappPluginModule.inAppMarkAsDeleted(templateId,eventId);
+    static inAppMarkAsDeleted(templateId: number, eventId: string) {
+        return RNMappPluginModule.inAppMarkAsDeleted(templateId, eventId);
     }
 
-    static triggerStatistic(templateId:number, originalEventId:string, trackingKey:string, displayMillis:number, reason:string, link):string {
+    static triggerStatistic(templateId: number, originalEventId: string, trackingKey: string, displayMillis: number, reason: string, link): string {
         return RNMappPluginModule.triggerStatistic(templateId, originalEventId, trackingKey, displayMillis, reason, link);
     }
 
     static isDeviceRegistered(): Promise<boolean> {
         return RNMappPluginModule.isDeviceRegistered(value);
     }
-
 
 
     /**
@@ -269,8 +261,6 @@ export class Mapp {
                 });
         });
     }
-
-
 
 
     static runAction(name: string, value: ?any): Promise<any> {

@@ -2,12 +2,11 @@
 package com.reactlibrary;
 
 import android.Manifest;
-import android.content.Context;
 import android.content.pm.PackageManager;
 import android.os.AsyncTask;
 import android.os.Build;
+import android.support.v4.app.NotificationManagerCompat;
 import android.support.v4.content.ContextCompat;
-import android.util.Log;
 
 import com.appoxee.Appoxee;
 import com.appoxee.AppoxeeOptions;
@@ -31,13 +30,11 @@ import com.facebook.react.bridge.WritableArray;
 import com.facebook.react.bridge.WritableMap;
 import com.facebook.react.bridge.WritableNativeMap;
 
-import org.json.JSONArray;
-import org.json.JSONObject;
-
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
+
 /**
  * Created by Aleksandar Marinkovic on 2019-05-15.
  * Copyright (c) 2019 MAPP.
@@ -51,11 +48,12 @@ public class RNMappPluginModule extends ReactContextBaseJavaModule {
     public RNMappPluginModule(ReactApplicationContext reactContext) {
         super(reactContext);
         this.reactContext = reactContext;
+
     }
 
     @Override
     public String getName() {
-        return "RNMappPlugin";
+        return "RNMappPluginModule";
     }
 
     @Override
@@ -83,6 +81,7 @@ public class RNMappPluginModule extends ReactContextBaseJavaModule {
 
         EventEmitter.shared().attachReactContext(getReactApplicationContext());
     }
+
     private void reportResultWithCallback(Callback callback, String error, Object result) {
         if (callback != null) {
             if (error != null) {
@@ -100,7 +99,7 @@ public class RNMappPluginModule extends ReactContextBaseJavaModule {
     }
 
     @ReactMethod
-    public void engage() {
+    public void engage2() {
         Appoxee.engage(Objects.requireNonNull(reactContext.getCurrentActivity()).getApplication());
 
     }
@@ -123,6 +122,11 @@ public class RNMappPluginModule extends ReactContextBaseJavaModule {
     public void setPushEnabled(boolean optIn) {
         Appoxee.instance().setPushEnabled(optIn);
 
+    }
+
+    @ReactMethod
+    public void isPushEnabled(Promise promise) {
+        promise.resolve(Appoxee.instance().isPushEnabled());
     }
 
 
@@ -150,13 +154,13 @@ public class RNMappPluginModule extends ReactContextBaseJavaModule {
     }
 
     @ReactMethod
-    public void setAttribute(String key, boolean value) {
+    public void setAttributeBoolean(String key, Boolean value) {
         Appoxee.instance().setAttribute(key, value);
 
     }
 
     @ReactMethod
-    public void setAttribute(String key, int value) {
+    public void setAttributeInt(String key, Integer value) {
         Appoxee.instance().setAttribute(key, value);
 
     }
@@ -200,13 +204,13 @@ public class RNMappPluginModule extends ReactContextBaseJavaModule {
     }
 
     @ReactMethod
-    public void getAttributeStringValue(Promise promise, String value) {
+    public void getAttributeStringValue(String value,Promise promise) {
         promise.resolve(Appoxee.instance().getAttributeStringValue(value));
     }
 
 
     @ReactMethod
-    public void lockScreenOrientation(int orientation) {
+    public void lockScreenOrientation(Integer orientation) {
         Appoxee.setOrientation(Objects.requireNonNull(reactContext.getCurrentActivity()).getApplication(), orientation);
     }
 
@@ -218,7 +222,8 @@ public class RNMappPluginModule extends ReactContextBaseJavaModule {
     @ReactMethod
     public void startGeoFencing() {
         if (shouldRequestLocationPermissions()) {
-            ReqiestPermissionsTask.RequestPermissionsTask task = new ReqiestPermissionsTask.RequestPermissionsTask(getReactApplicationContext(), new ReqiestPermissionsTask.RequestPermissionsTask.Callback() {
+            RequestPermissionsTask task = new RequestPermissionsTask(getReactApplicationContext(),
+                    new RequestPermissionsTask.Callback() {
                 @Override
                 public void onResult(boolean enabled) {
                     if (enabled) {
@@ -233,10 +238,12 @@ public class RNMappPluginModule extends ReactContextBaseJavaModule {
 
 
     }
+
     @ReactMethod
     public void stopGeoFencing() {
         Appoxee.instance().stopGeoFencing();
     }
+
     @ReactMethod
     public void fetchInboxMessage(final Promise promise) {
 
@@ -247,9 +254,10 @@ public class RNMappPluginModule extends ReactContextBaseJavaModule {
             @Override
             public void onInAppInboxMessages(List<APXInboxMessage> richMessages) {
                 WritableArray messagesArray = Arguments.createArray();
-                for (APXInboxMessage message : richMessages) {
-                    messagesArray.pushMap(messageToJson(message));
-                }
+                if (richMessages != null)
+                    for (APXInboxMessage message : richMessages) {
+                        messagesArray.pushMap(messageToJson(message));
+                    }
                 promise.resolve(messagesArray);
             }
 
@@ -268,28 +276,28 @@ public class RNMappPluginModule extends ReactContextBaseJavaModule {
     }
 
     @ReactMethod
-    public void inAppMarkAsRead(int templateId, String eventId) {
+    public void inAppMarkAsRead(Integer templateId, String eventId) {
         Appoxee.instance().triggerStatistcs((reactContext.getCurrentActivity()), getInAppStatisticsRequestObject(templateId,
                 eventId,
                 InAppStatistics.INBOX_INBOX_MESSAGE_READ_KEY, null, null, null));
     }
 
     @ReactMethod
-    public void inAppMarkAsUnRead(int templateId, String eventId) {
+    public void inAppMarkAsUnRead(Integer templateId, String eventId) {
         Appoxee.instance().triggerStatistcs((reactContext.getCurrentActivity()), getInAppStatisticsRequestObject(templateId,
                 eventId,
                 InAppStatistics.INBOX_INBOX_MESSAGE_UNREAD_KEY, null, null, null));
     }
 
     @ReactMethod
-    public void inAppMarkAsDeleted(int templateId, String eventId) {
+    public void inAppMarkAsDeleted(Integer templateId, String eventId) {
         Appoxee.instance().triggerStatistcs((reactContext.getCurrentActivity()), getInAppStatisticsRequestObject(templateId,
                 eventId,
                 InAppStatistics.INBOX_INBOX_MESSAGE_DELETED_KEY, null, null, null));
     }
 
     @ReactMethod
-    public void triggerStatistic(int templateId, String originalEventId,
+    public void triggerStatistic(Integer templateId, String originalEventId,
                                  String trackingKey, Long displayMillis,
                                  String reason, String link) {
         Appoxee.instance()
@@ -303,10 +311,6 @@ public class RNMappPluginModule extends ReactContextBaseJavaModule {
 
     }
 
-    @ReactMethod
-    public void isPushEnabled(Promise promise) {
-        promise.resolve(Appoxee.instance().isPushEnabled());
-    }
 
     @ReactMethod
     public void addAndroidListener(String eventName) {
@@ -350,7 +354,8 @@ public class RNMappPluginModule extends ReactContextBaseJavaModule {
             msgJson.putInt("templateId", msg.getTemplateId());
             msgJson.putString("title", msg.getContent());
             msgJson.putString("eventId", msg.getEventId());
-            msgJson.putString("expirationDate", msg.getExpirationDate().toString());
+            if (msg.getExpirationDate() != null)
+                msgJson.putString("expirationDate", msg.getExpirationDate().toString());
             if (msg.getIconUrl() != null)
                 msgJson.putString("iconURl", msg.getIconUrl());
             if (msg.getStatus() != null)
@@ -384,7 +389,7 @@ public class RNMappPluginModule extends ReactContextBaseJavaModule {
             deviceInfo.putString("manufacturer", deviceInfoList.manufacturer);
             deviceInfo.putString("osVersion", deviceInfoList.osVersion);
             deviceInfo.putString("resolution", deviceInfoList.resolution);
-            deviceInfo.putInt("density", deviceInfoList.density);
+            deviceInfo.putString("density", String.valueOf(deviceInfoList.density));
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -430,6 +435,17 @@ public class RNMappPluginModule extends ReactContextBaseJavaModule {
                 ContextCompat.checkSelfPermission(getReactApplicationContext(), Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_DENIED;
     }
 
+
+    @ReactMethod
+    public void clearNotifications() {
+        NotificationManagerCompat.from(reactContext.getApplicationContext()).cancelAll();
+    }
+
+
+    @ReactMethod
+    public void clearNotification(int id) {
+        NotificationManagerCompat.from(reactContext.getApplicationContext()).cancel(id);
+    }
 
 
 }

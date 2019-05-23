@@ -30,14 +30,8 @@
         </receiver>
         <activity
             android:name=".HelperActivity"
-            android:exported="false"
+            android:exported="true"
             android:theme="@style/HelperActivityStyle">
-        </activity>
-
-        <activity
-            android:name=".ActivityListener"
-            android:label="mapp"
-            android:theme="@android:style/Theme.NoDisplay">
 
             <intent-filter android:label="mapp">
                 <category android:name="android.intent.category.DEFAULT" />
@@ -56,6 +50,20 @@
                 <data android:host="deeplink" />
                 <data android:host="inbox" />
                 <data android:host="custom" />
+            </intent-filter>
+
+        </activity>
+
+        <activity
+            android:name=".ActivityListener"
+            android:exported="false"
+            android:theme="@style/HelperActivityStyle">
+            <intent-filter
+                >
+                <action android:name="com.mapp.RICH_PUSH" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
             </intent-filter>
         </activity>
     </application>
