@@ -102,7 +102,7 @@ android {
     }
 
     defaultConfig {
-        applicationId "com.appoxee.example"
+        applicationId "com.example"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 1
@@ -141,6 +141,10 @@ dependencies {
     implementation fileTree(dir: "libs", include: ["*.jar"])
     implementation "com.android.support:appcompat-v7:${rootProject.ext.supportLibVersion}"
     implementation "com.facebook.react:react-native:+"
+    implementation ("com.google.firebase:firebase-messaging:17.3.4")
+            {
+                exclude group: 'com.android.support'
+            }
     implementation project(path: ':android')  // From node_modules
 }
 

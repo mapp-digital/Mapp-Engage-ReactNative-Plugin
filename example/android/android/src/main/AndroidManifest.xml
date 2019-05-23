@@ -1,6 +1,64 @@
-
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-          package="com.reactlibrary">
+    package="com.reactlibrary">
+
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+    <uses-permission android:name="android.permission.INTERNET" />
+
+    <application>
+        <receiver
+            android:name=".MyPushBroadcastReceiver"
+            android:enabled="true"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="com.appoxee.PUSH_OPENED" />
+                <action android:name="com.appoxee.PUSH_RECEIVED" />
+                <action android:name="com.appoxee.PUSH_DISMISSED" />
+
+                <category android:name="${applicationId}" />
+
+                <action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <!-- Accepts URIs that begin with "http://www.example.com/gizmos” -->
+                <data
+                    android:host="www.example.com"
+                    android:pathPrefix="/gizmos"
+                    android:scheme="http" />
+            </intent-filter>
+        </receiver>
+        <activity
+            android:name=".HelperActivity"
+            android:exported="false"
+            android:theme="@style/HelperActivityStyle">
+        </activity>
+
+        <activity
+            android:name=".ActivityListener"
+            android:label="mapp"
+            android:theme="@android:style/Theme.NoDisplay">
+
+            <intent-filter android:label="mapp">
+                <category android:name="android.intent.category.DEFAULT" />
+
+                <action android:name="android.intent.action.VIEW" />
+                <action android:name="com.appoxee.VIEW_CUSTOM_LINKS" />
+                <action android:name="com.appoxee.VIEW_INBOX" />
+                <action android:name="com.appoxee.VIEW_DEEPLINK" />
+
+                <category android:name="android.intent.category.BROWSABLE" />
+
+                <data
+                    android:host="pushnotification"
+                    android:scheme="mapp" />
+                <data android:scheme="apx" />
+                <data android:host="deeplink" />
+                <data android:host="inbox" />
+                <data android:host="custom" />
+            </intent-filter>
+        </activity>
+    </application>
 
 </manifest>
   

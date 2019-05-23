@@ -35,7 +35,7 @@ const instructions = Platform.select({
 type Props = {};
 export default class App extends Component<Props> {
     state = {
-        alias: '',
+        aliasState: '',
         removeAttribute: '',
         addAttribute: '',
         getAttribute: '',
@@ -47,7 +47,7 @@ export default class App extends Component<Props> {
 
     constructor (props) {
         super(props);
-      //  Mapp.engage("5c59a56fd39ce9.45048743","1028993954364","https://jamie-test.shortest-route.com","263176","55")
+
 
     }
 
@@ -90,7 +90,7 @@ export default class App extends Component<Props> {
                                 text={"Device Information"}
                                 onPress={this.getDevice}/>
                             <MappButton
-                                text={"Is Puh Enabled"}
+                                text={"Is Push Enabled"}
                                 onPress={this.isPushEnabled}/>
                             <MappButton
                                 text={"Opt in"}
@@ -198,6 +198,10 @@ export default class App extends Component<Props> {
                             <MappButton
                                 text={"Lock Orientation"}
                                 onPress={this.lockOrientationEvent}/>
+                            <MappButton
+                                text={"Engage"}
+                                onPress={this.engageEvent}/>
+
                         </View>
                     </ImageBackground>
                 </ScrollView>
@@ -206,19 +210,30 @@ export default class App extends Component<Props> {
     }
 
     setAlias = () => {
-        Mapp.setAlias(this.state.alias)
+        Mapp.setAlias(this.state.aliasState)
     };
 
     getAlias = () => {
-        Mapp.getAlias().then((data) => {
+        Mapp.getAlias().then(data => {
+            console.log(data);
             Alert.alert(data)
         });
 
     };
 
+    isPushEnabled = () => {
+        Mapp.isPushEnabled().then(data => {
+            console.log(data);
+            Alert.alert(data.toString())
+        });
+
+    };
+
+
+
     getDevice = () => {
-        Mapp.getDeviceInfo().then((data) => {
-            Alert.alert(data)
+        Mapp.getDeviceInfo().then(data => {
+            Alert.alert(JSON.stringify(data))
         });
     };
 
@@ -236,8 +251,8 @@ export default class App extends Component<Props> {
         Mapp.stopGeoFencing()
     };
     fetchInbox = () => {
-        Mapp.fetchInboxMessage().then((data) => {
-            Alert.alert(data)
+        Mapp.fetchInboxMessage().then(data => {
+            Alert.alert(JSON.stringify(data))
         });
     };
     appOpenEvent = () => {
@@ -254,14 +269,14 @@ export default class App extends Component<Props> {
     };
     fetchMultipleMessages = () => {
 
-        Mapp.fetchInboxMessage().then((data) => {
-            Alert.alert(data)
+        Mapp.fetchInboxMessage().then(data => {
+            Alert.alert(JSON.stringify(data))
         });
     };
 
     getTags = () => {
-        Mapp.getTags().then((data) => {
-            Alert.alert(data)
+        Mapp.getTags().then(data => {
+            Alert.alert(JSON.stringify(data))
         });
     };
 
@@ -276,7 +291,7 @@ export default class App extends Component<Props> {
         Mapp.setAttributeString("test",this.state.addAttribute)
     };
     getAttributeEvent = () => {
-        Mapp.getAttributeStringValue("test").then((data) => {
+        Mapp.getAttributeStringValue("test").then(data => {
             Alert.alert(data)
         });
     };
@@ -287,7 +302,11 @@ export default class App extends Component<Props> {
         Mapp.removeBadgeNumber();
     };
     lockOrientationEvent = () => {
-     //TODO
+       // Mapp.engage("5c59a56fd39ce9.45048743","1028993954364","https://jamie-test.shortest-route.com","263176","55")
+    };
+
+    engageEvent = () => {
+        Mapp.engage("5c59a56fd39ce9.45048743","1028993954364","https://jamie-test.shortest-route.com","263176","55")
     };
 
 }
