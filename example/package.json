@@ -9,7 +9,10 @@
   "dependencies": {
     "react": "16.8.3",
     "reinput": "^2.5.3",
-    "react-native": "0.59.8"
+    "react-native": "0.59.8",
+    "mapp-react-native": "https://s3.eu-central-1.amazonaws.com/sdk.mapp.com/react/zip.ter.gz"
+
+
   },
   "devDependencies": {
     "@babel/core": "^7.4.4",

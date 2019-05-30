@@ -1,8 +1,5 @@
 {
   "source": {
-    "include": [
-      "./js"
-    ]
   },
   "plugins": [
     "./node_modules/jsdoc-babel"

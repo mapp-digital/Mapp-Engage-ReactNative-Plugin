@@ -1,6 +1,9 @@
+module.exports = {
 
-import { NativeModules } from 'react-native';
-
-const { RNMappPlugin } = NativeModules;
-
-export default RNMappPlugin;
+    get Mapp() {
+        return require('./Mapp.js');
+    },
+    get MappEventEmitter() {
+        return require('./MappEventEmitter.js');
+    },
+};
