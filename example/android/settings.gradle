@@ -1,3 +1,5 @@
 rootProject.name = 'example'
+include ':react-native-mapp-plugin'
+project(':react-native-mapp-plugin').projectDir = new File(rootProject.projectDir, '../node_modules/react-native-mapp-plugin/android')
 
 include ':app', ':android', ':Mapp_Androi_SDK_frankfurt-5.0.6'

@@ -8,10 +8,10 @@ import {
 
 import CustomEvent from './CustomEvent.js'
 
-import MappEventEmitter from './MappEventEmitter.js'
+//import MappEventEmitter from './MappEventEmitter.js'
 
 const {RNMappPluginModule} = NativeModules;
-const EventEmitter = new MappEventEmitter();
+//const EventEmitter = new MappEventEmitter();
 
 const PUSH_RECEIVED_EVENT = "PushNotificationEvent";
 const MappIntentEvent = "MappIntentEve";

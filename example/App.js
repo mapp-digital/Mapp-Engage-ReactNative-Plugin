@@ -201,6 +201,9 @@ export default class App extends Component<Props> {
                             <MappButton
                                 text={"Engage"}
                                 onPress={this.engageEvent}/>
+                            <MappButton
+                                text={"Engage2"}
+                                onPress={this.engageEvent2}/>
 
                         </View>
                     </ImageBackground>
@@ -307,6 +310,10 @@ export default class App extends Component<Props> {
 
     engageEvent = () => {
         Mapp.engage("5c59a56fd39ce9.45048743","1028993954364","https://jamie-test.shortest-route.com","263176","55")
+    };
+
+    engageEvent2 = () => {
+        Mapp.engage2()
     };
 
 }
