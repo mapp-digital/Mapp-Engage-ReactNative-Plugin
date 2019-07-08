@@ -125,7 +125,7 @@ export class Mapp {
      * Set Custom Attribute
      *
      */
-    static setAttributeInt(key: string, value: boolean) {
+    static setAttributeInt(key: string, value: number) {
         return RNMappPluginModule.setAttributeInt(key, value);
     }
 
@@ -133,13 +133,13 @@ export class Mapp {
      * Set Custom Attribute
      *
      */
-    static setAttributeBoolean(key: string, value: number) {
+    static setAttributeBoolean(key: string, value: boolean) {
         return RNMappPluginModule.setAttributeBoolean(key, value);
     }
 
     /**
      * Remove Custom Attribute
-     *
+     * TODO: it is andoid only function
      */
     static removeAttribute(key: string) {
         return RNMappPluginModule.removeAttribute(key);
@@ -188,7 +188,7 @@ export class Mapp {
         return RNMappPluginModule.getAttributeStringValue(value);
     }
 
-
+    /* TODO: This methosd is only available for Android */
     static lockScreenOrientation(value: boolean) {
         return RNMappPluginModule.lockScreenOrientation(value);
     }
@@ -231,9 +231,17 @@ export class Mapp {
     static triggerStatistic(templateId: number, originalEventId: string, trackingKey: string, displayMillis: number, reason: string, link): string {
         return RNMappPluginModule.triggerStatistic(templateId, originalEventId, trackingKey, displayMillis, reason, link);
     }
-
+    // TODO: Android only
     static isDeviceRegistered(): Promise<boolean> {
         return RNMappPluginModule.isDeviceRegistered(value);
+    }
+    // TODO: iOS only
+    static removeDeviceAlias() {
+        return RNMappPluginModule.removeDeviceAlias();
+    }
+    // TODO: iOS only
+    static incrementNumericKey(key:String, value:number) {
+        return RNMappPluginModule.incrementNumericKey(key,value);
     }
 
 
