@@ -2,11 +2,14 @@
 package com.reactlibrary;
 
 import android.Manifest;
+import android.app.Application;
 import android.content.pm.PackageManager;
 import android.os.AsyncTask;
 import android.os.Build;
-import android.support.v4.app.NotificationManagerCompat;
-import android.support.v4.content.ContextCompat;
+
+
+import androidx.core.app.NotificationManagerCompat;
+import androidx.core.content.ContextCompat;
 
 import com.appoxee.Appoxee;
 import com.appoxee.AppoxeeOptions;
@@ -44,11 +47,12 @@ public class RNMappPluginModule extends ReactContextBaseJavaModule {
     private final ReactApplicationContext reactContext;
     private Map<Callback, String> mFeedSubscriberMap = new ConcurrentHashMap<>();
     private Map<Callback, Boolean> mCallbackWasCalledMap = new ConcurrentHashMap<>();
+    private Application application = null;
 
     public RNMappPluginModule(ReactApplicationContext reactContext) {
         super(reactContext);
         this.reactContext = reactContext;
-
+        application = (Application) reactContext.getApplicationContext();
     }
 
     @Override
@@ -59,12 +63,12 @@ public class RNMappPluginModule extends ReactContextBaseJavaModule {
     @Override
     public void initialize() {
         super.initialize();
-
-
+        if (getCurrentActivity() != null)
+            application = (Application) getCurrentActivity().getApplication();
         getReactApplicationContext().addLifecycleEventListener(new LifecycleEventListener() {
             @Override
             public void onHostResume() {
-                Appoxee.engage(Objects.requireNonNull(reactContext.getCurrentActivity()).getApplication());
+                Appoxee.engage(application);
             }
 
             @Override
@@ -100,7 +104,7 @@ public class RNMappPluginModule extends ReactContextBaseJavaModule {
 
     @ReactMethod
     public void engage2() {
-        Appoxee.engage(Objects.requireNonNull(reactContext.getCurrentActivity()).getApplication());
+        Appoxee.engage(Objects.requireNonNull(application));
 
     }
 
@@ -113,7 +117,7 @@ public class RNMappPluginModule extends ReactContextBaseJavaModule {
         opt.googleProjectId = googleProjectId;
         opt.cepURL = cepURL;
         opt.tenantID = tenantID;
-        Appoxee.engage(Objects.requireNonNull(reactContext.getCurrentActivity()).getApplication(), opt);
+        Appoxee.engage(Objects.requireNonNull(application), opt);
 
 
     }
@@ -204,19 +208,19 @@ public class RNMappPluginModule extends ReactContextBaseJavaModule {
     }
 
     @ReactMethod
-    public void getAttributeStringValue(String value,Promise promise) {
+    public void getAttributeStringValue(String value, Promise promise) {
         promise.resolve(Appoxee.instance().getAttributeStringValue(value));
     }
 
 
     @ReactMethod
     public void lockScreenOrientation(Integer orientation) {
-        Appoxee.setOrientation(Objects.requireNonNull(reactContext.getCurrentActivity()).getApplication(), orientation);
+        Appoxee.setOrientation(Objects.requireNonNull((Application) reactContext.getApplicationContext()), orientation);
     }
 
     @ReactMethod
     public void removeBadgeNumber() {
-        Appoxee.removeBadgeNumber(Objects.requireNonNull(reactContext.getCurrentActivity()).getApplication());
+        Appoxee.removeBadgeNumber(Objects.requireNonNull((Application) reactContext.getApplicationContext()));
     }
 
     @ReactMethod
@@ -224,13 +228,13 @@ public class RNMappPluginModule extends ReactContextBaseJavaModule {
         if (shouldRequestLocationPermissions()) {
             RequestPermissionsTask task = new RequestPermissionsTask(getReactApplicationContext(),
                     new RequestPermissionsTask.Callback() {
-                @Override
-                public void onResult(boolean enabled) {
-                    if (enabled) {
-                        Appoxee.instance().startGeoFencing();
-                    }
-                }
-            });
+                        @Override
+                        public void onResult(boolean enabled) {
+                            if (enabled) {
+                                Appoxee.instance().startGeoFencing();
+                            }
+                        }
+                    });
             task.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.ACCESS_FINE_LOCATION);
         } else {
             Appoxee.instance().startGeoFencing();
@@ -272,26 +276,26 @@ public class RNMappPluginModule extends ReactContextBaseJavaModule {
 
     @ReactMethod
     public void triggerInApp(String key) {
-        Appoxee.instance().triggerDMCCallInApp((reactContext.getCurrentActivity()), key);
+        Appoxee.instance().triggerDMCCallInApp((getCurrentActivity()), key);
     }
 
     @ReactMethod
     public void inAppMarkAsRead(Integer templateId, String eventId) {
-        Appoxee.instance().triggerStatistcs((reactContext.getCurrentActivity()), getInAppStatisticsRequestObject(templateId,
+        Appoxee.instance().triggerStatistcs((getCurrentActivity()), getInAppStatisticsRequestObject(templateId,
                 eventId,
                 InAppStatistics.INBOX_INBOX_MESSAGE_READ_KEY, null, null, null));
     }
 
     @ReactMethod
     public void inAppMarkAsUnRead(Integer templateId, String eventId) {
-        Appoxee.instance().triggerStatistcs((reactContext.getCurrentActivity()), getInAppStatisticsRequestObject(templateId,
+        Appoxee.instance().triggerStatistcs((reactContext.getApplicationContext()), getInAppStatisticsRequestObject(templateId,
                 eventId,
                 InAppStatistics.INBOX_INBOX_MESSAGE_UNREAD_KEY, null, null, null));
     }
 
     @ReactMethod
     public void inAppMarkAsDeleted(Integer templateId, String eventId) {
-        Appoxee.instance().triggerStatistcs((reactContext.getCurrentActivity()), getInAppStatisticsRequestObject(templateId,
+        Appoxee.instance().triggerStatistcs((reactContext.getApplicationContext()), getInAppStatisticsRequestObject(templateId,
                 eventId,
                 InAppStatistics.INBOX_INBOX_MESSAGE_DELETED_KEY, null, null, null));
     }
@@ -301,7 +305,7 @@ public class RNMappPluginModule extends ReactContextBaseJavaModule {
                                  String trackingKey, Long displayMillis,
                                  String reason, String link) {
         Appoxee.instance()
-                .triggerStatistcs((reactContext.getCurrentActivity())
+                .triggerStatistcs((reactContext.getApplicationContext())
                         , getInAppStatisticsRequestObject(templateId, originalEventId, trackingKey, displayMillis, reason, link));
     }
 

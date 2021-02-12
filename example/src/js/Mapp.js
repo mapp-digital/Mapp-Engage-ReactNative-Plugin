@@ -281,13 +281,7 @@ export class Mapp {
         return EventEmitter.addListener(name, listener);
     }
 
-    /**
-     * Removes a listener for an Urban Airship event.
-     *
-     * @param {string} eventName The event name. Either notificationResponse, pushReceived,
-     * register, deepLink, or notificationOptInStatus.
-     * @param {Function} listener The event listner.
-     */
+
     static removeListener(eventName: EventName, listener: Function) {
         var name = convertEventEnum(eventName);
         EventEmitter.removeListener(name, listener);

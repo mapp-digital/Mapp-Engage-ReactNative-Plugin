@@ -2,14 +2,13 @@
 
 package com.reactlibrary;
 
-import android.content.Context;
+
 import android.os.Handler;
 import android.os.Looper;
-import android.support.annotation.MainThread;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 
-import com.facebook.react.ReactApplication;
+
+import androidx.annotation.MainThread;
+
 import com.facebook.react.bridge.ReactContext;
 import com.facebook.react.modules.core.RCTNativeAppEventEmitter;
 

@@ -1,6 +1,8 @@
 package com.reactlibrary;
 
-import android.support.annotation.Nullable;
+
+
+import androidx.annotation.Nullable;
 
 import com.appoxee.push.PushData;
 import com.facebook.react.bridge.ReadableMap;

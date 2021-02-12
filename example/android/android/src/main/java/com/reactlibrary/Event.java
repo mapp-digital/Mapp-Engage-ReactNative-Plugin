@@ -1,4 +1,3 @@
-/* Copyright Urban Airship and Contributors */
 
 package com.reactlibrary;
 

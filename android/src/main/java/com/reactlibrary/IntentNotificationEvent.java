@@ -1,9 +1,8 @@
 package com.reactlibrary;
 
 import android.net.Uri;
-import android.support.annotation.NonNull;
 
-import com.appoxee.push.PushData;
+
 import com.facebook.react.bridge.WritableMap;
 import com.facebook.react.bridge.WritableNativeMap;
 
@@ -15,13 +14,11 @@ public class IntentNotificationEvent implements Event {
 
     private static final String PUSH_RECEIVED_EVENT = "MappIntentEvent";
 
-    @NonNull
     @Override
     public String getName() {
         return PUSH_RECEIVED_EVENT;
     }
 
-    @NonNull
     @Override
     public WritableMap getBody() {
 

@@ -1,9 +1,7 @@
 // @flow
 'use strict';
 
-/**
- * Urban Airship Custom events
- **/
+
 class CustomEvent {
     _name: string;
     _value: number;
