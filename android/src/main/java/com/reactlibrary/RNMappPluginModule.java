@@ -109,17 +109,26 @@ public class RNMappPluginModule extends ReactContextBaseJavaModule {
     }
 
     @ReactMethod
-    public void engage(String sdkKey, String googleProjectId, String cepURL, String appID, String tenantID) {
-
+    public void engage(String sdkKey, String googleProjectId, String server, String appID, String tenantID) {
         AppoxeeOptions opt = new AppoxeeOptions();
         opt.appID = appID;
         opt.sdkKey = sdkKey;
         opt.googleProjectId = googleProjectId;
-        opt.cepURL = cepURL;
+        opt.server = AppoxeeOptions.Server.valueOf(server);
         opt.tenantID = tenantID;
         Appoxee.engage(Objects.requireNonNull(application), opt);
+    }
 
-
+    @ReactMethod
+    public void engageTestServer(String cepURl, String sdkKey, String googleProjectId, String server, String appID, String tenantID) {
+        AppoxeeOptions opt = new AppoxeeOptions();
+        opt.appID = appID;
+        opt.sdkKey = sdkKey;
+        opt.googleProjectId = googleProjectId;
+        opt.server = AppoxeeOptions.Server.valueOf(server);
+        opt.cepURL = cepURl;
+        opt.tenantID = tenantID;
+        Appoxee.engage(Objects.requireNonNull(application), opt);
     }
 
     @ReactMethod
@@ -225,21 +234,57 @@ public class RNMappPluginModule extends ReactContextBaseJavaModule {
 
     @ReactMethod
     public void startGeoFencing() {
-        if (shouldRequestLocationPermissions()) {
+        if (Build.VERSION.SDK_INT < 23) {
+            Appoxee.instance().startGeoFencing();
+        } else if (Build.VERSION.SDK_INT <= 28) {
+            RequestPermissionsTask task = new RequestPermissionsTask(getReactApplicationContext(),
+                    new RequestPermissionsTask.Callback() {
+                        @Override
+                        public void onResult(boolean enabled) {
+                            if (enabled) {
+
+                                Appoxee.instance().startGeoFencing();
+                            }
+                        }
+                    });
+            task.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.ACCESS_FINE_LOCATION);
+
+        } else if (Build.VERSION.SDK_INT == 29) {
+            RequestPermissionsTask task = new RequestPermissionsTask(getReactApplicationContext(),
+                    new RequestPermissionsTask.Callback() {
+                        @Override
+                        public void onResult(boolean enabled) {
+                            if (enabled) {
+
+                                Appoxee.instance().startGeoFencing();
+                            }
+                        }
+                    });
+            task.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_BACKGROUND_LOCATION);
+
+        } else if (Build.VERSION.SDK_INT == 30) {
             RequestPermissionsTask task = new RequestPermissionsTask(getReactApplicationContext(),
                     new RequestPermissionsTask.Callback() {
                         @Override
                         public void onResult(boolean enabled) {
                             if (enabled) {
                                 Appoxee.instance().startGeoFencing();
+                                RequestPermissionsTask task2 = new RequestPermissionsTask(getReactApplicationContext(),
+                                        new RequestPermissionsTask.Callback() {
+                                            @Override
+                                            public void onResult(boolean enabled) {
+                                                if (enabled) {
+                                                    Appoxee.instance().startGeoFencing();
+                                                }
+                                            }
+                                        });
+                                task2.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, Manifest.permission.ACCESS_BACKGROUND_LOCATION);
+
                             }
                         }
                     });
             task.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.ACCESS_FINE_LOCATION);
-        } else {
-            Appoxee.instance().startGeoFencing();
         }
-
 
     }
 
@@ -438,7 +483,6 @@ public class RNMappPluginModule extends ReactContextBaseJavaModule {
         return ContextCompat.checkSelfPermission(getReactApplicationContext(), Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_DENIED &&
                 ContextCompat.checkSelfPermission(getReactApplicationContext(), Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_DENIED;
     }
-
 
     @ReactMethod
     public void clearNotifications() {
