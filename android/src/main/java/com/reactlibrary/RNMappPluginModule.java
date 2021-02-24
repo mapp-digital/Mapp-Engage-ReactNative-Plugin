@@ -3,6 +3,7 @@ package com.reactlibrary;
 
 import android.Manifest;
 import android.app.Application;
+import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.os.AsyncTask;
 import android.os.Build;
@@ -21,6 +22,7 @@ import com.appoxee.internal.inapp.model.InAppStatistics;
 import com.appoxee.internal.inapp.model.MessageContext;
 import com.appoxee.internal.inapp.model.Tracking;
 import com.appoxee.internal.inapp.model.TrackingAttributes;
+import com.appoxee.push.NotificationMode;
 import com.appoxee.push.PushData;
 import com.facebook.react.bridge.Arguments;
 import com.facebook.react.bridge.LifecycleEventListener;
@@ -65,6 +67,7 @@ public class RNMappPluginModule extends ReactContextBaseJavaModule {
         super.initialize();
         if (getCurrentActivity() != null)
             application = (Application) getCurrentActivity().getApplication();
+        Appoxee.setOrientation(application, ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
         getReactApplicationContext().addLifecycleEventListener(new LifecycleEventListener() {
             @Override
             public void onHostResume() {
@@ -115,7 +118,12 @@ public class RNMappPluginModule extends ReactContextBaseJavaModule {
         opt.sdkKey = sdkKey;
         opt.googleProjectId = googleProjectId;
         opt.server = AppoxeeOptions.Server.valueOf(server);
+        if (server.equals("TEST") || server.equals("TEST55")) {
+            opt.cepURL = "https://jamie-test.shortest-route.com";
+        }
+        opt.notificationMode = NotificationMode.BACKGROUND_AND_FOREGROUND;
         opt.tenantID = tenantID;
+
         Appoxee.engage(Objects.requireNonNull(application), opt);
     }
 
