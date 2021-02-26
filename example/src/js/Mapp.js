@@ -8,13 +8,13 @@ import {
 
 import CustomEvent from './CustomEvent.js'
 
-//import MappEventEmitter from './MappEventEmitter.js'
+import MappEventEmitter from './MappEventEmitter.js'
 
-const {RNMappPluginModule} = NativeModules;
-//const EventEmitter = new MappEventEmitter();
+const {RNMappPluginModule,EmitterSubscription} = NativeModules;
+const EventEmitter = new MappEventEmitter();
 
-const PUSH_RECEIVED_EVENT = "PushNotificationEvent";
-const MappIntentEvent = "MappIntentEve";
+const PUSH_RECEIVED_EVENT = "con.mapp.rich_message_received";
+const MappIntentEvent = "com.mapp.deep_link_received";
 
 /**
  * @private
@@ -275,15 +275,32 @@ export class Mapp {
         return RNMappPluginModule.runAction(name, value);
     }
 
+    static addPushListener(listener: Function): EmitterSubscription {
+        return this.addListener("notificationResponse", listener);
+    }
+
+    static addDeepLinkingListener(listener: Function): EmitterSubscription {
+        return this.addListener("deepLink", listener);
+    }
+
+
+    static removePushListener(listener: Function): EmitterSubscription {
+        return this.removeListener("notificationResponse", listener);
+    }
+
+    static removeDeepLinkingListener(listener: Function): EmitterSubscription {
+        return this.removeListener("deepLink", listener);
+    }
+
 
     static addListener(eventName: EventName, listener: Function): EmitterSubscription {
-        var name = convertEventEnum(eventName);
+        let name = convertEventEnum(eventName);
         return EventEmitter.addListener(name, listener);
     }
 
 
     static removeListener(eventName: EventName, listener: Function) {
-        var name = convertEventEnum(eventName);
+        let name = convertEventEnum(eventName);
         EventEmitter.removeListener(name, listener);
     }
 

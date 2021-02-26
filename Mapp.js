@@ -13,8 +13,8 @@ import MappEventEmitter from './MappEventEmitter.js'
 const {RNMappPluginModule} = NativeModules;
 const EventEmitter = new MappEventEmitter();
 
-const PUSH_RECEIVED_EVENT = "PushNotificationEvent";
-const MappIntentEvent = "MappIntentEve";
+const PUSH_RECEIVED_EVENT = "con.mapp.rich_message_received";
+const MappIntentEvent = "com.mapp.deep_link_received";
 
 /**
  * @private
@@ -125,7 +125,7 @@ export class Mapp {
      * Set Custom Attribute
      *
      */
-    static setAttributeInt(key: string, value: boolean) {
+    static setAttributeInt(key: string, value: number) {
         return RNMappPluginModule.setAttributeInt(key, value);
     }
 
@@ -133,13 +133,13 @@ export class Mapp {
      * Set Custom Attribute
      *
      */
-    static setAttributeBoolean(key: string, value: number) {
+    static setAttributeBoolean(key: string, value: boolean) {
         return RNMappPluginModule.setAttributeBoolean(key, value);
     }
 
     /**
      * Remove Custom Attribute
-     *
+     * TODO: it is andoid only function
      */
     static removeAttribute(key: string) {
         return RNMappPluginModule.removeAttribute(key);
@@ -175,130 +175,149 @@ export class Mapp {
      * @return {Promise.<Array>} A promise with the result.
      */
     static getTags(): Promise<Array<string>> {
-        return RNMappPluginModule.getTags();
+    return RNMappPluginModule.getTags();
+}
+
+
+static getDeviceInfo(): Promise<Object> {
+    return RNMappPluginModule.getDeviceInfo();
+}
+
+
+static getAttributeStringValue(value: string): Promise<string> {
+    return RNMappPluginModule.getAttributeStringValue(value);
+}
+
+/* TODO: This methosd is only available for Android */
+static lockScreenOrientation(value: boolean) {
+    return RNMappPluginModule.lockScreenOrientation(value);
+}
+
+
+static removeBadgeNumber() {
+    return RNMappPluginModule.removeBadgeNumber();
+}
+
+
+static startGeoFencing() {
+    return RNMappPluginModule.startGeoFencing();
+}
+
+static stopGeoFencing() {
+    return RNMappPluginModule.stopGeoFencing();
+}
+
+static fetchInboxMessage(): Promise<any> {
+    return RNMappPluginModule.fetchInboxMessage();
+}
+
+
+static triggerInApp(value: string) {
+    return RNMappPluginModule.triggerInApp(value);
+}
+
+static inAppMarkAsRead(templateId: number, eventId: string) {
+    return RNMappPluginModule.inAppMarkAsRead(templateId, eventId);
+}
+
+static inAppMarkAsUnRead(templateId: number, eventId: string) {
+    return RNMappPluginModule.inAppMarkAsUnRead(templateId, eventId);
+}
+
+static inAppMarkAsDeleted(templateId: number, eventId: string) {
+    return RNMappPluginModule.inAppMarkAsDeleted(templateId, eventId);
+}
+
+static triggerStatistic(templateId: number, originalEventId: string, trackingKey: string, displayMillis: number, reason: string, link): string {
+    return RNMappPluginModule.triggerStatistic(templateId, originalEventId, trackingKey, displayMillis, reason, link);
+}
+// TODO: Android only
+static isDeviceRegistered(): Promise<boolean> {
+    return RNMappPluginModule.isDeviceRegistered(value);
+}
+// TODO: iOS only
+static removeDeviceAlias() {
+    return RNMappPluginModule.removeDeviceAlias();
+}
+// TODO: iOS only
+static incrementNumericKey(key:String, value:number) {
+    return RNMappPluginModule.incrementNumericKey(key,value);
+}
+
+
+/**
+ * Adds a custom event.
+ *
+ * @param {CustomEvent} event The custom event.
+ * @return {Promise.<null, Error>}  A promise that returns null if resolved, or an Error if the
+ * custom event is rejected.
+ */
+static addCustomEvent(event: CustomEvent): Promise {
+    var actionArg = {
+        event_name: event._name,
+        event_value: event._value,
+        transaction_id: event._transactionId,
+        properties: event._properties
     }
 
-
-    static getDeviceInfo(): Promise<Object> {
-        return RNMappPluginModule.getDeviceInfo();
-    }
-
-
-    static getAttributeStringValue(value: string): Promise<string> {
-        return RNMappPluginModule.getAttributeStringValue(value);
-    }
-
-
-    static lockScreenOrientation(value: boolean) {
-        return RNMappPluginModule.lockScreenOrientation(value);
-    }
+    return new Promise((resolve, reject) => {
+        RNMappPluginModule.runAction("add_custom_event_action", actionArg)
+            .then(() => {
+                resolve();
+            }, (error) => {
+                reject(error);
+            });
+    });
+}
 
 
-    static removeBadgeNumber() {
-        return RNMappPluginModule.removeBadgeNumber();
-    }
+static runAction(name: string, value: ?any): Promise<any> {
+    return RNMappPluginModule.runAction(name, value);
+}
+
+static addPushListener(listener: Function): EmitterSubscription {
+    return this.addListener("notificationResponse", listener);
+}
+
+static addDeepLinkingListener(listener: Function): EmitterSubscription {
+    return this.addListener("deepLink", listener);
+}
 
 
-    static startGeoFencing() {
-        return RNMappPluginModule.startGeoFencing();
-    }
+static removePushListener(listener: Function): EmitterSubscription {
+    return this.removeListener("notificationResponse", listener);
+}
 
-    static stopGeoFencing() {
-        return RNMappPluginModule.stopGeoFencing();
-    }
-
-    static fetchInboxMessage(): Promise<any> {
-        return RNMappPluginModule.fetchInboxMessage();
-    }
+static removeDeepLinkingListener(listener: Function): EmitterSubscription {
+    return this.removeListener("deepLink", listener);
+}
 
 
-    static triggerInApp(value: string) {
-        return RNMappPluginModule.triggerInApp(value);
-    }
-
-    static inAppMarkAsRead(templateId: number, eventId: string) {
-        return RNMappPluginModule.inAppMarkAsRead(templateId, eventId);
-    }
-
-    static inAppMarkAsUnRead(templateId: number, eventId: string) {
-        return RNMappPluginModule.inAppMarkAsUnRead(templateId, eventId);
-    }
-
-    static inAppMarkAsDeleted(templateId: number, eventId: string) {
-        return RNMappPluginModule.inAppMarkAsDeleted(templateId, eventId);
-    }
-
-    static triggerStatistic(templateId: number, originalEventId: string, trackingKey: string, displayMillis: number, reason: string, link): string {
-        return RNMappPluginModule.triggerStatistic(templateId, originalEventId, trackingKey, displayMillis, reason, link);
-    }
-
-    static isDeviceRegistered(): Promise<boolean> {
-        return RNMappPluginModule.isDeviceRegistered(value);
-    }
+static addListener(eventName: EventName, listener: Function): EmitterSubscription {
+    let name = convertEventEnum(eventName);
+    return EventEmitter.addListener(name, listener);
+}
 
 
-    /**
-     * Adds a custom event.
-     *
-     * @param {CustomEvent} event The custom event.
-     * @return {Promise.<null, Error>}  A promise that returns null if resolved, or an Error if the
-     * custom event is rejected.
-     */
-    static addCustomEvent(event: CustomEvent): Promise {
-        var actionArg = {
-            event_name: event._name,
-            event_value: event._value,
-            transaction_id: event._transactionId,
-            properties: event._properties
-        }
-
-        return new Promise((resolve, reject) => {
-            RNMappPluginModule.runAction("add_custom_event_action", actionArg)
-                .then(() => {
-                    resolve();
-                }, (error) => {
-                    reject(error);
-                });
-        });
-    }
+static removeListener(eventName: EventName, listener: Function) {
+    let name = convertEventEnum(eventName);
+    EventEmitter.removeListener(name, listener);
+}
 
 
-    static runAction(name: string, value: ?any): Promise<any> {
-        return RNMappPluginModule.runAction(name, value);
-    }
+/**
+ * Clears all notifications for the application.
+ * Supported on Android and iOS 10+. For older iOS devices, you can set
+ * the badge number to 0 to clear notifications.
+ */
+static clearNotifications() {
+    RNMappPluginModule.clearNotifications();
+}
 
 
-    static addListener(eventName: EventName, listener: Function): EmitterSubscription {
-        var name = convertEventEnum(eventName);
-        return EventEmitter.addListener(name, listener);
-    }
-
-    /**
-     * Removes a listener for an Urban Airship event.
-     *
-     * @param {string} eventName The event name. Either notificationResponse, pushReceived,
-     * register, deepLink, or notificationOptInStatus.
-     * @param {Function} listener The event listner.
-     */
-    static removeListener(eventName: EventName, listener: Function) {
-        var name = convertEventEnum(eventName);
-        EventEmitter.removeListener(name, listener);
-    }
-
-
-    /**
-     * Clears all notifications for the application.
-     * Supported on Android and iOS 10+. For older iOS devices, you can set
-     * the badge number to 0 to clear notifications.
-     */
-    static clearNotifications() {
-        RNMappPluginModule.clearNotifications();
-    }
-
-
-    static clearNotification(identifier: string) {
-        RNMappPluginModule.clearNotification(identifier)
-    }
+static clearNotification(identifier: string) {
+    RNMappPluginModule.clearNotification(identifier)
+}
 }
 
 module.exports = Mapp;

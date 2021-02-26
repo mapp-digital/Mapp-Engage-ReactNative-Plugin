@@ -67,11 +67,12 @@ public class RNMappPluginModule extends ReactContextBaseJavaModule {
         super.initialize();
         if (getCurrentActivity() != null)
             application = (Application) getCurrentActivity().getApplication();
-        Appoxee.setOrientation(application, ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
         getReactApplicationContext().addLifecycleEventListener(new LifecycleEventListener() {
             @Override
             public void onHostResume() {
                 Appoxee.engage(application);
+                Appoxee.setOrientation(application, ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+
             }
 
             @Override
@@ -123,8 +124,9 @@ public class RNMappPluginModule extends ReactContextBaseJavaModule {
         }
         opt.notificationMode = NotificationMode.BACKGROUND_AND_FOREGROUND;
         opt.tenantID = tenantID;
-
         Appoxee.engage(Objects.requireNonNull(application), opt);
+        Appoxee.setOrientation(application, ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+
     }
 
     @ReactMethod
@@ -136,6 +138,8 @@ public class RNMappPluginModule extends ReactContextBaseJavaModule {
         opt.server = AppoxeeOptions.Server.valueOf(server);
         opt.cepURL = cepURl;
         opt.tenantID = tenantID;
+        Appoxee.setOrientation(application, ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+
         Appoxee.engage(Objects.requireNonNull(application), opt);
     }
 

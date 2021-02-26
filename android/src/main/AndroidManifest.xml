@@ -29,18 +29,16 @@
                 android:theme="@style/HelperActivityStyle">
 
             <intent-filter android:label="mapp">
-                <category android:name="android.intent.category.DEFAULT" />
 
-                <action android:name="com.appoxee.VIEW_CUSTOM_LINKS" />
-                <action android:name="com.appoxee.VIEW_INBOX" />
-                <action android:name="com.appoxee.VIEW_DEEPLINK" />
+                    <data android:scheme="apx" />
+                    <data android:host="deeplink" />
 
-                <category android:name="android.intent.category.BROWSABLE" />
+                    <action android:name="com.appoxee.VIEW_DEEPLINK" />
 
-                <data android:scheme="apx" />
-                <data android:host="deeplink" />
-                <data android:host="inbox" />
-                <data android:host="custom" />
+                    <category android:name="android.intent.category.DEFAULT" />
+                    <category android:name="android.intent.category.BROWSABLE" />
+                    <category android:name="${applicationId}" />
+
             </intent-filter>
 
         </activity>

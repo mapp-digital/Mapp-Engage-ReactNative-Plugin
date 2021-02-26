@@ -11,7 +11,7 @@ import com.facebook.react.bridge.WritableMap;
  */
 public class PushNotificationEvent implements Event {
 
-    private static final String PUSH_RECEIVED_EVENT = "PushNotificationEvent";
+    private static final String PUSH_RECEIVED_EVENT = "con.mapp.rich_message_received";
 
     @NonNull
     @Override

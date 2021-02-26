@@ -12,7 +12,7 @@ import com.facebook.react.bridge.WritableNativeMap;
  */
 public class IntentNotificationEvent implements Event {
 
-    private static final String PUSH_RECEIVED_EVENT = "MappIntentEvent";
+    private static final String PUSH_RECEIVED_EVENT = "com.mapp.deep_link_received" ;
 
     @Override
     public String getName() {

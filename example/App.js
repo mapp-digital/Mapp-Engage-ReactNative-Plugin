@@ -17,16 +17,15 @@ import {
     SafeAreaView,
     Alert
 } from 'react-native';
-import MappButton from './src/components/MappButton'
-import MappInputText from './src/components/MappInputText'
 
-import {MappEventEmitter, Mapp} from './src/js'
+import {MappEventEmitter, Mapp} from './src/js';
+import { MappButton, MappInputText, } from './src/components';
 
 const instructions = Platform.select({
     ios: 'Press Cmd+R to reload,\n' + 'Cmd+D or shake for dev menu',
     android:
-    'Double tap R on your keyboard to reload,\n' +
-    'Shake or press menu button for dev menu',
+        'Double tap R on your keyboard to reload,\n' +
+        'Shake or press menu button for dev menu',
 });
 /**
  * Created by Aleksandar Marinkovic on 5/16/19.
@@ -47,7 +46,7 @@ export default class App extends Component<Props> {
 
     constructor (props) {
         super(props);
-
+        Mapp.engage("5fd76d903c2247.21400126","1028993954364","TEST","264115","33")
 
     }
 
@@ -204,7 +203,12 @@ export default class App extends Component<Props> {
                             <MappButton
                                 text={"Engage2"}
                                 onPress={this.engageEvent2}/>
-
+                            <MappButton
+                                text={"Deep links"}
+                                onPress={this.addDeeplink}/>
+                            <MappButton
+                                text={"Push listener"}
+                                onPress={this.addPushListener}/>
                         </View>
                     </ImageBackground>
                 </ScrollView>
@@ -305,16 +309,32 @@ export default class App extends Component<Props> {
         Mapp.removeBadgeNumber();
     };
     lockOrientationEvent = () => {
-       // Mapp.engage("5c59a56fd39ce9.45048743","1028993954364","https://jamie-test.shortest-route.com","263176","55")
+
+        // Mapp.engage("5c59a56fd39ce9.45048743","1028993954364","https://jamie-test.shortest-route.com","263176","55")
     };
 
     engageEvent = () => {
-        Mapp.engage("5c59a56fd39ce9.45048743","1028993954364","https://jamie-test.shortest-route.com","263176","55")
+        Mapp.engage("5fd76d903c2247.21400126","1028993954364","TEST","264115","33")
     };
 
     engageEvent2 = () => {
         Mapp.engage2()
     };
+
+    addDeeplink = () => {
+        Mapp.addDeepLinkingListener((notification) => {
+            console.log(JSON.stringify(notification));
+            Alert.alert(JSON.stringify(notification))
+        });
+    };
+    addPushListener = () => {
+        Mapp.addPushListener((notification) => {
+            console.log(JSON.stringify(notification));
+            Alert.alert(JSON.stringify(notification))
+        });
+    };
+
+
 
 }
 
