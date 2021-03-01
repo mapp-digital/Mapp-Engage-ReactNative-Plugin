@@ -20,7 +20,10 @@ NSString *const MappRNLocationExit = @"com.mapp.georegion_exit";
 NSString *const MappRNCustomLinkReceived = @"com.mapp.custom_link_received";
 NSString *const MappRNDeepLinkReceived = @"com.mapp.deep_link_received";
 NSString *const MappRNRichMessage = @"con.mapp.rich_message_received";
+NSString *const MappRNPushMessage = @"con.mapp.push_message_received";
 NSString *const MappErrorMessage = @"con.mapp.error_message";
+NSString *const MappRNInappMessage = @"con.mapp.inapp_message";
+
 
 @implementation RNMappEventEmmiter {
     bool hasListeners;
@@ -46,7 +49,7 @@ NSString *const MappErrorMessage = @"con.mapp.error_message";
 }
 
 - (NSArray<NSString *> *)supportedEvents {
-    return @[MappRNInitEvent, MappRNInboxMessageReceived, MappRNInboxMessagesReceived, MappRNLocationEnter, MappRNCustomLinkReceived, MappRNDeepLinkReceived, MappRNRichMessage, MappErrorMessage];
+    return @[MappRNInitEvent, MappRNInboxMessageReceived, MappRNInboxMessagesReceived, MappRNLocationEnter, MappRNCustomLinkReceived, MappRNDeepLinkReceived, MappRNRichMessage,MappRNPushMessage, MappErrorMessage,MappRNInappMessage];
 }
 
 - (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary<NSKeyValueChangeKey,id> *)change context:(void *)context {
@@ -72,26 +75,36 @@ NSString *const MappErrorMessage = @"con.mapp.error_message";
 #pragma mark - Notification Delegate
 
 - (void)appoxee:(nonnull Appoxee *)appoxee handledRemoteNotification:(nonnull APXPushNotification *)pushNotification andIdentifer:(nonnull NSString *)actionIdentifier {
-    
+    if (hasListeners) {
+        [self sendEventWithName:MappRNRichMessage body:[self getPushMessage:pushNotification]];
+    }
 }
 
 - (void)appoxee:(nonnull Appoxee *)appoxee handledRichContent:(nonnull APXRichMessage *)richMessage didLaunchApp:(BOOL)didLaunch {
-    [self sendEventWithName:MappRNRichMessage body:[self getRichMessage:richMessage]];
+    if (hasListeners) {
+        [self sendEventWithName:MappRNRichMessage body:[self getRichMessage:richMessage]];
+    }
 }
 
 
 #pragma mark Inapp Delegate
 
 - (void)appoxeeInapp:(nonnull AppoxeeInapp *)appoxeeInapp didReceiveInappMessageWithIdentifier:(nonnull NSNumber *)identifier andMessageExtraData:(nullable NSDictionary <NSString *, id> *)messageExtraData {
-    
+    if (hasListeners) {
+        [self sendEventWithName:MappRNInappMessage body:@{@"id": [identifier stringValue], @"extraData": messageExtraData}];
+    }
 }
 
 - (void)didReceiveDeepLinkWithIdentifier:(nonnull NSNumber *)identifier withMessageString:(nonnull NSString *)message andTriggerEvent:(nonnull NSString *)triggerEvent {
-    
+    if (hasListeners) {
+        [self sendEventWithName:MappRNDeepLinkReceived body:@{@"id":[identifier stringValue], @"message": message, @"triggerEvent": triggerEvent }];
+    }
 }
 
 - (void)didReceiveCustomLinkWithIdentifier:(nonnull NSNumber *)identifier withMessageString:(nonnull NSString *)message {
-    
+    if (hasListeners) {
+        [self sendEventWithName:MappRNCustomLinkReceived body:@{@"id":[identifier stringValue], @"message": message}];
+    }
 }
 
 - (void)didReceiveInBoxMessages:(NSArray *)messages {
@@ -180,3 +193,5 @@ NSString *const MappErrorMessage = @"con.mapp.error_message";
     
     return [dateFormatter stringFromDate:date];
 }
+@end
+

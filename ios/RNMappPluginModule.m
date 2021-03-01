@@ -57,6 +57,14 @@ RCT_EXPORT_METHOD(setAlias:(NSString *) alias) {
     }];
 }
 
+RCT_EXPORT_METHOD(removeDeviceAlias) {
+    [[Appoxee shared] removeDeviceAliasWithCompletionHandler:^(NSError * _Nullable appoxeeError, id  _Nullable data) {
+            if (appoxeeError != nil) {
+                NSLog(@"%@", appoxeeError.debugDescription);
+            }
+    }];
+}
+
 RCT_EXPORT_METHOD(onInitCompletedListener:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject) {
     if ([[Appoxee shared] isReady]) {
         resolve(@"SDK is ready");
@@ -87,7 +95,14 @@ RCT_EXPORT_METHOD(setPushEnabled: (BOOL) enabled) {
         }
     }];
 }
-
+RCT_EXPORT_METHOD(incrementNumericKey: (NSString *) key value: (NSNumber *) number) {
+    [[Appoxee shared] incrementNumericKey:key byNumericValue:number withCompletionHandler:^(NSError * _Nullable appoxeeError, id  _Nullable data) {
+        if (appoxeeError != nil) {
+            NSLog(@"%@", appoxeeError.debugDescription);
+        }
+    }];
+}
+                  
 RCT_EXPORT_METHOD(setAttributeString: (NSString *)key value: (NSString *) value)  {
     [[Appoxee shared] setStringValue:value forKey:key withCompletionHandler:^(NSError * _Nullable appoxeeError, id  _Nullable data) {
         if(appoxeeError != nil) {
