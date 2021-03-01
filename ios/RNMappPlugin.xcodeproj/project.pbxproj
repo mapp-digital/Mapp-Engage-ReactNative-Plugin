@@ -7,7 +7,11 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		B3E7B58A1CC2AC0600A0062D /* RNMappPlugin.m in Sources */ = {isa = PBXBuildFile; fileRef = B3E7B5891CC2AC0600A0062D /* RNMappPlugin.m */; };
+		8F910C0825ED4EC40024DA9D /* RNMappEventEmmiter.m in Sources */ = {isa = PBXBuildFile; fileRef = 8F910C0525ED4EC30024DA9D /* RNMappEventEmmiter.m */; };
+		8F910C0925ED4EC40024DA9D /* RNMappPluginModule.m in Sources */ = {isa = PBXBuildFile; fileRef = 8F910C0725ED4EC40024DA9D /* RNMappPluginModule.m */; };
+		8F910C0E25ED4F010024DA9D /* AppoxeeInapp.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8F910C0D25ED4F010024DA9D /* AppoxeeInapp.framework */; };
+		8F910C1025ED4F040024DA9D /* AppoxeeLocationServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8F910C0F25ED4F040024DA9D /* AppoxeeLocationServices.framework */; };
+		8F910C1225ED4F070024DA9D /* AppoxeeSDK.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8F910C1125ED4F070024DA9D /* AppoxeeSDK.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -24,8 +28,13 @@
 
 /* Begin PBXFileReference section */
 		134814201AA4EA6300B7C361 /* libRNMappPlugin.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libRNMappPlugin.a; sourceTree = BUILT_PRODUCTS_DIR; };
-		B3E7B5881CC2AC0600A0062D /* RNMappPlugin.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RNMappPlugin.h; sourceTree = "<group>"; };
-		B3E7B5891CC2AC0600A0062D /* RNMappPlugin.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RNMappPlugin.m; sourceTree = "<group>"; };
+		8F910C0425ED4EC30024DA9D /* RNMappEventEmmiter.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RNMappEventEmmiter.h; sourceTree = "<group>"; };
+		8F910C0525ED4EC30024DA9D /* RNMappEventEmmiter.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RNMappEventEmmiter.m; sourceTree = "<group>"; };
+		8F910C0625ED4EC30024DA9D /* RNMappPluginModule.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RNMappPluginModule.h; sourceTree = "<group>"; };
+		8F910C0725ED4EC40024DA9D /* RNMappPluginModule.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RNMappPluginModule.m; sourceTree = "<group>"; };
+		8F910C0D25ED4F010024DA9D /* AppoxeeInapp.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AppoxeeInapp.framework; path = Frameworks/AppoxeeInapp.framework; sourceTree = "<group>"; };
+		8F910C0F25ED4F040024DA9D /* AppoxeeLocationServices.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AppoxeeLocationServices.framework; path = Frameworks/AppoxeeLocationServices.framework; sourceTree = "<group>"; };
+		8F910C1125ED4F070024DA9D /* AppoxeeSDK.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AppoxeeSDK.framework; path = Frameworks/AppoxeeSDK.framework; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -33,6 +42,9 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				8F910C0E25ED4F010024DA9D /* AppoxeeInapp.framework in Frameworks */,
+				8F910C1025ED4F040024DA9D /* AppoxeeLocationServices.framework in Frameworks */,
+				8F910C1225ED4F070024DA9D /* AppoxeeSDK.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -50,10 +62,23 @@
 		58B511D21A9E6C8500147676 = {
 			isa = PBXGroup;
 			children = (
-				B3E7B5881CC2AC0600A0062D /* RNMappPlugin.h */,
-				B3E7B5891CC2AC0600A0062D /* RNMappPlugin.m */,
+				8F910C0425ED4EC30024DA9D /* RNMappEventEmmiter.h */,
+				8F910C0525ED4EC30024DA9D /* RNMappEventEmmiter.m */,
+				8F910C0625ED4EC30024DA9D /* RNMappPluginModule.h */,
+				8F910C0725ED4EC40024DA9D /* RNMappPluginModule.m */,
 				134814211AA4EA7D00B7C361 /* Products */,
+				8F910C0C25ED4F010024DA9D /* Frameworks */,
 			);
+			sourceTree = "<group>";
+		};
+		8F910C0C25ED4F010024DA9D /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				8F910C1125ED4F070024DA9D /* AppoxeeSDK.framework */,
+				8F910C0F25ED4F040024DA9D /* AppoxeeLocationServices.framework */,
+				8F910C0D25ED4F010024DA9D /* AppoxeeInapp.framework */,
+			);
+			name = Frameworks;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -95,6 +120,7 @@
 			developmentRegion = English;
 			hasScannedForEncodings = 0;
 			knownRegions = (
+				English,
 				en,
 			);
 			mainGroup = 58B511D21A9E6C8500147676;
@@ -112,7 +138,8 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				B3E7B58A1CC2AC0600A0062D /* RNMappPlugin.m in Sources */,
+				8F910C0925ED4EC40024DA9D /* RNMappPluginModule.m in Sources */,
+				8F910C0825ED4EC40024DA9D /* RNMappEventEmmiter.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -203,8 +230,12 @@
 		58B511F01A9E6C8500147676 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)/Frameworks",
+				);
 				HEADER_SEARCH_PATHS = (
-				"$(inherited)",
+					"$(inherited)",
 					/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include,
 					"$(SRCROOT)/../../../React/**",
 					"$(SRCROOT)/../../react-native/React/**",
@@ -219,6 +250,10 @@
 		58B511F11A9E6C8500147676 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)/Frameworks",
+				);
 				HEADER_SEARCH_PATHS = (
 					"$(inherited)",
 					/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include,

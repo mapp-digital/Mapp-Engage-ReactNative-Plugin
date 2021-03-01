@@ -1,0 +1,35 @@
+require "json"
+
+package = JSON.parse(File.read(File.join(__dir__, "package.json")))
+
+Pod::Spec.new do |s|
+  s.name         = "RNMappPlugin"
+  s.version      = package["version"]
+  s.summary      = package["description"]
+  s.description  = <<-DESC
+                  react-native-apoxee-plugin
+                   DESC
+  s.homepage     = "https://github.com/github_account/react-native-apoxee-plugin"
+  # brief license entry:
+  s.license      = "MIT"
+  # optional - use expanded license entry instead:
+  # s.license    = { :type => "MIT", :file => "LICENSE" }
+  s.authors      = { "Your Name" => "yourname@email.com" }
+  s.platforms    = { :ios => "10.0" }
+  s.source       = { :git => "https://github.com/github_account/react-native-apoxee-plugin.git", :tag => "#{s.version}" }
+
+  s.source_files = "ios/**/*.{h,c,m,swift}"
+  s.vendored_framework = "ios/Frameworks/AppoxeeSDK.framework", "ios/Frameworks/AppoxeeLocationServices.framework", "ios/Frameworks/AppoxeeInapp.framework"
+  s.resources = "ios/Frameworks/AppoxeeSDKResources.bundle", "ios/Frameworks/AppoxeeInappResources.bundle"
+  s.preserve_path = "ios/Frameworks/"
+  # s.public_header_files = "ios/Frameworks/AppoxeeSDK.framework/Headers/"
+  s.requires_arc = true
+  s.frameworks = "WebKit"
+  s.library = 'sqlite3'
+
+  s.dependency "React"
+  
+  # ...
+  # s.dependency "..."
+end
+
