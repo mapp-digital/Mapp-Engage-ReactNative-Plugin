@@ -37,6 +37,7 @@ RCT_EXPORT_METHOD(engage: (NSString *)sdkKey projectId: (NSString *)projectId ce
 RCT_REMAP_METHOD(autoengage,engage:(NSString *) server) {
     SERVER serv = [self getServerKeyFor:server];
     [[Appoxee shared] engageAndAutoIntegrateWithLaunchOptions:nil andDelegate:[RNMappEventEmmiter shared] with:serv];
+    [[Appoxee shared] addObserver: [RNMappEventEmmiter shared] forKeyPath:@"isReady" options:NSKeyValueObservingOptionNew context:nil];
 }
 
 RCT_EXPORT_METHOD(getAlias:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject) {
@@ -65,14 +66,14 @@ RCT_EXPORT_METHOD(removeDeviceAlias) {
     }];
 }
 
-RCT_EXPORT_METHOD(onInitCompletedListener:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject) {
-    if ([[Appoxee shared] isReady]) {
-        resolve(@"SDK is ready");
-    } else {
-        [[Appoxee shared] addObserver: [RNMappEventEmmiter shared] forKeyPath:@"isReady" options:NSKeyValueObservingOptionNew context:nil];
-        reject(@"SDK_STATUS", @"sdk is not ready, wait for event", nil);
-    }
-}
+//RCT_EXPORT_METHOD(onInitCompletedListener:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject) {
+//    if ([[Appoxee shared] isReady]) {
+//        resolve(@"SDK is ready");
+//    } else {
+////        [[Appoxee shared] addObserver: [RNMappEventEmmiter shared] forKeyPath:@"isReady" options:NSKeyValueObservingOptionNew context:nil];
+//        reject(@"SDK_STATUS", @"sdk is not ready, wait for event", nil);
+//    }
+//}
 
 RCT_EXPORT_METHOD(isReady:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject) {
     resolve(@([[Appoxee shared] isReady]));
@@ -182,6 +183,19 @@ RCT_EXPORT_METHOD(getAttributeStringValue: (NSString *) key resolver:(RCTPromise
         
     }];
 }
+
+RCT_EXPORT_METHOD(removeBadgeNumber) {
+    [[UIApplication sharedApplication] setApplicationIconBadgeNumber: 0];
+}
+
+RCT_EXPORT_METHOD(clearNotifications) {
+    [[UNUserNotificationCenter currentNotificationCenter] removeAllDeliveredNotifications];
+}
+
+RCT_EXPORT_METHOD(clearNotification: (NSNumber *) index ){
+    [[UNUserNotificationCenter currentNotificationCenter] removeDeliveredNotificationsWithIdentifiers: @[[index stringValue]]];
+}
+
 #pragma mark Exported methods - Inapp
 
 RCT_REMAP_METHOD(engageInapp,engageInapp:(NSString *) server) {
@@ -189,8 +203,9 @@ RCT_REMAP_METHOD(engageInapp,engageInapp:(NSString *) server) {
     [[AppoxeeInapp shared] engageWithDelegate:[RNMappEventEmmiter shared] with:serv];
 }
 
-RCT_EXPORT_METHOD(fetchInboxMessage) {
+RCT_EXPORT_METHOD(fetchInboxMessage: (RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject) {
     [[AppoxeeInapp shared] fetchAPXInBoxMessages];
+    resolve(@"Fetching, set event listener for iOS");
 }
 
 RCT_EXPORT_METHOD(triggerInApp: (NSString *) event) {

@@ -55,6 +55,7 @@ NSString *const MappRNInappMessage = @"con.mapp.inapp_message";
 - (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary<NSKeyValueChangeKey,id> *)change context:(void *)context {
     if ([keyPath isEqualToString:@"isReady"]) {
         [[Appoxee shared] removeObserver:self forKeyPath:@"isReady"];
+        [[AppoxeeLocationManager shared] setDelegate:self];
         if (hasListeners) {
             [self sendEventWithName:MappRNInitEvent body:@{@"status": @"initialized"}];
         }

@@ -13,6 +13,8 @@ import MappEventEmitter from './MappEventEmitter.js'
 const {RNMappPluginModule} = NativeModules;
 const EventEmitter = new MappEventEmitter();
 
+const IOS_INIT = "com.mapp.init";
+const IOS_INBOX_MESSAGES = "com.mapp.inbox_messages_received";
 const PUSH_RECEIVED_EVENT = "con.mapp.rich_message_received";
 const MappIntentEvent = "com.mapp.deep_link_received";
 
@@ -25,6 +27,12 @@ function convertEventEnum(type: EventName): ?string {
     }
     else if (type === 'deepLink') {
         return MappIntentEvent;
+    }
+    else if (type === 'iosSDKInit') {
+        return IOS_INIT;
+    }
+    else if (type === 'iosInboxMessages') {
+        return IOS_INBOX_MESSAGES;
     }
     throw new Error("Invalid event name: " + type);
 }
@@ -72,6 +80,9 @@ export class Mapp {
      */
 
     static engage(sdkKey: string, googleProjectId: string, cepURL: string, appID: string, tenantID: string) {
+        if (Platform.OS == 'ios') {
+            return RNMappPluginModule.autoengage(cepURL);
+        }
         return RNMappPluginModule.engage(sdkKey, googleProjectId, cepURL, appID, tenantID);
     }
 
@@ -175,149 +186,158 @@ export class Mapp {
      * @return {Promise.<Array>} A promise with the result.
      */
     static getTags(): Promise<Array<string>> {
-    return RNMappPluginModule.getTags();
-}
-
-
-static getDeviceInfo(): Promise<Object> {
-    return RNMappPluginModule.getDeviceInfo();
-}
-
-
-static getAttributeStringValue(value: string): Promise<string> {
-    return RNMappPluginModule.getAttributeStringValue(value);
-}
-
-/* TODO: This methosd is only available for Android */
-static lockScreenOrientation(value: boolean) {
-    return RNMappPluginModule.lockScreenOrientation(value);
-}
-
-
-static removeBadgeNumber() {
-    return RNMappPluginModule.removeBadgeNumber();
-}
-
-
-static startGeoFencing() {
-    return RNMappPluginModule.startGeoFencing();
-}
-
-static stopGeoFencing() {
-    return RNMappPluginModule.stopGeoFencing();
-}
-
-static fetchInboxMessage(): Promise<any> {
-    return RNMappPluginModule.fetchInboxMessage();
-}
-
-
-static triggerInApp(value: string) {
-    return RNMappPluginModule.triggerInApp(value);
-}
-
-static inAppMarkAsRead(templateId: number, eventId: string) {
-    return RNMappPluginModule.inAppMarkAsRead(templateId, eventId);
-}
-
-static inAppMarkAsUnRead(templateId: number, eventId: string) {
-    return RNMappPluginModule.inAppMarkAsUnRead(templateId, eventId);
-}
-
-static inAppMarkAsDeleted(templateId: number, eventId: string) {
-    return RNMappPluginModule.inAppMarkAsDeleted(templateId, eventId);
-}
-
-static triggerStatistic(templateId: number, originalEventId: string, trackingKey: string, displayMillis: number, reason: string, link): string {
-    return RNMappPluginModule.triggerStatistic(templateId, originalEventId, trackingKey, displayMillis, reason, link);
-}
-// TODO: Android only
-static isDeviceRegistered(): Promise<boolean> {
-    return RNMappPluginModule.isDeviceRegistered(value);
-}
-// TODO: iOS only
-static removeDeviceAlias() {
-    return RNMappPluginModule.removeDeviceAlias();
-}
-// TODO: iOS only
-static incrementNumericKey(key:String, value:number) {
-    return RNMappPluginModule.incrementNumericKey(key,value);
-}
-
-
-/**
- * Adds a custom event.
- *
- * @param {CustomEvent} event The custom event.
- * @return {Promise.<null, Error>}  A promise that returns null if resolved, or an Error if the
- * custom event is rejected.
- */
-static addCustomEvent(event: CustomEvent): Promise {
-    var actionArg = {
-        event_name: event._name,
-        event_value: event._value,
-        transaction_id: event._transactionId,
-        properties: event._properties
+        return RNMappPluginModule.getTags();
     }
 
-    return new Promise((resolve, reject) => {
-        RNMappPluginModule.runAction("add_custom_event_action", actionArg)
-            .then(() => {
-                resolve();
-            }, (error) => {
-                reject(error);
-            });
-    });
-}
+
+    static getDeviceInfo(): Promise<Object> {
+        return RNMappPluginModule.getDeviceInfo();
+    }
 
 
-static runAction(name: string, value: ?any): Promise<any> {
-    return RNMappPluginModule.runAction(name, value);
-}
+    static getAttributeStringValue(value: string): Promise<string> {
+        return RNMappPluginModule.getAttributeStringValue(value);
+    }
 
-static addPushListener(listener: Function): EmitterSubscription {
-    return this.addListener("notificationResponse", listener);
-}
-
-static addDeepLinkingListener(listener: Function): EmitterSubscription {
-    return this.addListener("deepLink", listener);
-}
+    /* TODO: This methosd is only available for Android */
+    static lockScreenOrientation(value: boolean) {
+        return RNMappPluginModule.lockScreenOrientation(value);
+    }
 
 
-static removePushListener(listener: Function): EmitterSubscription {
-    return this.removeListener("notificationResponse", listener);
-}
-
-static removeDeepLinkingListener(listener: Function): EmitterSubscription {
-    return this.removeListener("deepLink", listener);
-}
+    static removeBadgeNumber() {
+        return RNMappPluginModule.removeBadgeNumber();
+    }
 
 
-static addListener(eventName: EventName, listener: Function): EmitterSubscription {
-    let name = convertEventEnum(eventName);
-    return EventEmitter.addListener(name, listener);
-}
+    static startGeoFencing() {
+        return RNMappPluginModule.startGeoFencing();
+    }
+
+    static stopGeoFencing() {
+        return RNMappPluginModule.stopGeoFencing();
+    }
+
+    static fetchInboxMessage(): Promise<any> {
+        return RNMappPluginModule.fetchInboxMessage();
+    }
 
 
-static removeListener(eventName: EventName, listener: Function) {
-    let name = convertEventEnum(eventName);
-    EventEmitter.removeListener(name, listener);
-}
+    static triggerInApp(value: string) {
+        return RNMappPluginModule.triggerInApp(value);
+    }
+
+    static inAppMarkAsRead(templateId: number, eventId: string) {
+        return RNMappPluginModule.inAppMarkAsRead(templateId, eventId);
+    }
+
+    static inAppMarkAsUnRead(templateId: number, eventId: string) {
+        return RNMappPluginModule.inAppMarkAsUnRead(templateId, eventId);
+    }
+
+    static inAppMarkAsDeleted(templateId: number, eventId: string) {
+        return RNMappPluginModule.inAppMarkAsDeleted(templateId, eventId);
+    }
+
+    static triggerStatistic(templateId: number, originalEventId: string, trackingKey: string, displayMillis: number, reason: string, link): string {
+        return RNMappPluginModule.triggerStatistic(templateId, originalEventId, trackingKey, displayMillis, reason, link);
+    }
+// TODO: Android only
+    static isDeviceRegistered(): Promise<boolean> {
+        return RNMappPluginModule.isDeviceRegistered(value);
+    }
+// TODO: iOS only
+    static removeDeviceAlias() {
+        return RNMappPluginModule.removeDeviceAlias();
+    }
+// TODO: iOS only
+    static incrementNumericKey(key:String, value:number) {
+        return RNMappPluginModule.incrementNumericKey(key,value);
+    }
 
 
-/**
- * Clears all notifications for the application.
- * Supported on Android and iOS 10+. For older iOS devices, you can set
- * the badge number to 0 to clear notifications.
- */
-static clearNotifications() {
-    RNMappPluginModule.clearNotifications();
-}
+    /**
+     * Adds a custom event.
+     *
+     * @param {CustomEvent} event The custom event.
+     * @return {Promise.<null, Error>}  A promise that returns null if resolved, or an Error if the
+     * custom event is rejected.
+     */
+    static addCustomEvent(event: CustomEvent): Promise {
+        var actionArg = {
+            event_name: event._name,
+            event_value: event._value,
+            transaction_id: event._transactionId,
+            properties: event._properties
+        }
+
+        return new Promise((resolve, reject) => {
+            RNMappPluginModule.runAction("add_custom_event_action", actionArg)
+                .then(() => {
+                    resolve();
+                }, (error) => {
+                    reject(error);
+                });
+        });
+    }
 
 
-static clearNotification(identifier: string) {
-    RNMappPluginModule.clearNotification(identifier)
-}
+    static runAction(name: string, value: ?any): Promise<any> {
+        return RNMappPluginModule.runAction(name, value);
+    }
+
+    static addPushListener(listener: Function): EmitterSubscription {
+        return this.addListener("notificationResponse", listener);
+    }
+
+    static addDeepLinkingListener(listener: Function): EmitterSubscription {
+        return this.addListener("deepLink", listener);
+    }
+
+    //ios specific
+    static addInitListener(listener: Function): EmitterSubscription {
+        return this.addListener("iosSDKInit", listener);
+    }
+
+    static addInboxMessagesListener(listener: Function): EmitterSubscription {
+        return this.addListener("iosInboxMessages", listener);
+    }
+    //end ios
+
+    static removePushListener(listener: Function): EmitterSubscription {
+        return this.removeListener("notificationResponse", listener);
+    }
+
+    static removeDeepLinkingListener(listener: Function): EmitterSubscription {
+        return this.removeListener("deepLink", listener);
+    }
+
+
+    static addListener(eventName: EventName, listener: Function): EmitterSubscription {
+        let name = convertEventEnum(eventName);
+        return EventEmitter.addListener(name, listener);
+    }
+
+
+    static removeListener(eventName: EventName, listener: Function) {
+        let name = convertEventEnum(eventName);
+        EventEmitter.removeListener(name, listener);
+    }
+
+
+    /**
+     * Clears all notifications for the application.
+     * Supported on Android and iOS 10+. For older iOS devices, you can set
+     * the badge number to 0 to clear notifications.
+     */
+    static clearNotifications() {
+        RNMappPluginModule.clearNotifications();
+    }
+
+
+    static clearNotification(identifier: string) {
+        RNMappPluginModule.clearNotification(identifier)
+    }
 }
 
 module.exports = Mapp;
