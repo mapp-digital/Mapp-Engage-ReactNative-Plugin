@@ -507,5 +507,10 @@ public class RNMappPluginModule extends ReactContextBaseJavaModule {
         NotificationManagerCompat.from(reactContext.getApplicationContext()).cancel(id);
     }
 
+    @ReactMethod
+    public void logOut(boolean pushEnabled) {
+        Appoxee.instance().logOut(application, pushEnabled);
+    }
+
 
 }
