@@ -39,7 +39,9 @@ function convertEventEnum(type: EventName): ?string {
 
 export type EventName = $Enum<{
     notificationResponse: string,
-    deepLink: string
+    deepLink: string,
+    iosSDKInit: string,
+    iosInboxMessages: string
 }>;
 
 export class Mapp {
@@ -70,7 +72,9 @@ export class Mapp {
      */
 
     static engage2() {
-        return RNMappPluginModule.engage2();
+        if (Platform.OS == "android") {
+            return RNMappPluginModule.engage2();
+        }
     }
 
 
@@ -79,20 +83,24 @@ export class Mapp {
      *
      */
 
-    static engage(sdkKey: string, googleProjectId: string, cepURL: string, appID: string, tenantID: string) {
+    static engage(sdkKey: string, googleProjectId: string, server: string, appID: string, tenantID: string) {
         if (Platform.OS == 'ios') {
-            return RNMappPluginModule.autoengage(cepURL);
+            RNMappPluginModule.engageInapp(server);
+            return RNMappPluginModule.autoengage(server);
         }
-        return RNMappPluginModule.engage(sdkKey, googleProjectId, cepURL, appID, tenantID);
+        return RNMappPluginModule.engage(sdkKey, googleProjectId, server, appID, tenantID);
     }
 
-    /**
+      /**
      * On Init Completed Listener
      *
      * @return {Promise.<boolean>} A promise with the result.
      */
     static onInitCompletedListener(): Promise<boolean> {
-        return RNMappPluginModule.onInitCompletedListener();
+        if (Platform.OS == "android") {
+            return RNMappPluginModule.onInitCompletedListener();
+        }
+        return null;
     }
 
     /**
@@ -145,7 +153,9 @@ export class Mapp {
      *
      */
     static setAttributeBoolean(key: string, value: boolean) {
-        return RNMappPluginModule.setAttributeBoolean(key, value);
+        if (Platform.OS == "android") {
+            return RNMappPluginModule.setAttributeBoolean(key, value);
+        }
     }
 
     /**
@@ -153,7 +163,9 @@ export class Mapp {
      * TODO: it is andoid only function
      */
     static removeAttribute(key: string) {
-        return RNMappPluginModule.removeAttribute(key);
+        if (Platform.OS == "android") {
+            return RNMappPluginModule.removeAttribute(key);
+        }
     }
 
     /**
@@ -199,9 +211,10 @@ export class Mapp {
         return RNMappPluginModule.getAttributeStringValue(value);
     }
 
-    /* TODO: This methosd is only available for Android */
     static lockScreenOrientation(value: boolean) {
-        return RNMappPluginModule.lockScreenOrientation(value);
+        if (Platform.OS == "android") {
+            return RNMappPluginModule.lockScreenOrientation(value);
+        }
     }
 
 
@@ -240,21 +253,26 @@ export class Mapp {
     }
 
     static triggerStatistic(templateId: number, originalEventId: string, trackingKey: string, displayMillis: number, reason: string, link): string {
-        return RNMappPluginModule.triggerStatistic(templateId, originalEventId, trackingKey, displayMillis, reason, link);
+        if (Platform.OS == "android") {
+            return RNMappPluginModule.triggerStatistic(templateId, originalEventId, trackingKey, displayMillis, reason, link);
+        }
+        return null;
     }
-// TODO: Android only
+
     static isDeviceRegistered(): Promise<boolean> {
         return RNMappPluginModule.isDeviceRegistered(value);
     }
-// TODO: iOS only
-    static removeDeviceAlias() {
-        return RNMappPluginModule.removeDeviceAlias();
-    }
-// TODO: iOS only
+
     static incrementNumericKey(key:String, value:number) {
-        return RNMappPluginModule.incrementNumericKey(key,value);
+        if (Platform.OS == "ios") {
+            return RNMappPluginModule.incrementNumericKey(key,value);
+        }
+        return null;
     }
 
+    static logOut(pushEnabled:Boolean) {
+        return RNMappPluginModule.logOut(pushEnabled);
+    }
 
     /**
      * Adds a custom event.
@@ -283,7 +301,9 @@ export class Mapp {
 
 
     static runAction(name: string, value: ?any): Promise<any> {
-        return RNMappPluginModule.runAction(name, value);
+        if (Platform.OS == "android") {
+            return RNMappPluginModule.runAction(name, value);
+        }
     }
 
     static addPushListener(listener: Function): EmitterSubscription {
@@ -294,15 +314,19 @@ export class Mapp {
         return this.addListener("deepLink", listener);
     }
 
-    //ios specific
     static addInitListener(listener: Function): EmitterSubscription {
-        return this.addListener("iosSDKInit", listener);
+        if (Platform.OS == "ios") {
+            return this.addListener("iosSDKInit", listener);
+        }
+        return null;
     }
 
     static addInboxMessagesListener(listener: Function): EmitterSubscription {
-        return this.addListener("iosInboxMessages", listener);
+        if (Platform.OS == "ios") {
+            return this.addListener("iosInboxMessages", listener);
+        }
+        return null;
     }
-    //end ios
 
     static removePushListener(listener: Function): EmitterSubscription {
         return this.removeListener("notificationResponse", listener);

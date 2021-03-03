@@ -66,14 +66,9 @@ RCT_EXPORT_METHOD(removeDeviceAlias) {
     }];
 }
 
-//RCT_EXPORT_METHOD(onInitCompletedListener:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject) {
-//    if ([[Appoxee shared] isReady]) {
-//        resolve(@"SDK is ready");
-//    } else {
-////        [[Appoxee shared] addObserver: [RNMappEventEmmiter shared] forKeyPath:@"isReady" options:NSKeyValueObservingOptionNew context:nil];
-//        reject(@"SDK_STATUS", @"sdk is not ready, wait for event", nil);
-//    }
-//}
+RCT_EXPORT_METHOD(logOut: (BOOL) pushEnabled) {
+    [[Appoxee shared] logoutWithOptin:pushEnabled];
+}
 
 RCT_EXPORT_METHOD(isReady:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject) {
     resolve(@([[Appoxee shared] isReady]));
@@ -212,9 +207,6 @@ RCT_EXPORT_METHOD(triggerInApp: (NSString *) event) {
     [[AppoxeeInapp shared] reportInteractionEventWithName:event andAttributes:nil];
 }
 
-//startGeoFencing
-//stopGeoFencing
-
 RCT_EXPORT_METHOD(inAppMarkAsRead: (NSNumber *) templateId event: (NSString *) eventId) {
     APXInBoxMessage *message = [[RNMappEventEmmiter shared] getMessageWith:templateId event:eventId];
     if (message) {
@@ -234,6 +226,10 @@ RCT_EXPORT_METHOD(inAppMarkAsDeleted: (NSNumber *) templateId event: (NSString *
     if (message) {
         [message markAsDeleted];
     }
+}
+
+RCT_EXPORT_METHOD(isDeviceRegistered:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject) {
+    resolve(@([[Appoxee shared] isReady]));
 }
 
 #pragma mark Exported methods - Location Manager

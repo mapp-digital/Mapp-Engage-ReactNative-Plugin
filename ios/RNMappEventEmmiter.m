@@ -19,8 +19,8 @@ NSString *const MappRNLocationEnter = @"com.mapp.georegion_enter";
 NSString *const MappRNLocationExit = @"com.mapp.georegion_exit";
 NSString *const MappRNCustomLinkReceived = @"com.mapp.custom_link_received";
 NSString *const MappRNDeepLinkReceived = @"com.mapp.deep_link_received";
-NSString *const MappRNRichMessage = @"con.mapp.rich_message_received";
-NSString *const MappRNPushMessage = @"con.mapp.push_message_received";
+NSString *const MappRNRichMessage = @"con.mapp.rich_message";
+NSString *const MappRNPushMessage = @"con.mapp.rich_message_received";
 NSString *const MappErrorMessage = @"con.mapp.error_message";
 NSString *const MappRNInappMessage = @"con.mapp.inapp_message";
 
@@ -124,7 +124,7 @@ NSString *const MappRNInappMessage = @"con.mapp.inapp_message";
 
 - (void)inAppCallFailedWithResponse:(NSString *_Nullable)response andError:(NSError *_Nullable)error {
     if (hasListeners) {
-        [self sendEventWithName:MappErrorMessage body: @{@"error": error, @"repsonse": response}];
+        [self sendEventWithName:MappErrorMessage body: @{@"error": error, @"response": response}];
     }
 }
 
@@ -195,4 +195,5 @@ NSString *const MappRNInappMessage = @"con.mapp.inapp_message";
     return [dateFormatter stringFromDate:date];
 }
 @end
+
 
