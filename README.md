@@ -14,10 +14,53 @@
 
 #### iOS
 
-1. In XCode, in the project navigator, right click `Libraries` ➜ `Add Files to [your project's name]`
-2. Go to `node_modules` ➜ `react-native-mapp-plugin` and add `RNMappPlugin.xcodeproj`
-3. In XCode, in the project navigator, select your project. Add `libRNMappPlugin.a` to your project's `Build Phases` ➜ `Link Binary With Libraries`
-4. Run your project (`Cmd+R`)<
+1) Install pods
+```
+cd ios && pod install
+```
+
+2) Add the following capabilities for your application target:
+  - Push Notification
+  - Background Modes > Remote Notifications
+  - Background Modes > Location updates
+
+3) Create a plist `AppoxeeConfig.plist` and include it in your application’s target:
+```
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>inapp</key>
+    <dict>
+        <key>custom_fields</key>
+        <array>
+            <string>customString</string>
+            <string>customNumber</string>
+            <string>customDate</string>
+        </array>
+        <key>media_timeout</key>
+        <integer>5</integer>
+    </dict>
+    <key>sdk</key>
+    <dict>
+        <key>app_id</key>
+        <string>your app id</string>
+        <key>dmc_system_id</key>
+        <integer>your dmc id</integer>
+        <key>sdk_key</key>
+        <string>your sdk key</string>
+        <key>is_eu</key>
+        <true/>
+        <key>open_landing_page_inside_app</key>
+        <false/>
+        <key>jamie_url</key>
+        <string>your inapp server url</string>
+        <key>apx_open_url_internal</key>
+        <string>YES</string>
+    </dict>
+</dict>
+</plist>
+```
 
 #### Android
 

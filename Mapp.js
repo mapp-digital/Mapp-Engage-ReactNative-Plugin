@@ -14,9 +14,11 @@ const {RNMappPluginModule} = NativeModules;
 const EventEmitter = new MappEventEmitter();
 
 const IOS_INIT = "com.mapp.init";
+const IOS_INBOX_MESSAGE = "com.mapp.inbox_message_received";
 const IOS_INBOX_MESSAGES = "com.mapp.inbox_messages_received";
 const PUSH_RECEIVED_EVENT = "con.mapp.rich_message_received";
 const MappIntentEvent = "com.mapp.deep_link_received";
+const IOS_RICH_MESSAGE = "com.mapp.rich_message";
 
 /**
  * @private
@@ -34,6 +36,12 @@ function convertEventEnum(type: EventName): ?string {
     else if (type === 'iosInboxMessages') {
         return IOS_INBOX_MESSAGES;
     }
+    else if (type === 'iosInboxMessage') {
+        return IOS_INBOX_MESSAGE;
+    }
+    else if (type === 'iosRichMessage') {
+        return IOS_RICH_MESSAGE;
+    }
     throw new Error("Invalid event name: " + type);
 }
 
@@ -41,7 +49,9 @@ export type EventName = $Enum<{
     notificationResponse: string,
     deepLink: string,
     iosSDKInit: string,
-    iosInboxMessages: string
+    iosInboxMessages: string,
+    iosInboxMessage: string,
+    iosRichMessage: string
 }>;
 
 export class Mapp {
@@ -324,6 +334,20 @@ export class Mapp {
     static addInboxMessagesListener(listener: Function): EmitterSubscription {
         if (Platform.OS == "ios") {
             return this.addListener("iosInboxMessages", listener);
+        }
+        return null;
+    }
+
+    static addInboxMessageListener(listener: Function): EmitterSubscription {
+        if (Platform.OS == "ios") {
+            return this.addListener("iosInboxMessage", listener);
+        }
+        return null;
+    }
+
+    static addRichMessagesListener(listener: Function): EmitterSubscription {
+        if (Platform.OS == "ios") {
+            return this.addListener("iosRichMessage", listener);
         }
         return null;
     }
