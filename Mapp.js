@@ -158,15 +158,6 @@ export class Mapp {
         return RNMappPluginModule.setAttributeInt(key, value);
     }
 
-    /**
-     * Set Custom Attribute
-     *
-     */
-    static setAttributeBoolean(key: string, value: boolean) {
-        if (Platform.OS == "android") {
-            return RNMappPluginModule.setAttributeBoolean(key, value);
-        }
-    }
 
     /**
      * Remove Custom Attribute
