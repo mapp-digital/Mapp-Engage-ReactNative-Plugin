@@ -2,11 +2,18 @@
 # react-native-mapp-plugin
 
 ## Getting started
+[Site](https://mapp.com/) |
+[Docs](https://mapp-wiki.atlassian.net/wiki/spaces/MIC/pages/1154875400/React+Native+Integration+for+Mapp+Cloud) 
+|[TestApk](https://github.com/MappCloud/React-Native-Test-Application/) 
 
-`$ npm install react-native-mapp-plugin --save`
+`$ npm install https://github.com/MappCloud/React-native-plugin.git --save`
+
+**The project is not yet on NPM. Until then, only github integration works **
+
 
 ### Mostly automatic installation
 
+For the old version of RN, 
 `$ react-native link react-native-mapp-plugin`
 
 ### Manual installation
@@ -77,20 +84,11 @@ cd ios && pod install
       compile project(':react-native-mapp-plugin')
   	```
 
-#### Windows
-[Read it! :D](https://github.com/ReactWindows/react-native)
-
-1. In Visual Studio add the `RNMappPlugin.sln` in `node_modules/react-native-mapp-plugin/windows/RNMappPlugin.sln` folder to their solution, reference from their app.
-2. Open up your `MainPage.cs` app
-  - Add `using Mapp.Plugin.RNMappPlugin;` to the usings at the top of the file
-  - Add `new RNMappPluginPackage()` to the `List<IReactPackage>` returned by the `Packages` method
-
-
 ## Usage
 ```javascript
-import RNMappPlugin from 'react-native-mapp-plugin';
+import Mapp from 'react-native-mapp-plugin';
 
 // TODO: What to do with the module?
-RNMappPlugin;
+Mapp;
 ```
   
