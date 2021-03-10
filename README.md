@@ -10,6 +10,8 @@
 
 **The project is not yet on NPM. Until then, only github integration works **
 
+Will be available after March 12, 2021
+npm install react-native-mapp-plugin --save`
 
 ### Mostly automatic installation
 
