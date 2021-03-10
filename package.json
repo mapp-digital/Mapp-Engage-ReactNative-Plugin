@@ -15,8 +15,8 @@
     "android",
     "mapp"
   ],
-  "author": "",
-  "license": "",
+  "author": "Mapp",
+  "license": "MIT",
   "peerDependencies": {
     "react": "^16.8.1",
     "react-native": ">=0.60.0-rc.0 <1.0.x"
@@ -25,5 +25,13 @@
     "jest": "^24.9.0",
     "react": "^16.9.0",
     "react-native": "^0.61.5"
-  }
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/MappCloud/React-native-plugin.git"
+  },
+  "bugs": {
+    "url": "https://github.com/MappCloud/React-native-plugin/issues"
+  },
+  "homepage": "https://github.com/MappCloud/React-native-plugin#readme"
 }
