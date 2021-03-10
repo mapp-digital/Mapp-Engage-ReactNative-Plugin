@@ -9,11 +9,11 @@ Pod::Spec.new do |s|
   s.description  = <<-DESC
                     Mapp SDK for React Native
                    DESC
-  s.homepage     = "https://github.com/github_account/react-native-apoxee-plugin"
+  s.homepage     = "https://github.com/MappCloud/React-native-plugin"
   s.license      = "MIT"
   s.author      = "Mapp"
   s.platforms    = { :ios => "10.0" }
-  s.source       = { :git => "https://github.com/github_account/react-native-apoxee-plugin.git", :tag => "#{s.version}" }
+  s.source       = { :git => "https://github.com/MappCloud/React-native-plugin", :tag => "#{s.version}" }
 
   s.source_files = "ios/**/*.{h,c,m,swift}"
   s.vendored_framework = "ios/Frameworks/AppoxeeSDK.framework", "ios/Frameworks/AppoxeeLocationServices.framework", "ios/Frameworks/AppoxeeInapp.framework"
