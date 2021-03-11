@@ -6,11 +6,7 @@
 [Docs](https://mapp-wiki.atlassian.net/wiki/spaces/MIC/pages/1154875400/React+Native+Integration+for+Mapp+Cloud) 
 |[TestApk](https://github.com/MappCloud/React-Native-Test-Application/) 
 
-`$ npm install https://github.com/MappCloud/React-native-plugin.git --save`
-
-**The project is not yet on NPM. Until then, only github integration works **
-
-Will be available after March 12, 2021
+### Installation from npm:
 
 `$ npm install react-native-mapp-plugin --save`
 
