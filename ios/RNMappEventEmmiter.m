@@ -81,7 +81,7 @@ NSString *const MappRNInappMessage = @"con.mapp.inapp_message";
     }
     NSString* deepLink = pushNotification.extraFields[@"apx_dpl"];
     if (deepLink && ![deepLink isEqualToString:@""] && hasListeners) {
-        [self sendEventWithName:MappRNDeepLinkReceived body:@{@"wid":actionIdentifier, @"message": deepLink, @"triggerEvent": @"" }];
+        [self sendEventWithName:MappRNDeepLinkReceived body:@{@"action":actionIdentifier, @"url": deepLink, @"event_trigger": @"" }];
     }
 }
 
@@ -102,7 +102,7 @@ NSString *const MappRNInappMessage = @"con.mapp.inapp_message";
 
 - (void)didReceiveDeepLinkWithIdentifier:(nonnull NSNumber *)identifier withMessageString:(nonnull NSString *)message andTriggerEvent:(nonnull NSString *)triggerEvent {
     if (hasListeners) {
-        [self sendEventWithName:MappRNDeepLinkReceived body:@{@"id":[identifier stringValue], @"message": message, @"triggerEvent": triggerEvent }];
+        [self sendEventWithName:MappRNDeepLinkReceived body:@{@"action":[identifier stringValue], @"url": message, @"event_trigger": triggerEvent }];
     }
 }
 
