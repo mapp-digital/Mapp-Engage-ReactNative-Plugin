@@ -246,44 +246,44 @@ RCT_EXPORT_METHOD(stopGeoFencing) {
 
 
 - (SERVER)getServerKeyFor: (NSString *) name {
-    if ([name containsString:@"L3"]) {
+    if ([name isEqualToString:@"L3"]) {
         return L3;
     }
-    if ([name containsString:@"EMC"]) {
+    if ([name isEqualToString:@"EMC"]) {
         return EMC;
     }
-    if ([name containsString:@"EMC_US"]) {
+    if ([name isEqualToString:@"EMC_US"]) {
         return EMC_US;
     }
-    if ([name containsString:@"CROC"]) {
+    if ([name isEqualToString:@"CROC"]) {
         return CROC;
     }
-    if ([name containsString:@"TEST"]) {
+    if ([name isEqualToString:@"TEST"]) {
         return TEST;
     }
-    if ([name containsString:@"TEST55"]) {
+    if ([name isEqualToString:@"TEST55"]) {
         return TEST55;
     }
     return TEST;
 }
 
 - (INAPPSERVER) getInappServerKeyFor: (NSString *) name {
-    if ([name containsString:@"L3"]) {
+    if ([name isEqualToString:@"L3"]) {
         return l3;
     }
-    if ([name containsString:@"EMC"]) {
+    if ([name isEqualToString:@"EMC"]) {
         return eMC;
     }
-    if ([name containsString:@"EMC_US"]) {
+    if ([name isEqualToString:@"EMC_US"]) {
         return eMC_US;
     }
-    if ([name containsString:@"CROC"]) {
+    if ([name isEqualToString:@"CROC"]) {
         return cROC;
     }
-    if ([name containsString:@"TEST"]) {
+    if ([name isEqualToString:@"TEST"]) {
         return tEST;
     }
-    if ([name containsString:@"TEST55"]) {
+    if ([name isEqualToString:@"TEST55"]) {
         return tEST55;
     }
     return tEST;
