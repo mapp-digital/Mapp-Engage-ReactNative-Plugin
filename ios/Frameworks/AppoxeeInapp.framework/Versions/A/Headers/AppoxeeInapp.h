@@ -79,7 +79,7 @@ typedef NS_ENUM(NSInteger, INAPPSERVER) {
 /**
  Appoxee Inapp instance
  @brief Method for getting a singleton instance of AppoxeeInapp
- <pre><code>
+ @code
  AppoxeeInapp *appoxeeInapp = [AppoxeeInapp shared];
  </pre></code>
  @return AppoxeeInapp an Instance Type of AppoxeeInapp.
@@ -102,7 +102,7 @@ typedef NS_ENUM(NSInteger, INAPPSERVER) {
  Method for engaging with AppoxeeInapp SDK.
  @brief Call this method to enable engagement with AppoxeeInapp SDK. You will typically call this method on application launch. 
  @attention Method is considered critical, and must be implemented.
- <pre><code>
+ @code
  - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
  {
     [[AppoxeeInapp shared] engageWithDelegate:self];
@@ -119,7 +119,7 @@ typedef NS_ENUM(NSInteger, INAPPSERVER) {
 /**
  Method for reporting an interactionable event, which may trigger a display of an Inapp message, provided by a Real Time Decisioning Engine.
  @brief Call this method to report significant events, which may trigger a display of an Inapp banner message or a full screen Inapp message.
- <pre><code>
+ @code
  - (void)userDidConfirmPaymentOfAmount:(nonnull NSNumber *)amount
  {
     [[AppoxeeInapp shared] reportInteractionEventWithName:@"payment" andAttributes:@{@"amount" : amount}];
