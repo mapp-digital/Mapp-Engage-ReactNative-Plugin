@@ -56,7 +56,7 @@ NSString *const MappRCTEventBodyKey = @"body";
     return shared;
 }
 
-- (void)sendEventWithName:(NSString *)eventName body:(id)body {
+- (void)sendEventWithMappName:(NSString *)eventName body:(id)body {
     @synchronized(self.pendingEvents) {
         [self.pendingEvents addObject:@{ MappRCTEventNameKey: eventName, MappRCTEventBodyKey: body}];
         [self notifyPendingEvents];
@@ -87,7 +87,7 @@ NSString *const MappRCTEventBodyKey = @"body";
         [[Appoxee shared] removeObserver:self forKeyPath:@"isReady"];
         [[AppoxeeLocationManager shared] setDelegate:self];
         if (hasListeners) {
-            [self sendEventWithName:MappRNInitEvent body:@{@"status": @"initialized"}];
+            [self sendEventWithMappName:MappRNInitEvent body:@{@"status": @"initialized"}];
         }
     }
 }
@@ -107,17 +107,17 @@ NSString *const MappRCTEventBodyKey = @"body";
 
 - (void)appoxee:(nonnull Appoxee *)appoxee handledRemoteNotification:(nonnull APXPushNotification *)pushNotification andIdentifer:(nonnull NSString *)actionIdentifier {
     if (hasListeners) {
-        [self sendEventWithName:MappRNRichMessage body:[self getPushMessage:pushNotification]];
+        [self sendEventWithMappName:MappRNRichMessage body:[self getPushMessage:pushNotification]];
     }
     NSString* deepLink = pushNotification.extraFields[@"apx_dpl"];
     if (deepLink && ![deepLink isEqualToString:@""] && hasListeners) {
-        [self sendEventWithName:MappRNDeepLinkReceived body:@{@"action":actionIdentifier, @"url": deepLink, @"event_trigger": @"" }];
+        [self sendEventWithMappName:MappRNDeepLinkReceived body:@{@"action":actionIdentifier, @"url": deepLink, @"event_trigger": @"" }];
     }
 }
 
 - (void)appoxee:(nonnull Appoxee *)appoxee handledRichContent:(nonnull APXRichMessage *)richMessage didLaunchApp:(BOOL)didLaunch {
     if (hasListeners) {
-        [self sendEventWithName:MappRNRichMessage body:[self getRichMessage:richMessage]];
+        [self sendEventWithMappName:MappRNRichMessage body:[self getRichMessage:richMessage]];
     }
 }
 
@@ -126,19 +126,19 @@ NSString *const MappRCTEventBodyKey = @"body";
 
 - (void)appoxeeInapp:(nonnull AppoxeeInapp *)appoxeeInapp didReceiveInappMessageWithIdentifier:(nonnull NSNumber *)identifier andMessageExtraData:(nullable NSDictionary <NSString *, id> *)messageExtraData {
     if (hasListeners) {
-        [self sendEventWithName:MappRNInappMessage body:@{@"id": [identifier stringValue], @"extraData": messageExtraData}];
+        [self sendEventWithMappName:MappRNInappMessage body:@{@"id": [identifier stringValue], @"extraData": messageExtraData}];
     }
 }
 
 - (void)didReceiveDeepLinkWithIdentifier:(nonnull NSNumber *)identifier withMessageString:(nonnull NSString *)message andTriggerEvent:(nonnull NSString *)triggerEvent {
     if (hasListeners) {
-        [self sendEventWithName:MappRNDeepLinkReceived body:@{@"action":[identifier stringValue], @"url": message, @"event_trigger": triggerEvent }];
+        [self sendEventWithMappName:MappRNDeepLinkReceived body:@{@"action":[identifier stringValue], @"url": message, @"event_trigger": triggerEvent }];
     }
 }
 
 - (void)didReceiveCustomLinkWithIdentifier:(nonnull NSNumber *)identifier withMessageString:(nonnull NSString *)message {
     if (hasListeners) {
-        [self sendEventWithName:MappRNCustomLinkReceived body:@{@"id":[identifier stringValue], @"message": message}];
+        [self sendEventWithMappName:MappRNCustomLinkReceived body:@{@"id":[identifier stringValue], @"message": message}];
     }
 }
 
@@ -152,19 +152,19 @@ NSString *const MappRCTEventBodyKey = @"body";
 //    }
     [self.messages addObjectsFromArray:messages];
     if (hasListeners) {
-        [self sendEventWithName:MappRNInboxMessagesReceived body:dicts];
+        [self sendEventWithMappName:MappRNInboxMessagesReceived body:dicts];
     }
 }
 
 - (void)inAppCallFailedWithResponse:(NSString *_Nullable)response andError:(NSError *_Nullable)error {
     if (hasListeners) {
-        [self sendEventWithName:MappErrorMessage body: @{@"error": error, @"response": response}];
+        [self sendEventWithMappName:MappErrorMessage body: @{@"error": error, @"response": response}];
     }
 }
 
 - (void)didReceiveInBoxMessage:(APXInBoxMessage *_Nullable)message {
     if (hasListeners) {
-        [self sendEventWithName:MappRNInboxMessageReceived body:[message getDictionary]];
+        [self sendEventWithMappName:MappRNInboxMessageReceived body:[message getDictionary]];
     }
 }
 
@@ -173,20 +173,20 @@ NSString *const MappRCTEventBodyKey = @"body";
 
 - (void)locationManager:(nonnull AppoxeeLocationManager *)manager didFailWithError:(nullable NSError *)error {
     if (hasListeners) {
-        [self sendEventWithName:MappErrorMessage body: @{@"error": error}];
+        [self sendEventWithMappName:MappErrorMessage body: @{@"error": error}];
     }
 }
 
 - (void)locationManager:(nonnull AppoxeeLocationManager *)manager didEnterGeoRegion:(nonnull CLCircularRegion *)geoRegion {
     if (hasListeners) {
-        [self sendEventWithName:MappRNLocationEnter body:@{@"latitude": [NSString stringWithFormat:@"%f", geoRegion.center.latitude], @"longitude": [NSString stringWithFormat:@"%f", geoRegion.center.longitude]}];
+        [self sendEventWithMappName:MappRNLocationEnter body:@{@"latitude": [NSString stringWithFormat:@"%f", geoRegion.center.latitude], @"longitude": [NSString stringWithFormat:@"%f", geoRegion.center.longitude]}];
     }
 
 }
 
 - (void)locationManager:(nonnull AppoxeeLocationManager *)manager didExitGeoRegion:(nonnull CLCircularRegion *)geoRegion {
     if (hasListeners) {
-        [self sendEventWithName:MappRNLocationExit body:@{@"latitude": [NSString stringWithFormat:@"%f", geoRegion.center.latitude], @"longitude": [NSString stringWithFormat:@"%f", geoRegion.center.longitude]}];
+        [self sendEventWithMappName:MappRNLocationExit body:@{@"latitude": [NSString stringWithFormat:@"%f", geoRegion.center.latitude], @"longitude": [NSString stringWithFormat:@"%f", geoRegion.center.longitude]}];
     }
 }
 
