@@ -126,6 +126,12 @@ NSString *const MappRCTEventBodyKey = @"body";
 
 - (void)appoxeeInapp:(nonnull AppoxeeInapp *)appoxeeInapp didReceiveInappMessageWithIdentifier:(nonnull NSNumber *)identifier andMessageExtraData:(nullable NSDictionary <NSString *, id> *)messageExtraData {
     if (hasListeners) {
+        NSDictionary* dict = [[NSDictionary alloc] init];
+        if (messageExtraData) {
+            dict = @{@"id": [identifier stringValue], @"extraData": messageExtraData};
+        } else {
+            dict = @{@"id": [identifier stringValue]};
+        }
         [self sendEventWithMappName:MappRNInappMessage body:@{@"id": [identifier stringValue], @"extraData": messageExtraData}];
     }
 }
@@ -158,6 +164,12 @@ NSString *const MappRCTEventBodyKey = @"body";
 
 - (void)inAppCallFailedWithResponse:(NSString *_Nullable)response andError:(NSError *_Nullable)error {
     if (hasListeners) {
+        NSError* newError = [NSError errorWithDomain:@"com.mapp.reactNativeError" code:200 userInfo:@{@"Error reason": @"No specific error message"}];
+        NSString* newResponse = @"There was unhandled error!";
+        if (error)
+            newError = error;
+        if (response)
+            newResponse = response;
         [self sendEventWithMappName:MappErrorMessage body: @{@"error": error, @"response": response}];
     }
 }
