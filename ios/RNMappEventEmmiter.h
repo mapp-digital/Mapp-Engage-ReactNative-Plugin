@@ -15,7 +15,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 @interface RNMappEventEmmiter : RCTEventEmitter <AppoxeeInappDelegate, AppoxeeNotificationDelegate, AppoxeeLocationManagerDelegate >
 
-//@property (nonatomic, weak) RCTBridge *bridge;
+@property (nonatomic, weak) RCTBridge *bridge;
 
 + (nullable instancetype) shared;
 - (APXInBoxMessage *) getMessageWith: (NSNumber *) templateId event: (NSString *) eventId;

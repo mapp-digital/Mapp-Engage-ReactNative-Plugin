@@ -18,7 +18,10 @@ class MappEventEmitter extends NativeEventEmitter {
   addListener(eventType: string, listener: Function, context: ?Object): EmitterSubscription {
     if (Platform.OS === 'android') {
         RNMappPluginModule.addAndroidListener(eventType);
-    }
+    } else if (Platform.OS === 'ios') {
+      this.addListener("com.mapp.onPendingEvent", async () => {
+        return dispatchEventsCallback(RNMappPluginModule.takePendingEvents);
+      });
     return super.addListener(eventType, listener, context);
   }
 

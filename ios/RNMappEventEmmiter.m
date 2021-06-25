@@ -10,7 +10,10 @@
 
 @interface RNMappEventEmmiter()
 @property (strong, nonatomic) NSMutableArray<APXInBoxMessage *> *messages;
+@property(nonatomic, strong) NSMutableArray *pendingEvents;
 @end
+
+NSString *const UARCTPendingEventName = @"com.mapp.onPendingEvent";
 
 NSString *const MappRNInitEvent = @"com.mapp.init";
 NSString *const MappRNInboxMessageReceived = @"com.mapp.inbox_message_received";
@@ -25,8 +28,21 @@ NSString *const MappErrorMessage = @"con.mapp.error_message";
 NSString *const MappRNInappMessage = @"con.mapp.inapp_message";
 
 
+NSString *const MappRCTEventNameKey = @"name";
+NSString *const MappRCTEventBodyKey = @"body";
+
+
 @implementation RNMappEventEmmiter {
     bool hasListeners;
+}
+
+- (instancetype)init
+{
+    self = [super init];
+    if (self) {
+        self.pendingEvents = [NSMutableArray array];
+    }
+    return self;
 }
 
 + (nullable instancetype) shared {
@@ -38,6 +54,20 @@ NSString *const MappRNInappMessage = @"con.mapp.inapp_message";
     });
 
     return shared;
+}
+
+- (void)sendEventWithName:(NSString *)eventName body:(id)body {
+    @synchronized(self.pendingEvents) {
+        [self.pendingEvents addObject:@{ MappRCTEventNameKey: eventName, MappRCTEventBodyKey: body}];
+        [self notifyPendingEvents];
+    }
+}
+
+- (void)notifyPendingEvents {
+    [self.bridge enqueueJSCall:@"RCTDeviceEventEmitter"
+                        method:@"emit"
+                          args:@[UARCTPendingEventName]
+                    completion:nil];
 }
 
 -(void)startObserving {
