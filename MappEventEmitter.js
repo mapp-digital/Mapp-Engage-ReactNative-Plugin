@@ -24,6 +24,7 @@ class MappEventEmitter extends NativeEventEmitter {
       });
     return super.addListener(eventType, listener, context);
   }
+}
 
   removeAllListeners(eventType: string) {
     if (Platform.OS === 'android') {
