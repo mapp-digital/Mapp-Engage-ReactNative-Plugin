@@ -13,7 +13,7 @@
 @property(nonatomic, strong) NSMutableArray *pendingEvents;
 @end
 
-NSString *const UARCTPendingEventName = @"com.mapp.onPendingEvent";
+NSString *const MappRCTPendingEventName = @"com.mapp.onPendingEvent";
 
 NSString *const MappRNInitEvent = @"com.mapp.init";
 NSString *const MappRNInboxMessageReceived = @"com.mapp.inbox_message_received";
@@ -22,10 +22,10 @@ NSString *const MappRNLocationEnter = @"com.mapp.georegion_enter";
 NSString *const MappRNLocationExit = @"com.mapp.georegion_exit";
 NSString *const MappRNCustomLinkReceived = @"com.mapp.custom_link_received";
 NSString *const MappRNDeepLinkReceived = @"com.mapp.deep_link_received";
-NSString *const MappRNRichMessage = @"con.mapp.rich_message";
-NSString *const MappRNPushMessage = @"con.mapp.rich_message_received";
-NSString *const MappErrorMessage = @"con.mapp.error_message";
-NSString *const MappRNInappMessage = @"con.mapp.inapp_message";
+NSString *const MappRNRichMessage = @"com.mapp.rich_message";
+NSString *const MappRNPushMessage = @"com.mapp.rich_message_received";
+NSString *const MappErrorMessage = @"com.mapp.error_message";
+NSString *const MappRNInappMessage = @"com.mapp.inapp_message";
 
 
 NSString *const MappRCTEventNameKey = @"name";
@@ -66,7 +66,7 @@ NSString *const MappRCTEventBodyKey = @"body";
 - (void)notifyPendingEvents {
     [self.bridge enqueueJSCall:@"RCTDeviceEventEmitter"
                         method:@"emit"
-                          args:@[UARCTPendingEventName]
+                          args:@[MappRCTPendingEventName]
                     completion:nil];
 }
 
