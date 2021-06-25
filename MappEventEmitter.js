@@ -22,8 +22,8 @@ class MappEventEmitter extends NativeEventEmitter {
       this.addListener("com.mapp.onPendingEvent", async () => {
         return dispatchEventsCallback(RNMappPluginModule.takePendingEvents);
       });
+    }
     return super.addListener(eventType, listener, context);
-  }
 }
 
   removeAllListeners(eventType: string) {
@@ -31,7 +31,6 @@ class MappEventEmitter extends NativeEventEmitter {
       const count = this.listeners(eventType).length;
         RNMappPluginModule.removeAndroidListeners(count);
     }
-
     super.removeAllListeners(eventType);
   }
 
