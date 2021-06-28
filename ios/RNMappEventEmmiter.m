@@ -13,8 +13,6 @@
 @property(nonatomic, strong) NSMutableArray *pendingEvents;
 @end
 
-NSString *const MappRCTPendingEventName = @"com.mapp.onPendingEvent";
-
 NSString *const MappRNInitEvent = @"com.mapp.init";
 NSString *const MappRNInboxMessageReceived = @"com.mapp.inbox_message_received";
 NSString *const MappRNInboxMessagesReceived = @"com.mapp.inbox_messages_received";
@@ -28,21 +26,8 @@ NSString *const MappErrorMessage = @"com.mapp.error_message";
 NSString *const MappRNInappMessage = @"com.mapp.inapp_message";
 
 
-NSString *const MappRCTEventNameKey = @"name";
-NSString *const MappRCTEventBodyKey = @"body";
-
-
 @implementation RNMappEventEmmiter {
     bool hasListeners;
-}
-
-- (instancetype)init
-{
-    self = [super init];
-    if (self) {
-        self.pendingEvents = [NSMutableArray array];
-    }
-    return self;
 }
 
 + (nullable instancetype) shared {
@@ -54,20 +39,6 @@ NSString *const MappRCTEventBodyKey = @"body";
     });
 
     return shared;
-}
-
-- (void)sendEvent:(NSString *)eventName body:(id)body {
-    @synchronized(self.pendingEvents) {
-        [self.pendingEvents addObject:@{ MappRCTEventNameKey: eventName, MappRCTEventBodyKey: body}];
-        [self notifyPendingEvents];
-    }
-}
-
-- (void)notifyPendingEvents {
-    [self.bridge enqueueJSCall:@"RCTDeviceEventEmitter"
-                        method:@"emit"
-                          args:@[MappRCTPendingEventName]
-                    completion:nil];
 }
 
 -(void)startObserving {
@@ -86,9 +57,7 @@ NSString *const MappRCTEventBodyKey = @"body";
     if ([keyPath isEqualToString:@"isReady"]) {
         [[Appoxee shared] removeObserver:self forKeyPath:@"isReady"];
         [[AppoxeeLocationManager shared] setDelegate:self];
-        if (hasListeners) {
-            [self sendEvent:MappRNInitEvent body:@{@"status": @"initialized"}];
-        }
+        [self sendEventWithName: MappRNInitEvent body: @{@"status": @"initialized"}];
     }
 }
 
@@ -106,19 +75,19 @@ NSString *const MappRCTEventBodyKey = @"body";
 #pragma mark - Notification Delegate
 
 - (void)appoxee:(nonnull Appoxee *)appoxee handledRemoteNotification:(nonnull APXPushNotification *)pushNotification andIdentifer:(nonnull NSString *)actionIdentifier {
-//    if (hasListeners) {
-//        [self sendEvent:MappRNRichMessage body:[self getPushMessage:pushNotification]];
-//    }
+    if ([self getPushMessage:pushNotification]) {
+        [self sendEventWithName: MappRNRichMessage body: [self getPushMessage:pushNotification]];
+    }
     NSString* deepLink = pushNotification.extraFields[@"apx_dpl"];
-//    if (deepLink && ![deepLink isEqualToString:@""] && hasListeners) {
-//        [self sendEvent:MappRNDeepLinkReceived body:@{@"action":actionIdentifier, @"url": deepLink, @"event_trigger": @"" }];
-//    }
+    if (deepLink && ![deepLink isEqualToString:@""] && actionIdentifier) {
+        [self sendEventWithName: MappRNDeepLinkReceived body: @{@"action":actionIdentifier, @"url": deepLink, @"event_trigger": @"" }];
+    }
     
 }
 
 - (void)appoxee:(nonnull Appoxee *)appoxee handledRichContent:(nonnull APXRichMessage *)richMessage didLaunchApp:(BOOL)didLaunch {
-    if (hasListeners) {
-        [self sendEvent:MappRNRichMessage body:[self getRichMessage:richMessage]];
+    if ([self getRichMessage:richMessage]) {
+        [self sendEventWithName: MappRNRichMessage body: [self getRichMessage:richMessage]];
     }
 }
 
@@ -133,20 +102,19 @@ NSString *const MappRCTEventBodyKey = @"body";
         } else {
             dict = @{@"id": [identifier stringValue]};
         }
-//        [self sendEvent:MappRNInappMessage body:@{@"id": [identifier stringValue], @"extraData": messageExtraData}];
+        [self sendEventWithName: MappRNInappMessage body: dict];
     }
 }
 
 - (void)didReceiveDeepLinkWithIdentifier:(nonnull NSNumber *)identifier withMessageString:(nonnull NSString *)message andTriggerEvent:(nonnull NSString *)triggerEvent {
-//    if (hasListeners) {
-//        [self sendEvent:MappRNDeepLinkReceived body:@{@"action":[identifier stringValue], @"url": message, @"event_trigger": triggerEvent }];
-//    }
-    [self sendEventWithName: MappRNDeepLinkReceived body: @{@"action":@"test123", @"url":@"www.google.com"}];
+    if (identifier && message && triggerEvent) {
+        [self sendEventWithName: MappRNDeepLinkReceived body: @{@"action":[identifier stringValue], @"url": message, @"event_trigger": triggerEvent }];
+    }
 }
 
 - (void)didReceiveCustomLinkWithIdentifier:(nonnull NSNumber *)identifier withMessageString:(nonnull NSString *)message {
-    if (hasListeners) {
-        [self sendEvent:MappRNCustomLinkReceived body:@{@"id":[identifier stringValue], @"message": message}];
+    if (identifier && message) {
+        [self sendEventWithName: MappRNCustomLinkReceived body: @{@"id":[identifier stringValue], @"message": message}];
     }
 }
 
@@ -155,12 +123,10 @@ NSString *const MappRCTEventBodyKey = @"body";
     for(APXInBoxMessage *message in messages) {
         [dicts addObject:[message getDictionary]];
     }
-//    if(!self.messages) {
-        self.messages = [[NSMutableArray alloc] init];
-//    }
+    self.messages = [[NSMutableArray alloc] init];
     [self.messages addObjectsFromArray:messages];
-    if (hasListeners) {
-        [self sendEvent:MappRNInboxMessagesReceived body:dicts];
+    if (dicts) {
+        [self sendEventWithName: MappRNInboxMessagesReceived body: dicts];
     }
 }
 
@@ -172,13 +138,13 @@ NSString *const MappRCTEventBodyKey = @"body";
             newError = error;
         if (response)
             newResponse = response;
-        [self sendEvent:MappErrorMessage body: @{@"error": error, @"response": response}];
+        [self sendEventWithName: MappErrorMessage body: @{@"error": error, @"response": response}];
     }
 }
 
 - (void)didReceiveInBoxMessage:(APXInBoxMessage *_Nullable)message {
-    if (hasListeners) {
-        [self sendEvent:MappRNInboxMessageReceived body:[message getDictionary]];
+    if ([message getDictionary]) {
+        [self sendEventWithName: MappRNInboxMessageReceived body: [message getDictionary]];
     }
 }
 
@@ -186,22 +152,19 @@ NSString *const MappRCTEventBodyKey = @"body";
 #pragma mark - Location Manager Delegate
 
 - (void)locationManager:(nonnull AppoxeeLocationManager *)manager didFailWithError:(nullable NSError *)error {
-    if (hasListeners) {
-        [self sendEvent:MappErrorMessage body: @{@"error": error}];
-    }
+    if (error)
+        [self sendEventWithName: MappErrorMessage body: @{@"error": error}];
 }
 
 - (void)locationManager:(nonnull AppoxeeLocationManager *)manager didEnterGeoRegion:(nonnull CLCircularRegion *)geoRegion {
-    if (hasListeners) {
-        [self sendEvent:MappRNLocationEnter body:@{@"latitude": [NSString stringWithFormat:@"%f", geoRegion.center.latitude], @"longitude": [NSString stringWithFormat:@"%f", geoRegion.center.longitude]}];
-    }
+    if (geoRegion)
+        [self sendEventWithName: MappRNLocationEnter body: @{@"latitude": [NSString stringWithFormat:@"%f", geoRegion.center.latitude], @"longitude": [NSString stringWithFormat:@"%f", geoRegion.center.longitude]}];
 
 }
 
 - (void)locationManager:(nonnull AppoxeeLocationManager *)manager didExitGeoRegion:(nonnull CLCircularRegion *)geoRegion {
-    if (hasListeners) {
-        [self sendEvent:MappRNLocationExit body:@{@"latitude": [NSString stringWithFormat:@"%f", geoRegion.center.latitude], @"longitude": [NSString stringWithFormat:@"%f", geoRegion.center.longitude]}];
-    }
+    if (geoRegion)
+        [self sendEventWithName: MappRNLocationExit body: @{@"latitude": [NSString stringWithFormat:@"%f", geoRegion.center.latitude], @"longitude": [NSString stringWithFormat:@"%f", geoRegion.center.longitude]}];
 }
 
 -(NSDictionary *) getRichMessage: (APXRichMessage *) message {
