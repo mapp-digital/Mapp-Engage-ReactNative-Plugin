@@ -138,7 +138,7 @@ NSString *const MappRNInappMessage = @"com.mapp.inapp_message";
             newError = error;
         if (response)
             newResponse = response;
-        [self sendEventWithName: MappErrorMessage body: @{@"error": error, @"response": response}];
+        [self sendEventWithName: MappErrorMessage body: @{@"error": newError, @"response": newResponse}];
     }
 }
 
