@@ -99,7 +99,7 @@ RCT_EXPORT_METHOD(incrementNumericKey: (NSString *) key value: (NSNumber *) numb
     }];
 }
                   
-RCT_EXPORT_METHOD(setAttributeString: (NSString *)key value: (NSString *) value)  {
+RCT_EXPORT_METHOD(setAttribute: (NSString *)key value: (NSString *) value)  {
     [[Appoxee shared] setStringValue:value forKey:key withCompletionHandler:^(NSError * _Nullable appoxeeError, id  _Nullable data) {
         if(appoxeeError != nil) {
             NSLog(@"%@", appoxeeError.debugDescription);
