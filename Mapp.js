@@ -16,7 +16,7 @@ const EventEmitter = new MappEventEmitter();
 const IOS_INIT = "com.mapp.init";
 const IOS_INBOX_MESSAGE = "com.mapp.inbox_message_received";
 const IOS_INBOX_MESSAGES = "com.mapp.inbox_messages_received";
-const PUSH_RECEIVED_EVENT = "con.mapp.rich_message_received";
+const PUSH_RECEIVED_EVENT = "com.mapp.rich_message_received";
 const MappIntentEvent = "com.mapp.deep_link_received";
 const IOS_RICH_MESSAGE = "com.mapp.rich_message";
 
