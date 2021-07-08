@@ -182,17 +182,28 @@ NSString *const MappRNInappMessage = @"com.mapp.inapp_message";
 
 -(NSDictionary *) getPushMessage: (APXPushNotification *) pushMessage {
     NSMutableDictionary *dict = [[NSMutableDictionary alloc] init];
-    [dict setObject:pushMessage.title forKey:@"title"];
-    [dict setObject:pushMessage.alert forKey:@"alert"];
-    [dict setObject:pushMessage.body forKey:@"body"];
-    [dict setObject:[NSNumber numberWithInteger: pushMessage.uniqueID] forKey: @"id"];
-    [dict setObject:[NSNumber numberWithInteger: pushMessage.badge] forKey: @"badge"];
-    [dict setObject:pushMessage.subtitle forKey:@"subtitle"];
-    [dict setObject:pushMessage.pushAction.categoryName forKey:@"category" ];
-    [dict setObject:pushMessage.extraFields forKey:@"extraFields"];
-    [dict setObject:pushMessage.isRich ? @"true": @"false" forKey:@"isRich"];
-    [dict setObject:pushMessage.isSilent ? @"true": @"false" forKey:@"isSilent"];
-    [dict setObject:pushMessage.isTriggerUpdate ? @"true": @"false" forKey:@"isTriggerUpdate"];
+    if (pushMessage.title)
+        [dict setObject:pushMessage.title forKey:@"title"];
+    if (pushMessage.alert)
+        [dict setObject:pushMessage.alert forKey:@"alert"];
+    if (pushMessage.body)
+        [dict setObject:pushMessage.body forKey:@"body"];
+    if (pushMessage.uniqueID)
+        [dict setObject:[NSNumber numberWithInteger: pushMessage.uniqueID] forKey: @"id"];
+    if (pushMessage.badge)
+        [dict setObject:[NSNumber numberWithInteger: pushMessage.badge] forKey: @"badge"];
+    if (pushMessage.subtitle)
+        [dict setObject:pushMessage.subtitle forKey:@"subtitle"];
+    if (pushMessage.pushAction.categoryName)
+        [dict setObject:pushMessage.pushAction.categoryName forKey:@"category" ];
+    if (pushMessage.extraFields)
+        [dict setObject:pushMessage.extraFields forKey:@"extraFields"];
+    if (pushMessage.isRich)
+        [dict setObject:pushMessage.isRich ? @"true": @"false" forKey:@"isRich"];
+    if (pushMessage.isSilent)
+        [dict setObject:pushMessage.isSilent ? @"true": @"false" forKey:@"isSilent"];
+    if (pushMessage.isTriggerUpdate)
+        [dict setObject:pushMessage.isTriggerUpdate ? @"true": @"false" forKey:@"isTriggerUpdate"];
     return dict;
 }
 
