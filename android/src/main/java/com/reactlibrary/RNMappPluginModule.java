@@ -335,7 +335,7 @@ public class RNMappPluginModule extends ReactContextBaseJavaModule {
 
     @ReactMethod
     public void triggerInApp(String key) {
-        Appoxee.instance().triggerDMCCallInApp((getCurrentActivity()), key);
+        Appoxee.instance().triggerInApp((getCurrentActivity()), key);
     }
 
     @ReactMethod
