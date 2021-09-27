@@ -21,6 +21,7 @@ import com.appoxee.internal.inapp.model.InAppStatistics;
 import com.appoxee.internal.inapp.model.MessageContext;
 import com.appoxee.internal.inapp.model.Tracking;
 import com.appoxee.internal.inapp.model.TrackingAttributes;
+import com.appoxee.internal.service.AppoxeeServiceAdapter;
 import com.appoxee.push.NotificationMode;
 import com.appoxee.push.PushData;
 import com.facebook.react.bridge.Arguments;
@@ -48,6 +49,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * Created by Aleksandar Marinkovic on 2019-05-15.
  * Copyright (c) 2019 MAPP.
  */
+@SuppressWarnings("ALL")
 public class RNMappPluginModule extends ReactContextBaseJavaModule {
 
     private final ReactApplicationContext reactContext;
@@ -69,8 +71,9 @@ public class RNMappPluginModule extends ReactContextBaseJavaModule {
     @Override
     public void initialize() {
         super.initialize();
-        if (getCurrentActivity() != null)
-            application = (Application) getCurrentActivity().getApplication();
+        // application is initialized in constructor
+/*        if (getCurrentActivity() != null)
+            application = (Application) getCurrentActivity().getApplication();*/
         getReactApplicationContext().addLifecycleEventListener(new LifecycleEventListener() {
             @Override
             public void onHostResume() {
@@ -109,7 +112,6 @@ public class RNMappPluginModule extends ReactContextBaseJavaModule {
         RemoteMessage remoteMessage = getRemoteMessage(msgJson);
         if (remoteMessage != null){
             Appoxee.instance().setRemoteMessage(remoteMessage);
-            Log.d(this.getClass().getName(),remoteMessage.toString());
         }
     }
 
@@ -147,12 +149,22 @@ public class RNMappPluginModule extends ReactContextBaseJavaModule {
         opt.sdkKey = sdkKey;
         opt.googleProjectId = googleProjectId;
         opt.server = AppoxeeOptions.Server.valueOf(server);
-        if (server.equals("TEST") || server.equals("TEST55")) {
+        if (server.equals("TEST") || server.equals("TEST55") || server.equals("TEST_55")) {
             opt.cepURL = "https://jamie-test.shortest-route.com";
         }
         opt.notificationMode = NotificationMode.BACKGROUND_AND_FOREGROUND;
         opt.tenantID = tenantID;
         Appoxee.engage(Objects.requireNonNull(application), opt);
+        Appoxee.instance().addInitListener(new Appoxee.OnInitCompletedListener() {
+            @Override
+            public void onInitCompleted(boolean successful, Exception failReason) {
+                /**
+                 * OnInitCompleteListener must be attached;
+                 * Internally {@link AppoxeeServiceAdapter#getDeviceInfoDMC()} is called and "user_id" created.
+                 * If "user_id" is null InApp messages are not working.
+                 */
+            }
+        });
         Appoxee.setOrientation(application, ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
 
     }
