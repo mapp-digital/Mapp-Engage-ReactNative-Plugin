@@ -1,19 +1,12 @@
 {
   "name": "react-native-mapp-plugin",
-  "version": "1.0.4beta6",
+  "version": "1.0.4beta7",
   "description": "Mapp SDK for React Native.",
   "main": "index.js",
-"scripts": {
-  "test": "echo \"Error: no test specified\" && exit 1",
-  "postinstall": "cross-os bar"
-},
-"cross-os": {
-  "bar": {
-    "darwin": "./iospatch.sh'",
-    "win32": "echo 'iospatch can't run on Windows'",
-    "linux": "echo 'iospatch can't run on Linux'"
-  }
-},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "postinstall": "./iospatch.sh"
+  },
   "keywords": [
     "react-native",
     "react",
@@ -25,15 +18,14 @@
   "author": "Mapp",
   "license": "MIT",
   "peerDependencies": {
-    "cross-os": "^1.4.0",
     "react": "^16.8.1",
     "react-native": ">=0.60.0-rc.0 <1.0.x"
   },
-"devDependencies": {
-  "jest": "^24.9.0",
-  "react": "^16.9.0",
-  "react-native": "^0.61.5"
-},
+  "devDependencies": {
+    "jest": "^24.9.0",
+    "react": "^16.9.0",
+    "react-native": "^0.61.5"
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/MappCloud/React-native-plugin/tree/push_messages_fix"
