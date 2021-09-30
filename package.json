@@ -1,11 +1,11 @@
 {
   "name": "react-native-mapp-plugin",
-  "version": "1.0.4beta8",
+  "version": "1.0.4beta9",
   "description": "Mapp SDK for React Native.",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "postinstall": "./iospatch.sh"
+    "postinstall": "node -e \"process.platform === 'darwin' && require('child_process').spawn('sh', ['./iospatch.sh'], { stdio: 'inherit'})\""
   },
   "keywords": [
     "react-native",
