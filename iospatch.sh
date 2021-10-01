@@ -1,7 +1,7 @@
 #!/bin/sh
 
 if [ -d ios/Frameworks ]; then
-	
+
 	if [ ! -d iostemp ]; then
   		mkdir -p iostemp;
 	fi

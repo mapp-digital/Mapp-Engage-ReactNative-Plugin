@@ -11,7 +11,7 @@ public  class MessageService extends MappMessagingService {
     public void onMessageReceived(RemoteMessage remoteMessage) {
         super.onMessageReceived(remoteMessage);
         //TODO handle push data if you went
-        PushData pushData = getData(remoteMessage);
+        //PushData pushData = getData(remoteMessage);
     }
 
     @Override

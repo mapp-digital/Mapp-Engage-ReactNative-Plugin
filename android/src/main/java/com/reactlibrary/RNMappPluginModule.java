@@ -5,9 +5,8 @@ import android.Manifest;
 import android.app.Application;
 import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
-import android.os.AsyncTask;
 import android.os.Build;
-
+import android.util.Log;
 
 import androidx.core.app.NotificationManagerCompat;
 import androidx.core.content.ContextCompat;
@@ -22,19 +21,25 @@ import com.appoxee.internal.inapp.model.InAppStatistics;
 import com.appoxee.internal.inapp.model.MessageContext;
 import com.appoxee.internal.inapp.model.Tracking;
 import com.appoxee.internal.inapp.model.TrackingAttributes;
+import com.appoxee.internal.service.AppoxeeServiceAdapter;
 import com.appoxee.push.NotificationMode;
 import com.appoxee.push.PushData;
 import com.facebook.react.bridge.Arguments;
+import com.facebook.react.bridge.Callback;
 import com.facebook.react.bridge.LifecycleEventListener;
 import com.facebook.react.bridge.Promise;
 import com.facebook.react.bridge.ReactApplicationContext;
 import com.facebook.react.bridge.ReactContextBaseJavaModule;
 import com.facebook.react.bridge.ReactMethod;
-import com.facebook.react.bridge.Callback;
 import com.facebook.react.bridge.WritableArray;
 import com.facebook.react.bridge.WritableMap;
 import com.facebook.react.bridge.WritableNativeMap;
+import com.google.firebase.messaging.RemoteMessage;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -44,6 +49,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * Created by Aleksandar Marinkovic on 2019-05-15.
  * Copyright (c) 2019 MAPP.
  */
+@SuppressWarnings("ALL")
 public class RNMappPluginModule extends ReactContextBaseJavaModule {
 
     private final ReactApplicationContext reactContext;
@@ -65,8 +71,9 @@ public class RNMappPluginModule extends ReactContextBaseJavaModule {
     @Override
     public void initialize() {
         super.initialize();
-        if (getCurrentActivity() != null)
-            application = (Application) getCurrentActivity().getApplication();
+        // application is initialized in constructor
+/*        if (getCurrentActivity() != null)
+            application = (Application) getCurrentActivity().getApplication();*/
         getReactApplicationContext().addLifecycleEventListener(new LifecycleEventListener() {
             @Override
             public void onHostResume() {
@@ -101,9 +108,32 @@ public class RNMappPluginModule extends ReactContextBaseJavaModule {
     }
 
     @ReactMethod
+    public void setRemoteMessage(String msgJson) {
+        RemoteMessage remoteMessage = getRemoteMessage(msgJson);
+        if (remoteMessage != null){
+            Appoxee.instance().setRemoteMessage(remoteMessage);
+        }
+    }
+
+    @ReactMethod
+    public void isPushFromMapp(String msgJson, Promise promise) {
+        try {
+            JSONObject json = new JSONObject(msgJson);
+            boolean mappPush = json.has("data") && json.getJSONObject("data").has("p");
+            promise.resolve(mappPush);
+        } catch (Exception e) {
+            promise.resolve(false);
+        }
+    }
+
+    @ReactMethod
+    public void setToken(String token) {
+        Appoxee.instance().setToken(token);
+    }
+
+    @ReactMethod
     public void setAlias(String alias) {
         Appoxee.instance().setAlias(alias);
-
     }
 
     @ReactMethod
@@ -119,12 +149,22 @@ public class RNMappPluginModule extends ReactContextBaseJavaModule {
         opt.sdkKey = sdkKey;
         opt.googleProjectId = googleProjectId;
         opt.server = AppoxeeOptions.Server.valueOf(server);
-        if (server.equals("TEST") || server.equals("TEST55")) {
+        if (server.equals("TEST") || server.equals("TEST55") || server.equals("TEST_55")) {
             opt.cepURL = "https://jamie-test.shortest-route.com";
         }
         opt.notificationMode = NotificationMode.BACKGROUND_AND_FOREGROUND;
         opt.tenantID = tenantID;
         Appoxee.engage(Objects.requireNonNull(application), opt);
+        Appoxee.instance().addInitListener(new Appoxee.OnInitCompletedListener() {
+            @Override
+            public void onInitCompleted(boolean successful, Exception failReason) {
+                /**
+                 * OnInitCompleteListener must be attached;
+                 * Internally {@link AppoxeeServiceAdapter#getDeviceInfoDMC()} is called and "user_id" created.
+                 * If "user_id" is null InApp messages are not working.
+                 */
+            }
+        });
         Appoxee.setOrientation(application, ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
 
     }
@@ -247,7 +287,7 @@ public class RNMappPluginModule extends ReactContextBaseJavaModule {
     @ReactMethod
     public void startGeoFencing() {
 
-     Appoxee.instance().startGeoFencing();
+        Appoxee.instance().startGeoFencing();
 //         if (Build.VERSION.SDK_INT < 23) {
 //             Appoxee.instance().startGeoFencing();
 //         } else if (Build.VERSION.SDK_INT <= 28) {
@@ -488,6 +528,50 @@ public class RNMappPluginModule extends ReactContextBaseJavaModule {
         return deviceInfo;
     }
 
+private RemoteMessage getRemoteMessage(String jsonMsg) {
+        if (jsonMsg == null)
+            return null;
+
+        final String KEY_TOKEN = "token";
+        final String KEY_COLLAPSE_KEY = "collapseKey";
+        final String KEY_DATA = "data";
+        final String KEY_FROM = "from";
+        final String KEY_MESSAGE_ID = "messageId";
+        final String KEY_MESSAGE_TYPE = "messageType";
+        final String KEY_SENT_TIME = "sentTime";
+        final String KEY_ERROR = "error";
+        final String KEY_TO = "to";
+        final String KEY_TTL = "ttl";
+
+        JSONObject json = null;
+        try {
+            json = new JSONObject(jsonMsg);
+
+            String collapseKey = json.has(KEY_COLLAPSE_KEY) ? json.getString(KEY_COLLAPSE_KEY) : "";
+            String messageId = json.has(KEY_MESSAGE_ID) ? json.getString(KEY_MESSAGE_ID) : "";
+            String messageType = json.has(KEY_MESSAGE_TYPE) ? json.getString(KEY_MESSAGE_TYPE) : "";
+            int ttl = json.has(KEY_TTL) ? json.getInt(KEY_TTL) : 0;
+            JSONObject data = json.has(KEY_DATA) ? json.getJSONObject(KEY_DATA) : null;
+
+            RemoteMessage.Builder builder = new RemoteMessage.Builder("appoxee@gcm.googleapis.com")
+                    .setMessageType(messageType)
+                    .setMessageId(messageId)
+                    .setTtl(ttl)
+                    .setCollapseKey(collapseKey);
+
+            if (data != null) {
+                for (Iterator<String> it = data.keys(); it.hasNext();) {
+                    String k = it.next();
+                    builder.addData(k, data.getString(k));
+                }
+            }
+
+            return builder.build();
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
 
     private boolean shouldRequestLocationPermissions() {
         if (Build.VERSION.SDK_INT < 23) {

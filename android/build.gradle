@@ -1,68 +1,76 @@
-apply plugin: 'com.android.library'
-
-def safeExtGet(prop, fallback) {
-  rootProject.ext.has(prop) ? rootProject.ext.get(prop) : fallback
-}
-allprojects {
+buildscript {
     repositories {
         flatDir {
             dirs 'libs'
         }
         google()
         mavenCentral()
+        maven {
+            // All of React Native (JS, Obj-C sources, Android binaries) is installed from npm
+            url "$rootDir/../node_modules/react-native/android"
+        }
         jcenter()
     }
-}
+    dependencies {
+        classpath 'com.android.tools.build:gradle:3.6.4'
 
-
-repositories {
-    google()
-    mavenCentral()
-    maven {
-        // All of React Native (JS, Obj-C sources, Android binaries) is installed from npm
-        url "$rootDir/../node_modules/react-native/android"
+        // NOTE: Do not place your application dependencies here; they belong
+        // in the individual module build.gradle files
     }
-    jcenter()
 }
-android {
-  compileSdkVersion safeExtGet('compileSdkVersion', 29)
-  buildToolsVersion safeExtGet('buildToolsVersion', '29.0.2')
 
-  defaultConfig {
-    minSdkVersion safeExtGet('minSdkVersion', 19)
-    targetSdkVersion safeExtGet('targetSdkVersion', 29)
-    versionCode 1
-    versionName '1.0'
-  }
+allprojects {
+    repositories {
+        google()
+        mavenCentral()
+        jcenter()
+        maven { url "https://maven.google.com/"}
+    }
+}
+apply plugin: 'com.android.library'
+
+
+def safeExtGet(prop, fallback) {
+    rootProject.ext.has(prop) ? rootProject.ext.get(prop) : fallback
+}
+
+android {
+    compileSdkVersion safeExtGet('compileSdkVersion', 29)
+    buildToolsVersion safeExtGet('buildToolsVersion', '29.0.2')
+
+    defaultConfig {
+        minSdkVersion safeExtGet('minSdkVersion', 19)
+        targetSdkVersion safeExtGet('targetSdkVersion', 29)
+        versionCode 1
+        versionName '1.0'
+    }
 
     buildTypes {
-          release {
-              minifyEnabled false
-              proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
-          }
-      }
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
 }
 
-
 dependencies {
-    implementation  'com.facebook.react:react-native:+'
+
+    implementation('com.facebook.react:react-native:+')
     implementation('com.google.android.gms:play-services-location:16.0.0')
             {
                 exclude group: 'com.android.support'
             }
     implementation 'com.android.support:appcompat-v7:28.0.0'
-   implementation 'com.google.code.gson:gson:2.8.5'
+    implementation 'com.google.code.gson:gson:2.8.5'
     implementation 'com.google.dagger:dagger:2.24'
     implementation 'androidx.appcompat:appcompat:1.1.0'
     annotationProcessor 'com.google.dagger:dagger-compiler:2.24'
-    implementation ("com.google.firebase:firebase-messaging:${safeExtGet('firebaseMessagingVersion', '20.0.0')}")
+    implementation("com.google.firebase:firebase-messaging:${safeExtGet('firebaseMessagingVersion', '20.0.0')}")
             {
                 exclude group: 'com.android.support'
             }
-    api ('com.google.android.gms:play-services-location:16.0.0')
+    api('com.google.android.gms:play-services-location:16.0.0')
     implementation 'androidx.media:media:1.0.1'
     implementation 'androidx.legacy:legacy-support-v13:1.0.0'
-    implementation 'com.mapp.sdk:mapp-android:6.0.17-special1'
-
+    implementation 'com.mapp.sdk:mapp-android:6.0.17-special8'
 }
-
