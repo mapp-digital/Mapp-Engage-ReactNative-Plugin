@@ -1,6 +1,6 @@
-#!/bin/bash
-if [[ "$OSTYPE" == "darwin"* ]]; then
-   if [ -d ios/Frameworks ]; then
+#!/bin/sh
+
+if [ -d ios/Frameworks ]; then
 
 	if [ ! -d iostemp ]; then
   		mkdir -p iostemp;
@@ -11,5 +11,3 @@ if [[ "$OSTYPE" == "darwin"* ]]; then
 	rm -rf iostemp
 	echo "Finished pathching iOS"
 fi
-fi
-
