@@ -79,7 +79,6 @@ public class RNMappPluginModule extends ReactContextBaseJavaModule {
             public void onHostResume() {
                 Appoxee.engage(application);
                 Appoxee.setOrientation(application, ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
-
             }
 
             @Override
