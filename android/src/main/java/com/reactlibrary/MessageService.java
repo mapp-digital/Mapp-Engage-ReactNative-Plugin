@@ -1,6 +1,6 @@
 package com.reactlibrary;
 
-import com.appoxee.push.PushData;
+import com.appoxee.Appoxee;
 import com.appoxee.push.fcm.MappMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
 
