@@ -96,7 +96,7 @@ RCT_EXPORT_METHOD(setPostponeNotificationRequest: (BOOL) postpone) {
     [[Appoxee shared] setPostponeNotificationRequest:postpone];
 }
 
-RCT_EXPORT_METHOD(setPostponeNotificationRequest) {
+RCT_EXPORT_METHOD(showNotificationAlertView) {
     [[Appoxee shared] showNotificationAlertDialog];
 }
 

@@ -171,6 +171,7 @@ export class Mapp {
   /**
    * Set to true to postpone a request for notifications.
    * Setting the property should be performed prior to engaging the SDK.
+   * iOS only
    */
   static setPostponeNotificationRequest(postpone: boolean) {
     return RNMappPluginModule.setPostponeNotificationRequest(postpone);
@@ -178,6 +179,7 @@ export class Mapp {
 
   /**
    * Display allow notification prompt.
+   * iOS only
    */
   static showNotificationAlertView() {
     return RNMappPluginModule.showNotificationAlertView();
