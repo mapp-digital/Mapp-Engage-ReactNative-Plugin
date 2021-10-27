@@ -169,6 +169,21 @@ export class Mapp {
   }
 
   /**
+   * Set to true to postpone a request for notifications.
+   * Setting the property should be performed prior to engaging the SDK.
+   */
+  static setPostponeNotificationRequest(postpone: boolean) {
+    return RNMappPluginModule.setPostponeNotificationRequest(postpone);
+  }
+
+  /**
+   * Display allow notification prompt.
+   */
+  static showNotificationAlertView() {
+    return RNMappPluginModule.showNotificationAlertView();
+  }  
+
+  /**
    * Set Custom Attribute
    *
    */

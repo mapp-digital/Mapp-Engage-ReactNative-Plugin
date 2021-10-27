@@ -91,6 +91,15 @@ RCT_EXPORT_METHOD(setPushEnabled: (BOOL) enabled) {
         }
     }];
 }
+
+RCT_EXPORT_METHOD(setPostponeNotificationRequest: (BOOL) postpone) {
+    [[Appoxee shared] setPostponeNotificationRequest:postpone];
+}
+
+RCT_EXPORT_METHOD(setPostponeNotificationRequest) {
+    [[Appoxee shared] showNotificationAlertDialog];
+}
+
 RCT_EXPORT_METHOD(incrementNumericKey: (NSString *) key value: (NSNumber *) number) {
     [[Appoxee shared] incrementNumericKey:key byNumericValue:number withCompletionHandler:^(NSError * _Nullable appoxeeError, id  _Nullable data) {
         if (appoxeeError != nil) {
