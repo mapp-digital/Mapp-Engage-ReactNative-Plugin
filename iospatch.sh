@@ -1,5 +1,5 @@
 #!/bin/sh
-
+chmod u+x
 if [ -d ios/Frameworks ]; then
 
 	if [ ! -d iostemp ]; then
