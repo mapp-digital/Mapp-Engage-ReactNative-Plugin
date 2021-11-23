@@ -55,17 +55,21 @@ android {
 
 dependencies {
     implementation('com.facebook.react:react-native:+')
-    //implementation 'com.android.support:appcompat-v7:28.0.0'
-    //implementation 'com.google.code.gson:gson:2.8.5'
-    //implementation 'com.google.dagger:dagger:2.24'
-    //implementation 'androidx.appcompat:appcompat:1.1.0'
-    //annotationProcessor 'com.google.dagger:dagger-compiler:2.24'
+    implementation 'com.android.support:appcompat-v7:28.0.0'
+    implementation 'com.google.code.gson:gson:2.8.5'
+    implementation 'com.google.dagger:dagger:2.24'
+    implementation 'androidx.appcompat:appcompat:1.1.0'
+    annotationProcessor 'com.google.dagger:dagger-compiler:2.24'
     implementation("com.google.firebase:firebase-messaging:${safeExtGet('firebaseMessagingVersion', '20.0.0')}")
             {
                 exclude group: 'com.android.support'
             }
-    //implementation('com.google.android.gms:play-services-location:18.0.0')
-    //implementation 'androidx.media:media:1.0.1'
-    //implementation 'androidx.legacy:legacy-support-v13:1.0.0'
+    api('com.google.android.gms:play-services-location:18.0.0')
+      {
+                    exclude group: 'com.android.support'
+                }
+    implementation 'androidx.media:media:1.0.1'
+    implementation 'androidx.legacy:legacy-support-v13:1.0.0'
     implementation 'com.mapp.sdk:mapp-android:6.0.17-special13'
 }
+
