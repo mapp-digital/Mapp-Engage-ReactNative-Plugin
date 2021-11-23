@@ -183,7 +183,7 @@ export class Mapp {
    */
   static showNotificationAlertView() {
     return RNMappPluginModule.showNotificationAlertView();
-  }  
+  }
 
   /**
    * Set Custom Attribute
@@ -258,6 +258,14 @@ export class Mapp {
 
   static removeBadgeNumber() {
     return RNMappPluginModule.removeBadgeNumber();
+  }
+
+  static startGeofencing():Promise<string> {
+    return RNMappPluginModule.startGeofencing();
+  }
+
+  static stopGeofencing() : Promise<string>{
+    return RNMappPluginModule.stopGeofencing();
   }
 
   static startGeoFencing() {
