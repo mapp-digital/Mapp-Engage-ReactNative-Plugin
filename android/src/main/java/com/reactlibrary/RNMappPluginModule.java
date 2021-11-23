@@ -8,6 +8,7 @@ import android.content.pm.PackageManager;
 import android.os.Build;
 import android.util.Log;
 
+import androidx.annotation.Nullable;
 import androidx.core.app.NotificationManagerCompat;
 import androidx.core.content.ContextCompat;
 
@@ -22,6 +23,7 @@ import com.appoxee.internal.inapp.model.MessageContext;
 import com.appoxee.internal.inapp.model.Tracking;
 import com.appoxee.internal.inapp.model.TrackingAttributes;
 import com.appoxee.internal.service.AppoxeeServiceAdapter;
+import com.appoxee.internal.util.ResultCallback;
 import com.appoxee.push.NotificationMode;
 import com.appoxee.push.PushData;
 import com.facebook.react.bridge.Arguments;
@@ -285,63 +287,38 @@ public class RNMappPluginModule extends ReactContextBaseJavaModule {
     }
 
     @ReactMethod
-    public void startGeoFencing() {
-
-        Appoxee.instance().startGeoFencing();
-//         if (Build.VERSION.SDK_INT < 23) {
-//             Appoxee.instance().startGeoFencing();
-//         } else if (Build.VERSION.SDK_INT <= 28) {
-//             RequestPermissionsTask task = new RequestPermissionsTask(getReactApplicationContext(),
-//                     new RequestPermissionsTask.Callback() {
-//                         @Override
-//                         public void onResult(boolean enabled) {
-//                             if (enabled) {
-//
-//                                 Appoxee.instance().startGeoFencing();
-//                             }
-//                         }
-//                     });
-//             task.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.ACCESS_FINE_LOCATION);
-//
-//         } else if (Build.VERSION.SDK_INT == 29) {
-//             RequestPermissionsTask task = new RequestPermissionsTask(getReactApplicationContext(),
-//                     new RequestPermissionsTask.Callback() {
-//                         @Override
-//                         public void onResult(boolean enabled) {
-//                             if (enabled) {
-//
-//                                 Appoxee.instance().startGeoFencing();
-//                             }
-//                         }
-//                     });
-//             task.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_BACKGROUND_LOCATION);
-//
-//         } else if (Build.VERSION.SDK_INT == 30) {
-//             RequestPermissionsTask task = new RequestPermissionsTask(getReactApplicationContext(),
-//                     new RequestPermissionsTask.Callback() {
-//                         @Override
-//                         public void onResult(boolean enabled) {
-//                             if (enabled) {
-//                                 Appoxee.instance().startGeoFencing();
-//                                 RequestPermissionsTask task2 = new RequestPermissionsTask(getReactApplicationContext(),
-//                                         new RequestPermissionsTask.Callback() {
-//                                             @Override
-//                                             public void onResult(boolean enabled) {
-//                                                 if (enabled) {
-//                                                     Appoxee.instance().startGeoFencing();
-//                                                 }
-//                                             }
-//                                         });
-//                                 task2.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, Manifest.permission.ACCESS_BACKGROUND_LOCATION);
-//
-//                             }
-//                         }
-//                     });
-//             task.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.ACCESS_FINE_LOCATION);
-//         }
-
+    public void startGeofencing(final Promise promise) {
+        Appoxee.instance().startGeoFencing(new ResultCallback<String>() {
+            @Override
+            public void onResult(@Nullable String result) {
+                promise.resolve(result);
+            }
+        });
     }
 
+    @ReactMethod
+    public void stopGeofencing(final Promise promise) {
+        Appoxee.instance().stopGeoFencing(new ResultCallback<String>() {
+            @Override
+            public void onResult(@Nullable String result) {
+                promise.resolve(result);
+            }
+        });
+    }
+
+    /**
+     * This method is deprecated in Java. Use method {@link #startGeofencing(ResultCallback)}}
+     */
+    @ReactMethod
+    @Deprecated()
+    public void startGeoFencing() {
+        Appoxee.instance().startGeoFencing();
+    }
+
+    /**
+     * Deprecated in Java. Use method {@link #stopGeofencing(ResultCallback)}
+     */
+    @Deprecated
     @ReactMethod
     public void stopGeoFencing() {
         Appoxee.instance().stopGeoFencing();
@@ -369,8 +346,6 @@ public class RNMappPluginModule extends ReactContextBaseJavaModule {
                 promise.resolve(messageToJson(message));
             }
         });
-
-
     }
 
     @ReactMethod
