@@ -186,6 +186,14 @@ export class Mapp {
   }
 
   /**
+   * Display notifications even app is in foreground .
+   * iOS only
+   */
+   static setShowNotificationsAtForeground(value: boolean) {
+    return RNMappPluginModule.setShowNotificationsAtForeground(value);
+  }
+
+  /**
    * Set Custom Attribute
    *
    */
