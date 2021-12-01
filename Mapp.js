@@ -182,7 +182,10 @@ export class Mapp {
    * iOS only
    */
   static showNotificationAlertView() {
-    return RNMappPluginModule.showNotificationAlertView();
+    if (Platform.OS === "ios") {
+      return RNMappPluginModule.showNotificationAlertView();
+    }
+
   }
 
   /**
@@ -190,7 +193,9 @@ export class Mapp {
    * iOS only
    */
    static setShowNotificationsAtForeground(value: boolean) {
-    return RNMappPluginModule.setShowNotificationsAtForeground(value);
+    if (Platform.OS === "ios") {
+      return RNMappPluginModule.setShowNotificationsAtForeground(value);
+    }
   }
 
   /**
