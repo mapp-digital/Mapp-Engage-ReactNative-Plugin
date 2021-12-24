@@ -111,7 +111,7 @@ public class RNMappPluginModule extends ReactContextBaseJavaModule {
     @ReactMethod
       public void setRemoteMessage(String msgJson) {
           RemoteMessage remoteMessage = getRemoteMessage(msgJson);
-          if (remoteMessage != null && Appoxee.instance() != null) {
+          if (remoteMessage != null && AppoxeeServiceAdapter.getInstance() != null) {
               Appoxee.instance().setRemoteMessage(remoteMessage);
           }
       }
@@ -129,7 +129,7 @@ public class RNMappPluginModule extends ReactContextBaseJavaModule {
 
     @ReactMethod
     public void setToken(String token) {
-    if (Appoxee.instance() != null)
+    if (AppoxeeServiceAdapter.getInstance() != null)
         Appoxee.instance().setToken(token);
     }
 
