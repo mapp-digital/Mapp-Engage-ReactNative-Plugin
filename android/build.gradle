@@ -70,6 +70,6 @@ dependencies {
                 }
     implementation 'androidx.media:media:1.0.1'
     implementation 'androidx.legacy:legacy-support-v13:1.0.0'
-    implementation 'com.mapp.sdk:mapp-android:6.0.17-special13'
+    implementation 'com.mapp.sdk:mapp-android:6.0.17-special14'
 }
 
