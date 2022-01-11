@@ -49,6 +49,4 @@ public class IntentNotificationEvent implements Event {
         this.message = message;
         this.type = type;
     }
-
-
 }
