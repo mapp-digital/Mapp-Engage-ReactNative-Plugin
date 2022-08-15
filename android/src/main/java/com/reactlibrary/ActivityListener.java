@@ -26,7 +26,7 @@ public class ActivityListener extends Activity {
         launchIntent.setData(intent.getData());
         launchIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
         startActivity(launchIntent);
-        Appoxee.handleRichPush(Appoxee.instance().getLastActivity(),intent);
+        Appoxee.handleRichPush(this,intent);
         finish();
     }
 
