@@ -6,7 +6,7 @@
 //
 
 #import <Foundation/Foundation.h>
-#import <AppoxeeSDK/AppoxeeSDK.h>
+#import "AppoxeeSDK.h"
 #import <AppoxeeInapp/AppoxeeInapp.h>
 #import <AppoxeeLocationServices/AppoxeeLocationManager.h>
 #import <React/RCTEventEmitter.h>

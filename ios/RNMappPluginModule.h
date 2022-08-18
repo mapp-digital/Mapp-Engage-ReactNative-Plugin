@@ -1,6 +1,6 @@
 #import <React/RCTBridgeModule.h>
 #import <React/RCTEventEmitter.h>
-#import <AppoxeeSDK/AppoxeeSDK.h>
+#import "AppoxeeSDK.h"
 #import <AppoxeeInapp/AppoxeeInapp.h>
 #import <AppoxeeLocationServices/AppoxeeLocationManager.h>
 #import <UserNotifications/UNUserNotificationCenter.h>
