@@ -13,6 +13,14 @@
     return [RNMappEventEmmiter shared].bridge;
 }
 
+- (void)setCallableJSModules:(RCTCallableJSModules *)callableJSModules {
+    [RNMappEventEmmiter shared].callableJSModules = callableJSModules;
+}
+
+- (RCTCallableJSModules *)callableJSModules {
+    return [RNMappEventEmmiter shared].callableJSModules;
+}
+
 - (dispatch_queue_t)methodQueue {
     return dispatch_get_main_queue();
 }
