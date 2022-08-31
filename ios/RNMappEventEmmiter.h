@@ -7,8 +7,8 @@
 
 #import <Foundation/Foundation.h>
 #import "AppoxeeSDK.h"
-#import <AppoxeeInapp/AppoxeeInapp.h>
-#import <AppoxeeLocationServices/AppoxeeLocationManager.h>
+#import "AppoxeeInapp.h"
+#import "AppoxeeLocationManager.h"
 #import <React/RCTEventEmitter.h>
 
 NS_ASSUME_NONNULL_BEGIN
