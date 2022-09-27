@@ -24,7 +24,7 @@ Pod::Spec.new do |s|
   s.frameworks = "WebKit"
   s.library = 'sqlite3'
   s.dependency "React" 
-  s.dependency "MappSDK" 
+  s.dependency "MappSDK" , '~> 6.0.6'
   s.dependency "MappSDKInapp"
   s.dependency "MappSDKGeotargeting"
 
