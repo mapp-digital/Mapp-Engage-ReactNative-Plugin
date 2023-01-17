@@ -1,7 +1,7 @@
-arguments=
+arguments=--init-script /var/folders/t6/pvjmf_n16v706r03q_t_vlx58tvf6j/T/init18028768000286331932.gradle --init-script /var/folders/t6/pvjmf_n16v706r03q_t_vlx58tvf6j/T/init9655228269826963407.gradle
 auto.sync=false
 build.scans.enabled=false
-connection.gradle.distribution=GRADLE_DISTRIBUTION(VERSION(7.1.1))
+connection.gradle.distribution=GRADLE_DISTRIBUTION(VERSION(7.4.2))
 connection.project.dir=
 eclipse.preferences.version=1
 gradle.user.home=
