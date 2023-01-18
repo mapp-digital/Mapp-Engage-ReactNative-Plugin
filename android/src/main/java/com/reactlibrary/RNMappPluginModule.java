@@ -148,7 +148,6 @@ public class RNMappPluginModule extends ReactContextBaseJavaModule {
         AppoxeeOptions opt = new AppoxeeOptions();
         opt.appID = appID;
         opt.sdkKey = sdkKey;
-        opt.googleProjectId = googleProjectId;
         opt.server = AppoxeeOptions.Server.valueOf(server);
         if (server.equals("TEST") || server.equals("TEST55") || server.equals("TEST_55")) {
             opt.cepURL = "https://jamie-test.shortest-route.com";
@@ -175,7 +174,6 @@ public class RNMappPluginModule extends ReactContextBaseJavaModule {
         AppoxeeOptions opt = new AppoxeeOptions();
         opt.appID = appID;
         opt.sdkKey = sdkKey;
-        opt.googleProjectId = googleProjectId;
         opt.server = AppoxeeOptions.Server.valueOf(server);
         opt.cepURL = cepURl;
         opt.tenantID = tenantID;

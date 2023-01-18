@@ -1,6 +1,8 @@
 
 package com.reactlibrary;
 
+import android.view.ViewManager;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
