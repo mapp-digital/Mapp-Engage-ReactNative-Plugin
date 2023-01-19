@@ -12,8 +12,9 @@ buildscript {
         jcenter()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:3.6.4'
-
+        classpath('com.android.tools.build:gradle:7.3.1')
+        classpath ('com.google.gms:google-services:4.3.14')
+        //classpath("com.facebook.react:react-native-gradle-plugin")
         // NOTE: Do not place your application dependencies here; they belong
         // in the individual module build.gradle files
     }
@@ -36,10 +37,10 @@ def safeExtGet(prop, fallback) {
 
 android {
     compileSdkVersion safeExtGet('compileSdkVersion', 33)
-    buildToolsVersion safeExtGet('buildToolsVersion', '30.0.3')
+    buildToolsVersion safeExtGet('buildToolsVersion', '33.0.1')
 
     defaultConfig {
-        minSdkVersion safeExtGet('minSdkVersion', 19)
+        minSdkVersion safeExtGet('minSdkVersion', 21)
         targetSdkVersion safeExtGet('targetSdkVersion', 33)
         versionCode 1
         versionName '1.0'
@@ -54,21 +55,24 @@ android {
 }
 
 dependencies {
+    implementation "com.android.support:appcompat-v7:27.1.1"
     implementation("com.facebook.react:react-native:+")
     implementation 'com.google.code.gson:gson:2.8.5'
     implementation 'com.google.dagger:dagger:2.24'
     implementation 'androidx.appcompat:appcompat:1.5.1'
+    implementation "androidx.lifecycle:lifecycle-viewmodel:2.5.1"
+    implementation "androidx.lifecycle:lifecycle-viewmodel-ktx:2.5.1"
     annotationProcessor 'com.google.dagger:dagger-compiler:2.24'
     implementation("com.google.firebase:firebase-messaging:${safeExtGet('firebaseMessagingVersion', '20.0.0')}")
             {
                 exclude group: 'com.android.support'
             }
     api('com.google.android.gms:play-services-location:18.0.0')
-      {
-                    exclude group: 'com.android.support'
-                }
+            {
+                exclude group: 'com.android.support'
+            }
     implementation 'androidx.media:media:1.0.1'
     implementation 'androidx.legacy:legacy-support-v13:1.0.0'
-    implementation 'com.mapp.sdk:mapp-android:6.0.19-rc04'
+    implementation 'com.mapp.sdk:mapp-android:6.0.19-rc05'
 }
 
