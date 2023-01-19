@@ -74,8 +74,10 @@ public class RNMappPluginModule extends ReactContextBaseJavaModule {
     public void initialize() {
         super.initialize();
         // application is initialized in constructor
-/*        if (getCurrentActivity() != null)
-            application = (Application) getCurrentActivity().getApplication();*/
+        /*
+         * if (getCurrentActivity() != null)
+         * application = (Application) getCurrentActivity().getApplication();
+         */
         getReactApplicationContext().addLifecycleEventListener(new LifecycleEventListener() {
             @Override
             public void onHostResume() {
@@ -109,12 +111,12 @@ public class RNMappPluginModule extends ReactContextBaseJavaModule {
     }
 
     @ReactMethod
-      public void setRemoteMessage(String msgJson) {
-          RemoteMessage remoteMessage = getRemoteMessage(msgJson);
-          if (remoteMessage != null) {
-              Appoxee.instance().setRemoteMessage(remoteMessage);
-          }
-      }
+    public void setRemoteMessage(String msgJson) {
+        RemoteMessage remoteMessage = getRemoteMessage(msgJson);
+        if (remoteMessage != null) {
+            Appoxee.instance().setRemoteMessage(remoteMessage);
+        }
+    }
 
     @ReactMethod
     public void isPushFromMapp(String msgJson, Promise promise) {
@@ -148,7 +150,6 @@ public class RNMappPluginModule extends ReactContextBaseJavaModule {
         AppoxeeOptions opt = new AppoxeeOptions();
         opt.appID = appID;
         opt.sdkKey = sdkKey;
-        opt.googleProjectId = googleProjectId;
         opt.server = AppoxeeOptions.Server.valueOf(server);
         if (server.equals("TEST") || server.equals("TEST55") || server.equals("TEST_55")) {
             opt.cepURL = "https://jamie-test.shortest-route.com";
@@ -161,7 +162,8 @@ public class RNMappPluginModule extends ReactContextBaseJavaModule {
             public void onInitCompleted(boolean successful, Exception failReason) {
                 /**
                  * OnInitCompleteListener must be attached;
-                 * Internally {@link AppoxeeServiceAdapter#getDeviceInfoDMC()} is called and "user_id" created.
+                 * Internally {@link AppoxeeServiceAdapter#getDeviceInfoDMC()} is called and
+                 * "user_id" created.
                  * If "user_id" is null InApp messages are not working.
                  */
             }
@@ -171,11 +173,11 @@ public class RNMappPluginModule extends ReactContextBaseJavaModule {
     }
 
     @ReactMethod
-    public void engageTestServer(String cepURl, String sdkKey, String googleProjectId, String server, String appID, String tenantID) {
+    public void engageTestServer(String cepURl, String sdkKey, String googleProjectId, String server, String appID,
+            String tenantID) {
         AppoxeeOptions opt = new AppoxeeOptions();
         opt.appID = appID;
         opt.sdkKey = sdkKey;
-        opt.googleProjectId = googleProjectId;
         opt.server = AppoxeeOptions.Server.valueOf(server);
         opt.cepURL = cepURl;
         opt.tenantID = tenantID;
@@ -195,7 +197,6 @@ public class RNMappPluginModule extends ReactContextBaseJavaModule {
         promise.resolve(Appoxee.instance().isPushEnabled());
     }
 
-
     @ReactMethod
     public void isReady(Promise promise) {
         promise.resolve(Appoxee.instance().isReady());
@@ -211,7 +212,6 @@ public class RNMappPluginModule extends ReactContextBaseJavaModule {
             }
         });
     }
-
 
     @ReactMethod
     public void setAttribute(String key, String value) {
@@ -258,7 +258,6 @@ public class RNMappPluginModule extends ReactContextBaseJavaModule {
         Appoxee.instance().removeAttribute(attribute);
     }
 
-
     @ReactMethod
     public void getAlias(Promise promise) {
         promise.resolve(Appoxee.instance().getAlias());
@@ -273,7 +272,6 @@ public class RNMappPluginModule extends ReactContextBaseJavaModule {
     public void getAttributeStringValue(String value, Promise promise) {
         promise.resolve(Appoxee.instance().getAttributeStringValue(value));
     }
-
 
     @ReactMethod
     public void lockScreenOrientation(Integer orientation) {
@@ -306,7 +304,8 @@ public class RNMappPluginModule extends ReactContextBaseJavaModule {
     }
 
     /**
-     * This method is deprecated in Java. Use method {@link #startGeofencing(ResultCallback)}}
+     * This method is deprecated in Java. Use method
+     * {@link #startGeofencing(ResultCallback)}}
      */
     @ReactMethod
     @Deprecated()
@@ -361,25 +360,27 @@ public class RNMappPluginModule extends ReactContextBaseJavaModule {
 
     @ReactMethod
     public void inAppMarkAsUnRead(Integer templateId, String eventId) {
-        Appoxee.instance().triggerStatistcs((reactContext.getApplicationContext()), getInAppStatisticsRequestObject(templateId,
-                eventId,
-                InAppStatistics.INBOX_INBOX_MESSAGE_UNREAD_KEY, null, null, null));
+        Appoxee.instance().triggerStatistcs((reactContext.getApplicationContext()),
+                getInAppStatisticsRequestObject(templateId,
+                        eventId,
+                        InAppStatistics.INBOX_INBOX_MESSAGE_UNREAD_KEY, null, null, null));
     }
 
     @ReactMethod
     public void inAppMarkAsDeleted(Integer templateId, String eventId) {
-        Appoxee.instance().triggerStatistcs((reactContext.getApplicationContext()), getInAppStatisticsRequestObject(templateId,
-                eventId,
-                InAppStatistics.INBOX_INBOX_MESSAGE_DELETED_KEY, null, null, null));
+        Appoxee.instance().triggerStatistcs((reactContext.getApplicationContext()),
+                getInAppStatisticsRequestObject(templateId,
+                        eventId,
+                        InAppStatistics.INBOX_INBOX_MESSAGE_DELETED_KEY, null, null, null));
     }
 
     @ReactMethod
     public void triggerStatistic(Integer templateId, String originalEventId,
-                                 String trackingKey, Long displayMillis,
-                                 String reason, String link) {
+            String trackingKey, Long displayMillis,
+            String reason, String link) {
         Appoxee.instance()
-                .triggerStatistcs((reactContext.getApplicationContext())
-                        , getInAppStatisticsRequestObject(templateId, originalEventId, trackingKey, displayMillis, reason, link));
+                .triggerStatistcs((reactContext.getApplicationContext()), getInAppStatisticsRequestObject(templateId,
+                        originalEventId, trackingKey, displayMillis, reason, link));
     }
 
     @ReactMethod
@@ -387,7 +388,6 @@ public class RNMappPluginModule extends ReactContextBaseJavaModule {
         promise.resolve(Appoxee.instance().isDeviceRegistered());
 
     }
-
 
     @ReactMethod
     public void addAndroidListener(String eventName) {
@@ -399,13 +399,12 @@ public class RNMappPluginModule extends ReactContextBaseJavaModule {
         EventEmitter.shared().removeAndroidListeners(count);
     }
 
-
     private static InAppStatistics getInAppStatisticsRequestObject(int templateId, String originalEventId,
-                                                                   String trackingKey, Long displayMillis,
-                                                                   String reason, String link) {
+            String trackingKey, Long displayMillis,
+            String reason, String link) {
 
         InAppStatistics inAppStatistics = new InAppStatistics();
-        //This will be received from the respective Screens.
+        // This will be received from the respective Screens.
         MessageContext mc = new MessageContext();
         mc.setTemplateId(templateId);
         mc.setOriginialEventid(originalEventId);
@@ -422,7 +421,6 @@ public class RNMappPluginModule extends ReactContextBaseJavaModule {
         return inAppStatistics;
 
     }
-
 
     private WritableMap messageToJson(APXInboxMessage msg) {
         WritableMap msgJson = new WritableNativeMap();
@@ -445,14 +443,12 @@ public class RNMappPluginModule extends ReactContextBaseJavaModule {
                 for (ApxInAppExtras apxInAppExtras : msg.getExtras())
                     msgJson.putString(apxInAppExtras.getName(), apxInAppExtras.getValue());
 
-
         } catch (Exception e) {
             e.printStackTrace();
         }
 
         return msgJson;
     }
-
 
     private WritableMap getDeviceInfoJson(DeviceInfo deviceInfoList) {
         WritableMap deviceInfo = new WritableNativeMap();
@@ -473,7 +469,6 @@ public class RNMappPluginModule extends ReactContextBaseJavaModule {
 
         return deviceInfo;
     }
-
 
     public static WritableMap getPushMessageToJSon(PushData pushData) {
         WritableMap deviceInfo = new WritableNativeMap();
@@ -502,7 +497,7 @@ public class RNMappPluginModule extends ReactContextBaseJavaModule {
         return deviceInfo;
     }
 
-private RemoteMessage getRemoteMessage(String jsonMsg) {
+    private RemoteMessage getRemoteMessage(String jsonMsg) {
         if (jsonMsg == null)
             return null;
 
@@ -552,15 +547,16 @@ private RemoteMessage getRemoteMessage(String jsonMsg) {
             return false;
         }
 
-        return ContextCompat.checkSelfPermission(getReactApplicationContext(), Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_DENIED &&
-                ContextCompat.checkSelfPermission(getReactApplicationContext(), Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_DENIED;
+        return ContextCompat.checkSelfPermission(getReactApplicationContext(),
+                Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_DENIED &&
+                ContextCompat.checkSelfPermission(getReactApplicationContext(),
+                        Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_DENIED;
     }
 
     @ReactMethod
     public void clearNotifications() {
         NotificationManagerCompat.from(reactContext.getApplicationContext()).cancelAll();
     }
-
 
     @ReactMethod
     public void clearNotification(int id) {
@@ -571,6 +567,4 @@ private RemoteMessage getRemoteMessage(String jsonMsg) {
     public void logOut(boolean pushEnabled) {
         Appoxee.instance().logOut(application, pushEnabled);
     }
-
-
 }
