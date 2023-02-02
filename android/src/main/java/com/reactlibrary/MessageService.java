@@ -1,10 +1,11 @@
 package com.reactlibrary;
 
+import android.util.Log;
+
 import androidx.annotation.NonNull;
 
 import com.appoxee.Appoxee;
 import com.appoxee.internal.logger.LoggerFactory;
-import com.appoxee.internal.service.AppoxeeServiceAdapter;
 import com.appoxee.push.fcm.MappMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
 
@@ -21,6 +22,7 @@ public class MessageService extends MappMessagingService {
 
     @Override
     public void onMessageReceived(@NonNull RemoteMessage remoteMessage) {
+        Log.d("onMessageReceived", remoteMessage.toString());
         waitInitialization();
         super.onMessageReceived(remoteMessage);
     }

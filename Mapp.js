@@ -52,8 +52,16 @@ export class Mapp {
    *
    * @param token
    */
-  static setToken(token: string) {
-    RNMappPluginModule.setToken(token);
+  static setToken(token: string): Promise<Boolean> {
+    return RNMappPluginModule.setToken(token);
+  }
+
+  /**
+   * Get device's firebase token
+   * @returns token
+   */
+  static getToken(): Promise<string> {
+    return RNMappPluginModule.getToken();
   }
 
   /**
@@ -62,7 +70,7 @@ export class Mapp {
    * @param {remoteMessage} push message received
    */
   static setRemoteMessage(remoteMessage: Any) {
-    RNMappPluginModule.setRemoteMessage(JSON.stringify(remoteMessage));
+    return RNMappPluginModule.setRemoteMessage(JSON.stringify(remoteMessage));
   }
 
   /**
@@ -79,8 +87,8 @@ export class Mapp {
    *
    * @param alias
    */
-  static setAlias(alias: string) {
-    RNMappPluginModule.setAlias(alias);
+  static setAlias(alias: string): Promise<Boolean> {
+    return RNMappPluginModule.setAlias(alias);
   }
 
   /**
@@ -185,14 +193,13 @@ export class Mapp {
     if (Platform.OS === "ios") {
       return RNMappPluginModule.showNotificationAlertView();
     }
-
   }
 
   /**
    * Display notifications even app is in foreground .
    * iOS only
    */
-   static setShowNotificationsAtForeground(value: boolean) {
+  static setShowNotificationsAtForeground(value: boolean) {
     if (Platform.OS === "ios") {
       return RNMappPluginModule.setShowNotificationsAtForeground(value);
     }
@@ -273,11 +280,15 @@ export class Mapp {
     return RNMappPluginModule.removeBadgeNumber();
   }
 
-  static startGeofencing():Promise<string> {
+  static requestGeofenceLocationPermission(): Promise<boolean> {
+    return RNMappPluginModule.requestGeofenceLocationPermission();
+  }
+
+  static startGeofencing(): Promise<string> {
     return RNMappPluginModule.startGeofencing();
   }
 
-  static stopGeofencing() : Promise<string>{
+  static stopGeofencing(): Promise<string> {
     return RNMappPluginModule.stopGeofencing();
   }
 
@@ -331,7 +342,7 @@ export class Mapp {
   }
 
   static isDeviceRegistered(): Promise<boolean> {
-    return RNMappPluginModule.isDeviceRegistered(value);
+    return RNMappPluginModule.isDeviceRegistered();
   }
 
   static incrementNumericKey(key: String, value: number) {
@@ -343,6 +354,27 @@ export class Mapp {
 
   static logOut(pushEnabled: Boolean) {
     return RNMappPluginModule.logOut(pushEnabled);
+  }
+
+  static getDeviceDmcInfo(): Promise<any> {
+    if (Platform.OS == "android") {
+      return RNMappPluginModule.getDeviceDmcInfo();
+    } else {
+      return Promise.resolve(null);
+    }
+  }
+
+  /**
+   * Check if permission for posting notifications on Android 13 and up is granted or not.
+   * If permission is not granted, then system dialog will be invoked and shown.
+   * @returns true if permission is granted, false if it is not
+   */
+  static requestPostNotificationPermission(): Promise<any> {
+    if (Platform.OS == "android") {
+      return RNMappPluginModule.requestPostNotificationPermission();
+    } else {
+      return Promise.resolve(true);
+    }
   }
 
   /**

@@ -18,8 +18,6 @@ import java.util.List;
 import java.util.Set;
 
 
-
-
 /**
  * Created by Aleksandar Marinkovic on 2019-05-15.
  * Copyright (c) 2019 MAPP.
