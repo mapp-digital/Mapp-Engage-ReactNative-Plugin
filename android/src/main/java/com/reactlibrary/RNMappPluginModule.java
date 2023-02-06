@@ -41,6 +41,7 @@ import com.facebook.react.bridge.ReactContextBaseJavaModule;
 import com.facebook.react.bridge.ReactMethod;
 import com.facebook.react.bridge.WritableArray;
 import com.facebook.react.bridge.WritableMap;
+import com.facebook.react.bridge.WritableNativeArray;
 import com.facebook.react.bridge.WritableNativeMap;
 import com.google.firebase.messaging.RemoteMessage;
 
@@ -405,6 +406,34 @@ public class RNMappPluginModule extends ReactContextBaseJavaModule {
         Appoxee.instance().stopGeoFencing();
     }
 
+    @ReactMethod
+    public void fetchLatestInboxMessage(final Promise promise) {
+
+        Appoxee.instance().fetchInboxMessages(reactContext.getApplicationContext());
+
+        InAppInboxCallback inAppInboxCallback = new InAppInboxCallback();
+        inAppInboxCallback.addInAppInboxMessagesReceivedCallback(new InAppInboxCallback.onInAppInboxMessagesReceived() {
+            @Override
+            public void onInAppInboxMessages(List<APXInboxMessage> richMessages) {
+                WritableArray messagesArray = Arguments.createArray();
+                APXInboxMessage msg=null;
+                if (richMessages != null){
+                    for (APXInboxMessage message : richMessages) {
+                        if(msg==null || message.getTemplateId()>msg.getTemplateId()){
+                           msg=message;
+                        }
+                        messagesArray.pushMap(messageToJson(message));
+                    }
+                }
+                promise.resolve(msg!=null ? messageToJson(msg) : null);
+            }
+
+            @Override
+            public void onInAppInboxMessage(final APXInboxMessage message) {
+                promise.resolve(messageToJson(message));
+            }
+        });
+    }
     @ReactMethod
     public void fetchInboxMessage(final Promise promise) {
 

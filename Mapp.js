@@ -300,6 +300,10 @@ export class Mapp {
     return RNMappPluginModule.stopGeoFencing();
   }
 
+  static fetchLatestInboxMessage(): Promise<any>{
+    return RNMappPluginModule.fetchLatestInboxMessage();
+  }
+
   static fetchInboxMessage(): Promise<any> {
     return RNMappPluginModule.fetchInboxMessage();
   }
