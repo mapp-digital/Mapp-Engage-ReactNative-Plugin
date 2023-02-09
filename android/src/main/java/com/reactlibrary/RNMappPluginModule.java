@@ -86,6 +86,7 @@ public class RNMappPluginModule extends ReactContextBaseJavaModule {
             public void onHostResume() {
                 Appoxee.engage(application);
                 Appoxee.setOrientation(application, ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+                Appoxee.instance().setReceiver(MyPushBroadcastReceiver.class);
             }
 
             @Override
@@ -117,12 +118,16 @@ public class RNMappPluginModule extends ReactContextBaseJavaModule {
     public void requestGeofenceLocationPermission(Promise promise) {
         if (Build.VERSION.SDK_INT > Build.VERSION_CODES.M && getCurrentActivity() instanceof ReactActivity) {
             ReactActivity activity = (ReactActivity) getCurrentActivity();
-            boolean fineLoc = activity.checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED;
-            boolean backLoc = activity.checkSelfPermission(Manifest.permission.ACCESS_BACKGROUND_LOCATION) == PackageManager.PERMISSION_GRANTED;
-            boolean coarseLoc = activity.checkSelfPermission(Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED;
+            boolean fineLoc = activity
+                    .checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED;
+            boolean backLoc = activity.checkSelfPermission(
+                    Manifest.permission.ACCESS_BACKGROUND_LOCATION) == PackageManager.PERMISSION_GRANTED;
+            boolean coarseLoc = activity.checkSelfPermission(
+                    Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED;
             boolean geofencePermission = false;
             List<String> requiredPermissions = new ArrayList<>();
-            requiredPermissions.addAll(List.of(Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION));
+            requiredPermissions.addAll(
+                    List.of(Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION));
 
             if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
                 geofencePermission = fineLoc;
@@ -130,23 +135,24 @@ public class RNMappPluginModule extends ReactContextBaseJavaModule {
                 geofencePermission = fineLoc && backLoc;
             }
 
-
             if (!geofencePermission) {
-                activity.requestPermissions(requiredPermissions.toArray(new String[]{}), 1,
+                activity.requestPermissions(requiredPermissions.toArray(new String[] {}), 1,
                         (requestCode, permissions, results) -> {
                             for (int i : results) {
                                 if (i != PackageManager.PERMISSION_GRANTED) {
-                                    //Toast.makeText(activity, "PERMISSION NOT GRANTED", Toast.LENGTH_SHORT).show();
+                                    // Toast.makeText(activity, "PERMISSION NOT GRANTED",
+                                    // Toast.LENGTH_SHORT).show();
                                     promise.resolve(false);
                                     return false;
                                 }
                             }
-                            //Toast.makeText(activity, "PERMISSION GRANTED", Toast.LENGTH_SHORT).show();
+                            // Toast.makeText(activity, "PERMISSION GRANTED", Toast.LENGTH_SHORT).show();
                             promise.resolve(true);
                             return true;
                         });
             } else {
-                //Toast.makeText(activity, "PERMISSION ALREADY GRANTED", Toast.LENGTH_SHORT).show();
+                // Toast.makeText(activity, "PERMISSION ALREADY GRANTED",
+                // Toast.LENGTH_SHORT).show();
                 promise.resolve(true);
             }
         } else {
@@ -158,22 +164,25 @@ public class RNMappPluginModule extends ReactContextBaseJavaModule {
     public void requestPostNotificationPermission(Promise promise) {
         if (Build.VERSION.SDK_INT > Build.VERSION_CODES.S_V2 && getCurrentActivity() instanceof ReactActivity) {
             ReactActivity activity = (ReactActivity) getCurrentActivity();
-            if (activity.checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
-                activity.requestPermissions(new String[]{Manifest.permission.POST_NOTIFICATIONS}, 1,
+            if (activity
+                    .checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
+                activity.requestPermissions(new String[] { Manifest.permission.POST_NOTIFICATIONS }, 1,
                         (requestCode, permissions, results) -> {
                             for (int i : results) {
                                 if (i != PackageManager.PERMISSION_GRANTED) {
-                                    //Toast.makeText(activity, "PERMISSION NOT GRANTED", Toast.LENGTH_SHORT).show();
+                                    // Toast.makeText(activity, "PERMISSION NOT GRANTED",
+                                    // Toast.LENGTH_SHORT).show();
                                     promise.resolve(false);
                                     return false;
                                 }
                             }
-                            //Toast.makeText(activity, "PERMISSION GRANTED", Toast.LENGTH_SHORT).show();
+                            // Toast.makeText(activity, "PERMISSION GRANTED", Toast.LENGTH_SHORT).show();
                             promise.resolve(true);
                             return true;
                         });
             } else {
-                //Toast.makeText(activity, "PERMISSION ALREADY GRANTED", Toast.LENGTH_SHORT).show();
+                // Toast.makeText(activity, "PERMISSION ALREADY GRANTED",
+                // Toast.LENGTH_SHORT).show();
                 promise.resolve(true);
             }
         } else {
@@ -253,12 +262,12 @@ public class RNMappPluginModule extends ReactContextBaseJavaModule {
             }
         });
         Appoxee.setOrientation(application, ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
-
+        Appoxee.instance().setReceiver(MyPushBroadcastReceiver.class);
     }
 
     @ReactMethod
     public void engageTestServer(String cepURl, String sdkKey, String googleProjectId, String server, String appID,
-                                 String tenantID) {
+            String tenantID) {
         AppoxeeOptions opt = new AppoxeeOptions();
         opt.appID = appID;
         opt.sdkKey = sdkKey;
@@ -416,16 +425,16 @@ public class RNMappPluginModule extends ReactContextBaseJavaModule {
             @Override
             public void onInAppInboxMessages(List<APXInboxMessage> richMessages) {
                 WritableArray messagesArray = Arguments.createArray();
-                APXInboxMessage msg=null;
-                if (richMessages != null){
+                APXInboxMessage msg = null;
+                if (richMessages != null) {
                     for (APXInboxMessage message : richMessages) {
-                        if(msg==null || message.getTemplateId()>msg.getTemplateId()){
-                           msg=message;
+                        if (msg == null || message.getTemplateId() > msg.getTemplateId()) {
+                            msg = message;
                         }
                         messagesArray.pushMap(messageToJson(message));
                     }
                 }
-                promise.resolve(msg!=null ? messageToJson(msg) : null);
+                promise.resolve(msg != null ? messageToJson(msg) : null);
             }
 
             @Override
@@ -434,6 +443,7 @@ public class RNMappPluginModule extends ReactContextBaseJavaModule {
             }
         });
     }
+
     @ReactMethod
     public void fetchInboxMessage(final Promise promise) {
 
@@ -488,8 +498,8 @@ public class RNMappPluginModule extends ReactContextBaseJavaModule {
 
     @ReactMethod
     public void triggerStatistic(Integer templateId, String originalEventId,
-                                 String trackingKey, Long displayMillis,
-                                 String reason, String link) {
+            String trackingKey, Long displayMillis,
+            String reason, String link) {
         Appoxee.instance()
                 .triggerStatistcs((reactContext.getApplicationContext()), getInAppStatisticsRequestObject(templateId,
                         originalEventId, trackingKey, displayMillis, reason, link));
@@ -536,8 +546,8 @@ public class RNMappPluginModule extends ReactContextBaseJavaModule {
     }
 
     private static InAppStatistics getInAppStatisticsRequestObject(int templateId, String originalEventId,
-                                                                   String trackingKey, Long displayMillis,
-                                                                   String reason, String link) {
+            String trackingKey, Long displayMillis,
+            String reason, String link) {
 
         InAppStatistics inAppStatistics = new InAppStatistics();
         // This will be received from the respective Screens.
@@ -665,7 +675,7 @@ public class RNMappPluginModule extends ReactContextBaseJavaModule {
                     .setCollapseKey(collapseKey);
 
             if (data != null) {
-                for (Iterator<String> it = data.keys(); it.hasNext(); ) {
+                for (Iterator<String> it = data.keys(); it.hasNext();) {
                     String k = it.next();
                     builder.addData(k, data.getString(k));
                 }

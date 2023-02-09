@@ -2,10 +2,8 @@
 
 package com.reactlibrary;
 
-
 import android.os.Handler;
 import android.os.Looper;
-
 
 import androidx.annotation.MainThread;
 
@@ -13,10 +11,9 @@ import com.facebook.react.bridge.ReactContext;
 import com.facebook.react.modules.core.RCTNativeAppEventEmitter;
 
 import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
+import java.util.Queue;
+import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.SynchronousQueue;
 
 /**
  * Created by Aleksandar Marinkovic on 2019-05-15.
@@ -24,13 +21,12 @@ import java.util.Set;
  */
 class EventEmitter {
 
-    private static EventEmitter sharedInstance = new EventEmitter();
+    private static final EventEmitter sharedInstance = new EventEmitter();
 
-    private final List<Event> pendingEvents = new ArrayList<>();
-    private final Set<String> knownListeners = new HashSet<>();
+    private final Queue<Event> pendingEvents = new ConcurrentLinkedQueue<>();
+    private final Queue<String> knownListeners = new ConcurrentLinkedQueue<>();
     private final Handler mainHandler = new Handler(Looper.getMainLooper());
 
-    private long listenerCount;
     private ReactContext reactContext;
 
     /**
@@ -63,16 +59,11 @@ class EventEmitter {
      * @param event The event.
      */
     void sendEvent(final Event event) {
-        mainHandler.post(new Runnable() {
-            @Override
-            public void run() {
-                synchronized (knownListeners) {
-                    if (!knownListeners.contains(event.getName()) || !emit(event)) {
-                        pendingEvents.add(event);
-                    }
-                }
+        synchronized (knownListeners) {
+            if (!knownListeners.contains(event.getName()) || !emit(event)) {
+                pendingEvents.add(event);
             }
-        });
+        }
     }
 
     /**
@@ -82,7 +73,6 @@ class EventEmitter {
      */
     void addAndroidListener(String eventName) {
         synchronized (knownListeners) {
-            listenerCount++;
             knownListeners.add(eventName);
         }
 
@@ -101,10 +91,11 @@ class EventEmitter {
      */
     void removeAndroidListeners(int count) {
         synchronized (knownListeners) {
-            listenerCount -= count;
-            if (listenerCount <= 0) {
-                listenerCount = 0;
-                knownListeners.clear();
+            for (int i = 0; i < count; i++) {
+                if (knownListeners.size() > 0)
+                    knownListeners.remove();
+                else
+                    break;
             }
         }
     }
