@@ -9,10 +9,9 @@ buildscript {
             // All of React Native (JS, Obj-C sources, Android binaries) is installed from npm
             url "$rootDir/../node_modules/react-native/android"
         }
-        jcenter()
     }
     dependencies {
-        classpath('com.android.tools.build:gradle:7.3.1')
+        classpath('com.android.tools.build:gradle:8.2.2')
         //classpath('com.google.gms:google-services:4.3.15')
         //classpath("com.facebook.react:react-native-gradle-plugin")
         // NOTE: Do not place your application dependencies here; they belong
@@ -23,8 +22,8 @@ buildscript {
 allprojects {
     repositories {
         google()
+        mavenLocal()
         mavenCentral()
-        jcenter()
         maven { url "https://maven.google.com/" }
     }
 }
@@ -35,12 +34,13 @@ def safeExtGet(prop, fallback) {
 }
 
 android {
-    compileSdkVersion safeExtGet('compileSdkVersion', 33)
-    buildToolsVersion safeExtGet('buildToolsVersion', '33.0.1')
+    namespace 'com.reactlibrary'
+    compileSdkVersion safeExtGet('compileSdkVersion', 34)
+    buildToolsVersion safeExtGet('buildToolsVersion', '34.0.0')
 
     defaultConfig {
         minSdkVersion safeExtGet('minSdkVersion', 21)
-        targetSdkVersion safeExtGet('targetSdkVersion', 33)
+        targetSdkVersion safeExtGet('targetSdkVersion', 34)
         versionCode 1
         versionName '1.0'
     }
@@ -54,18 +54,18 @@ android {
 }
 
 dependencies {
-    implementation("com.facebook.react:react-native:+")
-    implementation 'com.google.code.gson:gson:2.8.5'
-    implementation 'com.google.dagger:dagger:2.24'
-    implementation 'androidx.appcompat:appcompat:1.6.0'
-    implementation "androidx.lifecycle:lifecycle-viewmodel:2.5.1"
-    implementation "androidx.lifecycle:lifecycle-viewmodel-ktx:2.5.1"
+    implementation('com.facebook.react:react-native:0.20.1')
+    implementation 'com.google.code.gson:gson:2.10.1'
+    //implementation 'com.google.dagger:dagger:2.24'
+    implementation 'androidx.appcompat:appcompat:1.6.1'
+    implementation 'androidx.lifecycle:lifecycle-viewmodel:2.7.0'
+    implementation 'androidx.lifecycle:lifecycle-viewmodel-ktx:2.7.0'
     annotationProcessor 'com.google.dagger:dagger-compiler:2.24'
-    implementation platform('com.google.firebase:firebase-bom:29.0.4')
+    implementation platform('com.google.firebase:firebase-bom:32.7.1')
     implementation('com.google.firebase:firebase-messaging')
-    api('com.google.android.gms:play-services-location:21.0.1')
-    implementation 'androidx.media:media:1.6.0'
+    api('com.google.android.gms:play-services-location:21.1.0')
+    implementation 'androidx.media:media:1.7.0'
     implementation 'androidx.legacy:legacy-support-v13:1.0.0'
-    implementation("com.mapp.sdk:mapp-android:6.0.20.2")
+    implementation("com.mapp.sdk:mapp-android:6.0.21")
 }
 

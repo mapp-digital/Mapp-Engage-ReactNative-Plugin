@@ -27,24 +27,16 @@ public class HelperActivity extends Activity {
             return;
         }
 
-        ComponentName name = intent.getComponent();
-        String packageName = getPackageName();
+        if (intent.getAction() != null && !intent.getAction().equals("")) {
+            Intent launchIntent = getDefaultActivityIntent();
+            launchIntent.setPackage(this.getPackageName());
+            launchIntent.putExtra("action", intent.getAction());
+            launchIntent.setData(intent.getData());
+            launchIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
+            startActivity(launchIntent);
 
-        if (Objects.equals(name.getPackageName(), packageName)) {
-            if (intent.getAction() != null && !intent.getAction().equals("")) {
-                Intent launchIntent = getDefaultActivityIntent();
-                ComponentName launcherComponent = launchIntent.getComponent();
-
-                if (Objects.equals(launcherComponent.getPackageName(), packageName)) {
-                    launchIntent.putExtra("action", intent.getAction());
-                    launchIntent.setData(intent.getData());
-                    launchIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
-                    startActivity(launchIntent);
-                }
-
-                EventEmitter.shared().sendEvent(new IntentNotificationEvent(Objects.requireNonNull(intent.getData()), intent.getAction()));
-                finish();
-            }
+            EventEmitter.shared().sendEvent(new IntentNotificationEvent(Objects.requireNonNull(intent.getData()), intent.getAction()));
+            finish();
         }
     }
 

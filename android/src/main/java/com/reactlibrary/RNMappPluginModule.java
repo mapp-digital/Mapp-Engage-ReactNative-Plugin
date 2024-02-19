@@ -2,18 +2,14 @@
 package com.reactlibrary;
 
 import android.Manifest;
-import android.app.Activity;
 import android.app.Application;
 import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.os.Build;
-import android.util.Log;
-import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 import androidx.core.app.NotificationManagerCompat;
 import androidx.core.content.ContextCompat;
-import androidx.fragment.app.FragmentActivity;
 
 import com.appoxee.Appoxee;
 import com.appoxee.AppoxeeOptions;
@@ -25,6 +21,7 @@ import com.appoxee.internal.inapp.model.InAppStatistics;
 import com.appoxee.internal.inapp.model.MessageContext;
 import com.appoxee.internal.inapp.model.Tracking;
 import com.appoxee.internal.inapp.model.TrackingAttributes;
+import com.appoxee.internal.permission.PermissionHelper;
 import com.appoxee.internal.permission.PermissionsCallback;
 import com.appoxee.internal.permission.PermissionsManager;
 import com.appoxee.internal.service.AppoxeeServiceAdapter;
@@ -41,14 +38,12 @@ import com.facebook.react.bridge.ReactContextBaseJavaModule;
 import com.facebook.react.bridge.ReactMethod;
 import com.facebook.react.bridge.WritableArray;
 import com.facebook.react.bridge.WritableMap;
-import com.facebook.react.bridge.WritableNativeArray;
 import com.facebook.react.bridge.WritableNativeMap;
 import com.google.firebase.messaging.RemoteMessage;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -116,77 +111,47 @@ public class RNMappPluginModule extends ReactContextBaseJavaModule {
 
     @ReactMethod
     public void requestGeofenceLocationPermission(Promise promise) {
-        if (Build.VERSION.SDK_INT > Build.VERSION_CODES.M && getCurrentActivity() instanceof ReactActivity) {
-            ReactActivity activity = (ReactActivity) getCurrentActivity();
-            boolean fineLoc = activity
-                    .checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED;
-            boolean backLoc = activity.checkSelfPermission(
-                    Manifest.permission.ACCESS_BACKGROUND_LOCATION) == PackageManager.PERMISSION_GRANTED;
-            boolean coarseLoc = activity.checkSelfPermission(
-                    Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED;
-            boolean geofencePermission = false;
-            List<String> requiredPermissions = new ArrayList<>();
-            requiredPermissions.addAll(
-                    List.of(Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION));
-
-            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
-                geofencePermission = fineLoc;
-            } else {
-                geofencePermission = fineLoc && backLoc;
-            }
-
-            if (!geofencePermission) {
-                activity.requestPermissions(requiredPermissions.toArray(new String[] {}), 1,
-                        (requestCode, permissions, results) -> {
-                            for (int i : results) {
-                                if (i != PackageManager.PERMISSION_GRANTED) {
-                                    // Toast.makeText(activity, "PERMISSION NOT GRANTED",
-                                    // Toast.LENGTH_SHORT).show();
-                                    promise.resolve(false);
-                                    return false;
-                                }
-                            }
-                            // Toast.makeText(activity, "PERMISSION GRANTED", Toast.LENGTH_SHORT).show();
-                            promise.resolve(true);
-                            return true;
-                        });
-            } else {
-                // Toast.makeText(activity, "PERMISSION ALREADY GRANTED",
-                // Toast.LENGTH_SHORT).show();
-                promise.resolve(true);
-            }
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
+            promise.resolve(true);
         } else {
-            promise.reject("Can't access activity for requesting permission!");
+            if (getCurrentActivity() instanceof ReactActivity) {
+                int fineLocation = getCurrentActivity().checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION);
+                int backgroundLocation = getCurrentActivity().checkSelfPermission(Manifest.permission.ACCESS_BACKGROUND_LOCATION);
+
+                if (fineLocation != PermissionsManager.PERMISSION_GRANTED ||
+                        backgroundLocation != PermissionsManager.PERMISSION_GRANTED) {
+                    PermissionHelper.getInstance().openAppSystemSettings(getCurrentActivity());
+                    promise.resolve(false);
+                } else {
+                    promise.resolve(true);
+                }
+            } else {
+                promise.reject("Can't access activity for requesting permission!");
+            }
         }
     }
 
     @ReactMethod
     public void requestPostNotificationPermission(Promise promise) {
-        if (Build.VERSION.SDK_INT > Build.VERSION_CODES.S_V2 && getCurrentActivity() instanceof ReactActivity) {
-            ReactActivity activity = (ReactActivity) getCurrentActivity();
-            if (activity
-                    .checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
-                activity.requestPermissions(new String[] { Manifest.permission.POST_NOTIFICATIONS }, 1,
-                        (requestCode, permissions, results) -> {
-                            for (int i : results) {
-                                if (i != PackageManager.PERMISSION_GRANTED) {
-                                    // Toast.makeText(activity, "PERMISSION NOT GRANTED",
-                                    // Toast.LENGTH_SHORT).show();
-                                    promise.resolve(false);
-                                    return false;
-                                }
-                            }
-                            // Toast.makeText(activity, "PERMISSION GRANTED", Toast.LENGTH_SHORT).show();
-                            promise.resolve(true);
-                            return true;
-                        });
-            } else {
-                // Toast.makeText(activity, "PERMISSION ALREADY GRANTED",
-                // Toast.LENGTH_SHORT).show();
-                promise.resolve(true);
-            }
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) {
+            promise.resolve(true);
         } else {
-            promise.reject("Can't access activity for requesting permission!");
+            if (getCurrentActivity() instanceof ReactActivity) {
+                ReactActivity activity = (ReactActivity) getCurrentActivity();
+                Appoxee.instance().requestNotificationsPermission(activity, new PermissionsCallback() {
+                    @Override
+                    public void onPermissionsResult(Map<String, Integer> map) {
+                        if (map.containsKey(Manifest.permission.POST_NOTIFICATIONS)) {
+                            Integer result = map.get(Manifest.permission.POST_NOTIFICATIONS);
+                            promise.resolve(result == PermissionsManager.PERMISSION_GRANTED);
+                        } else {
+                            promise.resolve(false);
+                        }
+                    }
+                });
+            } else {
+                promise.reject("Can't access activity for requesting permission!");
+            }
         }
     }
 
@@ -267,7 +232,7 @@ public class RNMappPluginModule extends ReactContextBaseJavaModule {
 
     @ReactMethod
     public void engageTestServer(String cepURl, String sdkKey, String googleProjectId, String server, String appID,
-            String tenantID) {
+                                 String tenantID) {
         AppoxeeOptions opt = new AppoxeeOptions();
         opt.appID = appID;
         opt.sdkKey = sdkKey;
@@ -418,7 +383,7 @@ public class RNMappPluginModule extends ReactContextBaseJavaModule {
     @ReactMethod
     public void fetchLatestInboxMessage(final Promise promise) {
 
-        Appoxee.instance().fetchInboxMessages(reactContext.getApplicationContext());
+        Appoxee.instance().fetchInboxMessages();
 
         InAppInboxCallback inAppInboxCallback = new InAppInboxCallback();
         inAppInboxCallback.addInAppInboxMessagesReceivedCallback(new InAppInboxCallback.onInAppInboxMessagesReceived() {
@@ -447,7 +412,7 @@ public class RNMappPluginModule extends ReactContextBaseJavaModule {
     @ReactMethod
     public void fetchInboxMessage(final Promise promise) {
 
-        Appoxee.instance().fetchInboxMessages(reactContext.getApplicationContext());
+        Appoxee.instance().fetchInboxMessages();
 
         InAppInboxCallback inAppInboxCallback = new InAppInboxCallback();
         inAppInboxCallback.addInAppInboxMessagesReceivedCallback(new InAppInboxCallback.onInAppInboxMessagesReceived() {
@@ -498,8 +463,8 @@ public class RNMappPluginModule extends ReactContextBaseJavaModule {
 
     @ReactMethod
     public void triggerStatistic(Integer templateId, String originalEventId,
-            String trackingKey, Long displayMillis,
-            String reason, String link) {
+                                 String trackingKey, Long displayMillis,
+                                 String reason, String link) {
         Appoxee.instance()
                 .triggerStatistcs((reactContext.getApplicationContext()), getInAppStatisticsRequestObject(templateId,
                         originalEventId, trackingKey, displayMillis, reason, link));
@@ -546,8 +511,8 @@ public class RNMappPluginModule extends ReactContextBaseJavaModule {
     }
 
     private static InAppStatistics getInAppStatisticsRequestObject(int templateId, String originalEventId,
-            String trackingKey, Long displayMillis,
-            String reason, String link) {
+                                                                   String trackingKey, Long displayMillis,
+                                                                   String reason, String link) {
 
         InAppStatistics inAppStatistics = new InAppStatistics();
         // This will be received from the respective Screens.
@@ -675,7 +640,7 @@ public class RNMappPluginModule extends ReactContextBaseJavaModule {
                     .setCollapseKey(collapseKey);
 
             if (data != null) {
-                for (Iterator<String> it = data.keys(); it.hasNext();) {
+                for (Iterator<String> it = data.keys(); it.hasNext(); ) {
                     String k = it.next();
                     builder.addData(k, data.getString(k));
                 }

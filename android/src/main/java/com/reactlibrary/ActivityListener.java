@@ -25,6 +25,7 @@ public class ActivityListener extends Activity {
         launchIntent.putExtra("action", intent.getAction());
         launchIntent.setData(intent.getData());
         launchIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
+        launchIntent.setPackage(this.getPackageName());
         startActivity(launchIntent);
         Appoxee.handleRichPush(this,intent);
         finish();

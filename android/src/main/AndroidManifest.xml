@@ -42,7 +42,6 @@
                     <category android:name="${applicationId}" />
 
             </intent-filter>
-
         </activity>
         <service
             android:name="com.appoxee.push.fcm.MappMessagingService"

@@ -12,6 +12,7 @@ public  class MyPushBroadcastReceiver extends PushDataReceiver {
     @Override
     public void onPushReceived(PushData pushData) {
         Log.d("APX", "Push received " + pushData);
+
         EventEmitter.shared().sendEvent(new PushNotificationEvent(pushData,"onPushReceived"));
         super.onPushReceived(pushData);
     }
