@@ -66,6 +66,10 @@ RCT_EXPORT_METHOD(setAlias:(NSString *) alias) {
     }];
 }
 
+RCT_EXPORT_METHOD(setToken:(NSString *) token) {
+    [[Appoxee shared] didRegisterForRemoteNotificationsWithDeviceToken:[[NSData alloc] initWithBase64EncodedString:token options:NSUTF8StringEncoding]];
+}
+
 RCT_EXPORT_METHOD(removeDeviceAlias) {
     [[Appoxee shared] removeDeviceAliasWithCompletionHandler:^(NSError * _Nullable appoxeeError, id  _Nullable data) {
             if (appoxeeError != nil) {
