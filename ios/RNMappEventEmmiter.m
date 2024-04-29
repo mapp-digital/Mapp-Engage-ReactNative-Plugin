@@ -65,7 +65,7 @@ NSString *const MappRNInappMessage = @"com.mapp.inapp_message";
 
 -(APXInBoxMessage *) getMessageWith: (NSNumber *) templateId event: (NSString *) eventId {
     for(APXInBoxMessage *message in self.messages) {
-        if ([message.messageId isEqualToString:templateId.stringValue] && [message.getMessageIdentifier isEqualToString:eventId]) {
+        if ([message.messageId isEqualToString:templateId.stringValue]) {
             return message;
         }
     }
