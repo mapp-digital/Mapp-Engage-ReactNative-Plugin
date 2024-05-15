@@ -51,3 +51,4 @@ buck-out/
 \.buckd/
 *.keystore
 yarn.lock
+*.tgz
