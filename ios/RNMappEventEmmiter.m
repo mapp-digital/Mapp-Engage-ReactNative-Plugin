@@ -121,7 +121,9 @@ NSString *const MappRNInappMessage = @"com.mapp.inapp_message";
 - (void)didReceiveInBoxMessages:(NSArray *)messages {
     NSMutableArray *dicts = [[NSMutableArray alloc] init];
     for(APXInBoxMessage *message in messages) {
-        [dicts addObject:[message getDictionary]];
+        NSDictionary* tempDict = [message getDictionary];
+        [tempDict addObject: @{@"eventId":message.eventId }]
+        [dicts addObject:tempDict];
     }
     self.messages = [[NSMutableArray alloc] init];
     [self.messages addObjectsFromArray:messages];
