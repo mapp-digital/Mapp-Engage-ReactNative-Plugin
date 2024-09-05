@@ -20,7 +20,7 @@
   "devDependencies": {
     "jest": "^28.1.3",
     "react": "18.0.0",
-    "react-native": "0.69.4"
+    "react-native": "^0.75.2"
   },
   "repository": {
     "type": "git",

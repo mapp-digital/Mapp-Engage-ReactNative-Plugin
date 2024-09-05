@@ -52,3 +52,4 @@ buck-out/
 *.keystore
 yarn.lock
 *.tgz
+package-lock.json
