@@ -232,21 +232,21 @@ RCT_EXPORT_METHOD(triggerInApp: (NSString *) event) {
     [[AppoxeeInapp shared] reportInteractionEventWithName:event andAttributes:nil];
 }
 
-RCT_EXPORT_METHOD(inAppMarkAsRead: (NSNumber *) templateId event: (NSString *) eventId) {
+RCT_EXPORT_METHOD(inAppMarkAsRead: (NSNumber * _Nonnull) templateId event: (NSString * _Nonnull) eventId) {
     APXInBoxMessage *message = [[RNMappEventEmmiter shared] getMessageWith:templateId event:eventId];
     if (message) {
         [message markAsRead];
     }
 }
 
-RCT_EXPORT_METHOD(inAppMarkAsUnRead: (NSNumber *) templateId event: (NSString *) eventId) {
+RCT_EXPORT_METHOD(inAppMarkAsUnRead: (NSNumber * _Nonnull) templateId event: (NSString * _Nonnull) eventId) {
     APXInBoxMessage *message = [[RNMappEventEmmiter shared] getMessageWith:templateId event:eventId];
     if (message) {
         [message markAsUnread];
     }
 }
 
-RCT_EXPORT_METHOD(inAppMarkAsDeleted: (NSNumber *) templateId event: (NSString *) eventId) {
+RCT_EXPORT_METHOD(inAppMarkAsDeleted: (NSNumber * _Nonnull) templateId event: (NSString * _Nonnull) eventId) {
     APXInBoxMessage *message = [[RNMappEventEmmiter shared] getMessageWith:templateId event:eventId];
     if (message) {
         [message markAsDeleted];
