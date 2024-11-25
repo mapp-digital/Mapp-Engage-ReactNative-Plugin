@@ -61,11 +61,11 @@ dependencies {
     implementation 'androidx.lifecycle:lifecycle-viewmodel:2.8.3'
     implementation 'androidx.lifecycle:lifecycle-viewmodel-ktx:2.8.3'
     annotationProcessor 'com.google.dagger:dagger-compiler:2.24'
-    implementation platform('com.google.firebase:firebase-bom:33.1.1')
+    implementation platform('com.google.firebase:firebase-bom:33.6.0')
     implementation('com.google.firebase:firebase-messaging')
     api('com.google.android.gms:play-services-location:21.3.0')
     implementation 'androidx.media:media:1.7.0'
     implementation 'androidx.legacy:legacy-support-v13:1.0.0'
-    implementation("com.mapp.sdk:mapp-android:6.0.24")
+    implementation("com.mapp.sdk:mapp-android:6.0.25")
 }
 
