@@ -301,7 +301,18 @@ export class Mapp {
   }
 
   static fetchLatestInboxMessage(): Promise<any>{
-    return RNMappPluginModule.fetchLatestInboxMessage();
+    if (Platform.OS == "ios") {
+      print("fatch latest message for iOS part")
+      RNMappPluginModule.fetchLatestInboxMessage();
+      this.addInboxMessagesListener(messages => {
+        print("message arrived ", messages, " length", messages[messages.length - 1])
+        messages.sort((message1, message2) => message1["template_id"] > message2["template_id"]);
+        alert(JSON.stringify(messages[0]));
+        return JSON.stringify(messages[0]);
+      });
+    } else {
+      return RNMappPluginModule.fetchLatestInboxMessage();
+    }
   }
 
   static fetchInboxMessage(): Promise<any> {

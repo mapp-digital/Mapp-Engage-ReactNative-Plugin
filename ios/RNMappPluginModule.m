@@ -228,6 +228,11 @@ RCT_EXPORT_METHOD(fetchInboxMessage: (RCTPromiseResolveBlock)resolve rejecter:(R
     resolve(@"Fetching, set event listener for iOS");
 }
 
+RCT_EXPORT_METHOD(fetchLatestInboxMessage: (RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject) {
+    [[AppoxeeInapp shared] fetchAPXInBoxMessages];
+    resolve(@"Fetching, set event listener for iOS");
+}
+
 RCT_EXPORT_METHOD(triggerInApp: (NSString *) event) {
     [[AppoxeeInapp shared] reportInteractionEventWithName:event andAttributes:nil];
 }
