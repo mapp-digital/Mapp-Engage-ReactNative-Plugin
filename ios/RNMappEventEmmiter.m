@@ -170,17 +170,17 @@ NSString *const MappRNInappMessage = @"com.mapp.inapp_message";
 -(NSDictionary *) getRichMessage: (APXRichMessage *) message {
     NSMutableDictionary *dict = [[NSMutableDictionary alloc] init];
     [dict setObject:[[NSNumber numberWithInteger:message.uniqueID] stringValue] forKey:@"id"];
-    if (pushMessage.title)
+    if (message.title)
         [dict setObject:message.title forKey:@"title"];
-    if (pushMessage.content)
+    if (message.content)
     [dict setObject:message.content forKey:@"content"];
-    if (pushMessage.title)
+    if (message.title)
         [dict setObject:message.title forKey:@"title"];
-    if (pushMessage.messageLink)
+    if (message.messageLink)
         [dict setObject:message.messageLink forKey:@"messageLink"];
-    if (pushMessage.postDate)
+    if (message.postDate)
         [dict setObject:[self stringFromDate: message.postDate inUTC:false] forKey:@"postDate"];
-    if (pushMessage.postDate)
+    if (message.postDate)
         [dict setObject:[self stringFromDate: message.postDate inUTC:true] forKey:@"postDateUTC"];
     return dict;
 
