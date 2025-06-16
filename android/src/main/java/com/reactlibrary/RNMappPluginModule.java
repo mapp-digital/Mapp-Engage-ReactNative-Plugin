@@ -7,6 +7,7 @@ import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.os.Build;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.app.NotificationManagerCompat;
 import androidx.core.content.ContextCompat;
@@ -39,6 +40,9 @@ import com.facebook.react.bridge.ReactMethod;
 import com.facebook.react.bridge.WritableArray;
 import com.facebook.react.bridge.WritableMap;
 import com.facebook.react.bridge.WritableNativeMap;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.messaging.FirebaseMessaging;
 import com.google.firebase.messaging.RemoteMessage;
 
 import org.json.JSONException;
@@ -186,10 +190,11 @@ public class RNMappPluginModule extends ReactContextBaseJavaModule {
 
     @ReactMethod
     public void getToken(Promise promise) {
-        Appoxee.instance().getFcmToken(new ResultCallback<String>() {
+        FirebaseMessaging.getInstance().getToken().addOnCompleteListener(new OnCompleteListener<String>() {
             @Override
-            public void onResult(@Nullable String s) {
-                promise.resolve(s);
+            public void onComplete(@NonNull Task<String> task) {
+                String token=task.getResult();
+                promise.resolve(token);
             }
         });
     }
