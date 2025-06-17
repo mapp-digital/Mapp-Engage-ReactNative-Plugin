@@ -450,7 +450,7 @@ public class RNMappPluginModule extends ReactContextBaseJavaModule {
     public void inAppMarkAsRead(Integer templateId, String eventId) {
         Appoxee.instance().triggerStatistcs((getCurrentActivity()), getInAppStatisticsRequestObject(templateId,
                 eventId,
-                InAppStatistics.INBOX_INBOX_MESSAGE_READ_KEY, null, null, null));
+                InAppStatistics.INBOX_INBOX_MESSAGE_READ_KEY, -1, null, null));
     }
 
     @ReactMethod
@@ -458,7 +458,7 @@ public class RNMappPluginModule extends ReactContextBaseJavaModule {
         Appoxee.instance().triggerStatistcs((reactContext.getApplicationContext()),
                 getInAppStatisticsRequestObject(templateId,
                         eventId,
-                        InAppStatistics.INBOX_INBOX_MESSAGE_UNREAD_KEY, null, null, null));
+                        InAppStatistics.INBOX_INBOX_MESSAGE_UNREAD_KEY, -1, null, null));
     }
 
     @ReactMethod
@@ -466,12 +466,12 @@ public class RNMappPluginModule extends ReactContextBaseJavaModule {
         Appoxee.instance().triggerStatistcs((reactContext.getApplicationContext()),
                 getInAppStatisticsRequestObject(templateId,
                         eventId,
-                        InAppStatistics.INBOX_INBOX_MESSAGE_DELETED_KEY, null, null, null));
+                        InAppStatistics.INBOX_INBOX_MESSAGE_DELETED_KEY, -1, null, null));
     }
 
     @ReactMethod
     public void triggerStatistic(Integer templateId, String originalEventId,
-                                 String trackingKey, Long displayMillis,
+                                 String trackingKey, int displayMillis,
                                  String reason, String link) {
         Appoxee.instance()
                 .triggerStatistcs((reactContext.getApplicationContext()), getInAppStatisticsRequestObject(templateId,
@@ -519,7 +519,7 @@ public class RNMappPluginModule extends ReactContextBaseJavaModule {
     }
 
     private static InAppStatistics getInAppStatisticsRequestObject(int templateId, String originalEventId,
-                                                                   String trackingKey, Long displayMillis,
+                                                                   String trackingKey, int displayMillis,
                                                                    String reason, String link) {
 
         InAppStatistics inAppStatistics = new InAppStatistics();
@@ -531,7 +531,10 @@ public class RNMappPluginModule extends ReactContextBaseJavaModule {
         Tracking tk = new Tracking();
         tk.setTrackingKey(trackingKey);
         TrackingAttributes ta = new TrackingAttributes();
-        ta.setTimeSinceDisplayMillis(displayMillis);
+        int displayTime=displayMillis>=0 ? displayMillis : -1;
+        if(displayTime>0) {
+            ta.setTimeSinceDisplayMillis((long) displayMillis);
+        }
         ta.setReason(reason);
         ta.setLink(link);
         tk.setTrackingAttributes(ta);

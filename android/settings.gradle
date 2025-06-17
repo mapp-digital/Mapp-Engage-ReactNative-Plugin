@@ -1,1 +1,23 @@
-include ':app'
+pluginManagement {
+    repositories {
+        google()
+        mavenCentral()
+        gradlePluginPortal()
+    }
+    plugins {
+        id("com.android.library") version("8.10.1") // 👈 for library
+        id("com.facebook.react") version("0.79.3")  // 👈 for React Native
+        id("org.jetbrains.kotlin.android") version("2.1.21") // 👈 for Kotlin
+    }
+}
+
+dependencyResolutionManagement {
+    repositories {
+        google()
+        mavenCentral()
+    }
+}
+includeBuild("../node_modules/@react-native/gradle-plugin")
+
+rootProject.name="MappEngagePlugin"
+include(":MappEngagePlugin")
