@@ -181,21 +181,29 @@ RCT_EXPORT_METHOD(getDeviceInfo:(RCTPromiseResolveBlock)resolve rejecter:(RCTPro
 
 RCT_EXPORT_METHOD(getAttributeStringValue: (NSString *) key resolver:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject) {
     [[Appoxee shared] fetchCustomFieldByKey:key withCompletionHandler:^(NSError * _Nullable appoxeeError, id  _Nullable data) {
+        NSLog(@"%@", data);
         if (!appoxeeError && [data isKindOfClass:[NSDictionary class]]) {
             NSDictionary *dictionary = (NSDictionary *)data;
+            NSLog(@"%@", dictionary);
             NSString *key = [[dictionary allKeys] firstObject];
             id value = dictionary[key]; // can be of the following types: NSString || NSNumber || NSDate
+            NSLog(@"%@", value);
             if ([value isKindOfClass: [NSString class]]) {
+                NSLog(@"value is string %@", value);
                 resolve(value);
             } else if ([value isKindOfClass: [NSNumber class]]) {
+                NSLog(@"value is number %@", value);
                 NSString *str = ((NSNumber *)value).stringValue;
                 resolve(str);
             } else if ([value isKindOfClass: [NSDate class]]) {
+                NSLog(@"value is date %@", value);
                 NSDate *date = (NSDate *)value;
                 NSDateFormatter *formatter = [[NSDateFormatter alloc] init];
                 [formatter setDateFormat: @"dd MMM yyyy HH:mm"];
                 NSString *stringFromDate = [formatter stringFromDate:date];
                 resolve(stringFromDate);
+            } else {
+                NSLog(@"value is non of types!");
             }
         } else {
             reject(@"GET_ATTRIBUTE_FAIL", @"Failed to get atribute string value", appoxeeError);
