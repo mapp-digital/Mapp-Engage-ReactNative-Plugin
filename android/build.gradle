@@ -1,71 +1,42 @@
-buildscript {
-    repositories {
-        flatDir {
-            dirs 'libs'
-        }
-        google()
-        mavenCentral()
-        maven {
-            // All of React Native (JS, Obj-C sources, Android binaries) is installed from npm
-            url "$rootDir/../node_modules/react-native/android"
-        }
-    }
-    dependencies {
-        classpath('com.android.tools.build:gradle:8.2.2')
-        //classpath('com.google.gms:google-services:4.3.15')
-        //classpath("com.facebook.react:react-native-gradle-plugin")
-        // NOTE: Do not place your application dependencies here; they belong
-        // in the individual module build.gradle files
-    }
-}
-
-allprojects {
-    repositories {
-        google()
-        mavenLocal()
-        mavenCentral()
-        maven { url "https://maven.google.com/" }
-    }
-}
-apply plugin: 'com.android.library'
-
-def safeExtGet(prop, fallback) {
-    rootProject.ext.has(prop) ? rootProject.ext.get(prop) : fallback
+plugins {
+    id("com.android.library")
+    id("org.jetbrains.kotlin.android")
+    id("com.facebook.react") // 👈 This is required for New Architecture & Codegen
 }
 
 android {
-    namespace 'com.reactlibrary'
-    compileSdkVersion safeExtGet('compileSdkVersion', 34)
-    buildToolsVersion safeExtGet('buildToolsVersion', '34.0.0')
+    namespace "com.reactlibrary"
+    compileSdk = 35
 
     defaultConfig {
-        minSdkVersion safeExtGet('minSdkVersion', 21)
-        targetSdkVersion safeExtGet('targetSdkVersion', 34)
-        versionCode 1
-        versionName '1.0'
+        minSdk = 21
+        targetSdk = 35
+        versionCode = 1
+        versionName = "1.0"
     }
 
-    buildTypes {
-        release {
-            minifyEnabled false
-            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
-        }
+    compileOptions {
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
     }
 }
 
 dependencies {
-    implementation('com.facebook.react:react-native:0.20.1')
-    implementation 'com.google.code.gson:gson:2.10.1'
-    //implementation 'com.google.dagger:dagger:2.24'
-    implementation 'androidx.appcompat:appcompat:1.7.0'
-    implementation 'androidx.lifecycle:lifecycle-viewmodel:2.8.3'
-    implementation 'androidx.lifecycle:lifecycle-viewmodel-ktx:2.8.3'
-    annotationProcessor 'com.google.dagger:dagger-compiler:2.24'
-    implementation platform('com.google.firebase:firebase-bom:33.6.0')
+    implementation "com.facebook.react:react-android:0.79.3"
+    implementation "org.jetbrains.kotlin:kotlin-stdlib:2.1.21"
+    implementation 'com.google.code.gson:gson:2.13.0'
+    implementation 'androidx.appcompat:appcompat:1.7.1'
+    implementation 'androidx.lifecycle:lifecycle-viewmodel-ktx:2.9.1'
+    implementation platform('com.google.firebase:firebase-bom:33.15.0')
     implementation('com.google.firebase:firebase-messaging')
     api('com.google.android.gms:play-services-location:21.3.0')
     implementation 'androidx.media:media:1.7.0'
     implementation 'androidx.legacy:legacy-support-v13:1.0.0'
-    implementation("com.mapp.sdk:mapp-android:6.0.25")
+    implementation("com.mapp.sdk:mapp-android:6.0.28")
 }
 
+react {
+    jsRootDir = file("../specs")                 // 👈 based on your structure
+    libraryName = "MappEngagePlugin"
+    codegenJavaPackageName = "com.reactlibrary"
+}
