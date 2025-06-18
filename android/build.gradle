@@ -1,7 +1,7 @@
 plugins {
     id("com.android.library")
     id("org.jetbrains.kotlin.android")
-    id("com.facebook.react") // 👈 This is required for New Architecture & Codegen
+    id("com.facebook.react") // This is required for New Architecture & Codegen
 }
 
 android {
@@ -32,11 +32,11 @@ dependencies {
     api('com.google.android.gms:play-services-location:21.3.0')
     implementation 'androidx.media:media:1.7.0'
     implementation 'androidx.legacy:legacy-support-v13:1.0.0'
-    implementation("com.mapp.sdk:mapp-android:6.0.28")
+    implementation("com.mapp.sdk:mapp-android:6.0.29-alpha01")
 }
 
 react {
-    jsRootDir = file("../specs")                 // 👈 based on your structure
+    jsRootDir = file("../specs")
     libraryName = "MappEngagePlugin"
     codegenJavaPackageName = "com.reactlibrary"
 }
