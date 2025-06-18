@@ -15,5 +15,9 @@ npm install #or yarn install
 
 ### Run application
 ```bash
-npx react-native run-android
+npx react-native run-android 
+```
+or
+```bash
+npx react-native run-ios
 ```
