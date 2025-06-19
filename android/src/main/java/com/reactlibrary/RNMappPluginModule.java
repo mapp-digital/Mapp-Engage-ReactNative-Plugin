@@ -40,6 +40,7 @@ import com.facebook.react.bridge.ReactMethod;
 import com.facebook.react.bridge.WritableArray;
 import com.facebook.react.bridge.WritableMap;
 import com.facebook.react.bridge.WritableNativeMap;
+import com.facebook.react.module.annotations.ReactModule;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.messaging.FirebaseMessaging;
@@ -59,8 +60,10 @@ import java.util.concurrent.ConcurrentHashMap;
  * Copyright (c) 2019 MAPP.
  */
 @SuppressWarnings("ALL")
+@ReactModule(name = RNMappPluginModule.NAME)
 public class RNMappPluginModule extends ReactContextBaseJavaModule {
 
+    public static final String NAME = "RNMappPluginModule";
     private final ReactApplicationContext reactContext;
     private Map<Callback, String> mFeedSubscriberMap = new ConcurrentHashMap<>();
     private Map<Callback, Boolean> mCallbackWasCalledMap = new ConcurrentHashMap<>();
@@ -74,7 +77,7 @@ public class RNMappPluginModule extends ReactContextBaseJavaModule {
 
     @Override
     public String getName() {
-        return "RNMappPluginModule";
+        return NAME;
     }
 
     @Override
@@ -167,8 +170,9 @@ public class RNMappPluginModule extends ReactContextBaseJavaModule {
         if (remoteMessage != null) {
             Appoxee.instance().setRemoteMessage(remoteMessage);
             promise.resolve(true);
+        } else {
+            promise.resolve(false);
         }
-        promise.resolve(false);
     }
 
     @ReactMethod
@@ -193,7 +197,7 @@ public class RNMappPluginModule extends ReactContextBaseJavaModule {
         FirebaseMessaging.getInstance().getToken().addOnCompleteListener(new OnCompleteListener<String>() {
             @Override
             public void onComplete(@NonNull Task<String> task) {
-                String token=task.getResult();
+                String token = task.getResult();
                 promise.resolve(token);
             }
         });
@@ -531,8 +535,8 @@ public class RNMappPluginModule extends ReactContextBaseJavaModule {
         Tracking tk = new Tracking();
         tk.setTrackingKey(trackingKey);
         TrackingAttributes ta = new TrackingAttributes();
-        int displayTime=displayMillis>=0 ? displayMillis : -1;
-        if(displayTime>0) {
+        int displayTime = displayMillis >= 0 ? displayMillis : -1;
+        if (displayTime > 0) {
             ta.setTimeSinceDisplayMillis((long) displayMillis);
         }
         ta.setReason(reason);

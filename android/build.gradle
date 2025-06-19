@@ -36,7 +36,7 @@ dependencies {
 }
 
 react {
-    jsRootDir = file("../specs")
-    libraryName = "MappEngagePlugin"
+    jsRootDir = rootDir
+    libraryName = "RNMappPlugin"
     codegenJavaPackageName = "com.reactlibrary"
 }
