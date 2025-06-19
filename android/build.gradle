@@ -32,7 +32,7 @@ dependencies {
     api('com.google.android.gms:play-services-location:21.3.0')
     implementation 'androidx.media:media:1.7.0'
     implementation 'androidx.legacy:legacy-support-v13:1.0.0'
-    implementation("com.mapp.sdk:mapp-android:6.0.29-alpha01")
+    implementation("com.mapp.sdk:mapp-android:6.0.29-alpha02")
 }
 
 react {
