@@ -1,35 +1,52 @@
-
 package com.reactlibrary;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import androidx.annotation.NonNull;
 
 import com.facebook.react.ReactPackage;
 import com.facebook.react.bridge.NativeModule;
 import com.facebook.react.bridge.ReactApplicationContext;
-import com.facebook.react.bridge.JavaScriptModule;
+import com.facebook.react.module.model.ReactModuleInfo;
+import com.facebook.react.module.model.ReactModuleInfoProvider;
 import com.facebook.react.uimanager.ViewManager;
 
-/**
- * Created by Aleksandar Marinkovic on 2019-05-15.
- * Copyright (c) 2019 MAPP.
- */
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 public class RNMappPluginPackage implements ReactPackage {
+
+  @NonNull
   @Override
-  public List<NativeModule> createNativeModules(ReactApplicationContext reactContext) {
-    List<NativeModule> modules = new ArrayList<>();
-    modules.add(new RNMappPluginModule(reactContext));
-    return modules;
+  public List<NativeModule> createNativeModules(@NonNull ReactApplicationContext reactContext) {
+    return Collections.singletonList(new RNMappPluginModule(reactContext));
   }
 
-  // Deprecated from RN 0.47
-  public List<Class<? extends JavaScriptModule>> createJSModules() {
+  @NonNull
+  @Override
+  public List<ViewManager> createViewManagers(@NonNull ReactApplicationContext reactContext) {
     return Collections.emptyList();
   }
 
-  @Override
-  public List<ViewManager> createViewManagers(ReactApplicationContext reactContext) {
-    return Collections.emptyList();
+  public ReactModuleInfoProvider getReactModuleInfoProvider() {
+    return () -> {
+      Map<String, ReactModuleInfo> moduleInfos = new HashMap<>();
+
+      moduleInfos.put(
+              RNMappPluginModule.NAME,
+              new ReactModuleInfo(
+                      RNMappPluginModule.NAME,
+                      RNMappPluginModule.NAME,
+                      false, // canOverrideExistingModule
+                      false, // needsEagerInit
+                      true,  // hasConstants
+                      false, // isCxxModule
+                      true   // isTurboModule -> THIS IS IMPORTANT
+              )
+      );
+
+      return moduleInfos;
+    };
   }
 }
+

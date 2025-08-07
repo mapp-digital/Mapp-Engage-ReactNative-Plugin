@@ -1,6 +1,5 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    package="com.reactlibrary">
+    xmlns:tools="http://schemas.android.com/tools">
 
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
     <uses-permission android:name="android.permission.INTERNET" />
@@ -61,7 +60,7 @@
                 android:name=".ActivityListener"
                 android:exported="false"
                 android:theme="@style/HelperActivityStyle">
-            <intent-filter>
+            <intent-filter tools:ignore="AppLinkUrlError">
                 <action android:name="com.mapp.RICH_PUSH" />
                 <category android:name="${applicationId}" />
 
