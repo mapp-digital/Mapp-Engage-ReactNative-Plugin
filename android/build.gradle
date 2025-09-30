@@ -6,11 +6,11 @@ plugins {
 
 android {
     namespace "com.reactlibrary"
-    compileSdk = 35
+    compileSdk = 36
 
     defaultConfig {
-        minSdk = 21
-        targetSdk = 35
+        minSdk = 24
+        targetSdk = 36
         versionCode = 1
         versionName = "1.0"
     }
@@ -22,17 +22,17 @@ android {
 }
 
 dependencies {
-    implementation "com.facebook.react:react-android:0.79.3"
+    implementation "com.facebook.react:react-android:0.81.4"
     implementation "org.jetbrains.kotlin:kotlin-stdlib:2.1.21"
-    implementation 'com.google.code.gson:gson:2.13.0'
+    implementation 'com.google.code.gson:gson:2.13.2'
     implementation 'androidx.appcompat:appcompat:1.7.1'
-    implementation 'androidx.lifecycle:lifecycle-viewmodel-ktx:2.9.1'
-    implementation platform('com.google.firebase:firebase-bom:33.15.0')
+    implementation 'androidx.lifecycle:lifecycle-viewmodel-ktx:2.9.4'
+    implementation platform('com.google.firebase:firebase-bom:34.3.0')
     implementation('com.google.firebase:firebase-messaging')
     api('com.google.android.gms:play-services-location:21.3.0')
-    implementation 'androidx.media:media:1.7.0'
+    implementation 'androidx.media:media:1.7.1'
     implementation 'androidx.legacy:legacy-support-v13:1.0.0'
-    implementation("com.mapp.sdk:mapp-android:6.0.29-alpha02")
+    implementation("com.mapp.sdk:mapp-android:6.1.0")
 }
 
 react {
