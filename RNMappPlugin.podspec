@@ -26,7 +26,7 @@ Pod::Spec.new do |s|
   s.dependency "React" 
   s.dependency "MappSDK" , '~> 6.0.10'
   s.dependency "MappSDKInapp"
-  s.dependency "MappSDKGeotargeting"
+  s.dependency "MappSDKGeotargeting", '~> 6.0.6'
 
 end
 
