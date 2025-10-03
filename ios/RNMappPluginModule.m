@@ -131,6 +131,23 @@ RCT_EXPORT_METHOD(incrementNumericKey: (NSString *) key value: (NSNumber *) numb
         }
     }];
 }
+
+RCT_EXPORT_METHOD(setAttributes: (NSDictionary *)attributes)  {
+    [[Appoxee shared] setCustomAttributtes:attributes withCompletionHandler:^(NSError * _Nullable appoxeeError, id  _Nullable data) {
+        if (appoxeeError) {
+            NSLog(@"%@", appoxeeError.debugDescription);
+        }
+    }];
+}
+
+RCT_EXPORT_METHOD(getAttributes: (NSArray *)attributes and:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject)  {
+    [[Appoxee shared] getCustomAttributes:attributes withCompletionHandler:^(NSError * _Nullable appoxeeError, id  _Nullable data) {
+        if (appoxeeError) {
+            NSLog(@"%@", appoxeeError.debugDescription);
+        }
+        resolve((NSDictionary*)data[@"get"]);
+    }];
+}
                   
 RCT_EXPORT_METHOD(setAttribute: (NSString *)key value: (NSString *) value)  {
     [[Appoxee shared] setStringValue:value forKey:key withCompletionHandler:^(NSError * _Nullable appoxeeError, id  _Nullable data) {
