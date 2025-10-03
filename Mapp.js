@@ -91,6 +91,15 @@ export class Mapp {
     return RNMappPluginModule.setAlias(alias);
   }
 
+    /**
+   * Sets user alias
+   *
+   * @param alias
+   */
+  static setAlias(alias: string, resendAttributes: bool): Promise<Boolean> {
+    return RNMappPluginModule.setAlias(alias, resendAttributes);
+  }
+
   /**
    * getAlias
    *
