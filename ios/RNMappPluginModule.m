@@ -66,7 +66,7 @@ RCT_EXPORT_METHOD(setAlias:(NSString *) alias) {
     }];
 }
 
-RCT_EXPORT_METHOD(setAlias:(NSString *) alias withResendAttributes:(BOOL) resendAttributes) {
+RCT_EXPORT_METHOD(setAliasWithResend:(NSString *) alias withResendAttributes:(BOOL) resendAttributes) {
     [[Appoxee shared] setDeviceAlias:alias withResendAttributes:resendAttributes withCompletionHandler:^(NSError * _Nullable appoxeeError, id  _Nullable data) {
         if (appoxeeError != nil) {
             NSLog(@"%@", appoxeeError.debugDescription);
