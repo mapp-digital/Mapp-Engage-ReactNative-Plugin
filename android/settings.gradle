@@ -5,9 +5,9 @@ pluginManagement {
         gradlePluginPortal()
     }
     plugins {
-        id("com.android.library") version("8.10.1") // 👈 for library
-        id("com.facebook.react") version("0.79.3")  // 👈 for React Native
-        id("org.jetbrains.kotlin.android") version("2.1.21") // 👈 for Kotlin
+        id("com.android.library") version("8.13.0") // 👈 for library
+        id("com.facebook.react") version("0.81.4")  // 👈 for React Native
+        id("org.jetbrains.kotlin.android") version("2.2.20") // 👈 for Kotlin
     }
 }
 
