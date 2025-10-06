@@ -15,6 +15,7 @@ import androidx.core.content.ContextCompat;
 import com.appoxee.Appoxee;
 import com.appoxee.AppoxeeOptions;
 import com.appoxee.DeviceInfo;
+import com.appoxee.GetCustomAttributesCallback;
 import com.appoxee.internal.inapp.model.APXInboxMessage;
 import com.appoxee.internal.inapp.model.ApxInAppExtras;
 import com.appoxee.internal.inapp.model.InAppInboxCallback;
@@ -205,7 +206,13 @@ public class RNMappPluginModule extends ReactContextBaseJavaModule {
 
     @ReactMethod
     public void setAlias(String alias, Promise promise) {
-        Appoxee.instance().setAlias(alias);
+        Appoxee.instance().setAlias(alias, false);
+        promise.resolve(true);
+    }
+
+    @ReactMethod
+    public void setAlias(String alias, boolean resendCustomAttributes, Promise promise) {
+        Appoxee.instance().setAlias(alias, resendCustomAttributes);
         promise.resolve(true);
     }
 
@@ -279,6 +286,27 @@ public class RNMappPluginModule extends ReactContextBaseJavaModule {
             @Override
             public void onInitCompleted(boolean b, Exception e) {
                 promise.resolve(b);
+            }
+        });
+    }
+
+    @ReactMethod
+    public void setAttributes(Map<String, Object> attributes, Promise promise) {
+        Appoxee.instance().setAttributes(attributes);
+        promise.resolve(true);
+    }
+
+    @ReactMethod
+    public void getAttributes(List<String> keys, Promise promise) {
+        Appoxee.instance().getCustomAttributes(keys, new GetCustomAttributesCallback() {
+            @Override
+            public void onSuccess(Map<String, String> customAttributes) {
+                promise.resolve(customAttributes);
+            }
+
+            @Override
+            public void onError(String errorMessage) {
+                promise.reject(new Throwable(errorMessage));
             }
         });
     }
