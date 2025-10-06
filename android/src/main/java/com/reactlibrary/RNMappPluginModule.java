@@ -38,6 +38,8 @@ import com.facebook.react.bridge.Promise;
 import com.facebook.react.bridge.ReactApplicationContext;
 import com.facebook.react.bridge.ReactContextBaseJavaModule;
 import com.facebook.react.bridge.ReactMethod;
+import com.facebook.react.bridge.ReadableArray;
+import com.facebook.react.bridge.ReadableMap;
 import com.facebook.react.bridge.WritableArray;
 import com.facebook.react.bridge.WritableMap;
 import com.facebook.react.bridge.WritableNativeMap;
@@ -50,6 +52,9 @@ import com.google.firebase.messaging.RemoteMessage;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -211,7 +216,7 @@ public class RNMappPluginModule extends ReactContextBaseJavaModule {
     }
 
     @ReactMethod
-    public void setAlias(String alias, boolean resendCustomAttributes, Promise promise) {
+    public void setAliasWithResend(String alias, boolean resendCustomAttributes, Promise promise) {
         Appoxee.instance().setAlias(alias, resendCustomAttributes);
         promise.resolve(true);
     }
@@ -291,24 +296,39 @@ public class RNMappPluginModule extends ReactContextBaseJavaModule {
     }
 
     @ReactMethod
-    public void setAttributes(Map<String, Object> attributes, Promise promise) {
-        Appoxee.instance().setAttributes(attributes);
+    public void setAttributes(ReadableMap attributes, Promise promise) {
+        if(attributes!=null){
+            HashMap internapMap=attributes.toHashMap();
+            Appoxee.instance().setAttributes(internapMap);
+        }
         promise.resolve(true);
     }
 
     @ReactMethod
-    public void getAttributes(List<String> keys, Promise promise) {
-        Appoxee.instance().getCustomAttributes(keys, new GetCustomAttributesCallback() {
-            @Override
-            public void onSuccess(Map<String, String> customAttributes) {
-                promise.resolve(customAttributes);
-            }
+    public void getAttributes(ReadableArray keys, Promise promise) {
+        List<String> internalKeys=new ArrayList<>();
 
-            @Override
-            public void onError(String errorMessage) {
-                promise.reject(new Throwable(errorMessage));
+        if(keys!=null && keys.size()>0) {
+            for (int i = 0; i < keys.size(); i++) {
+                internalKeys.add(keys.getString(i));
             }
-        });
+        }
+
+        if(internalKeys.size()>0) {
+            Appoxee.instance().getCustomAttributes(internalKeys, new GetCustomAttributesCallback() {
+                @Override
+                public void onSuccess(Map<String, String> customAttributes) {
+                    promise.resolve(customAttributes);
+                }
+
+                @Override
+                public void onError(String errorMessage) {
+                    promise.reject(new Throwable(errorMessage));
+                }
+            });
+        }else{
+            promise.resolve(Collections.emptyMap());
+        }
     }
 
     @ReactMethod

@@ -98,7 +98,7 @@ export class Mapp {
    * @param resendAttributes
    */
   static setAlias(alias: string, resendAttributes: bool): Promise<Boolean> {
-    return RNMappPluginModule.setAlias(alias, resendAttributes);
+    return RNMappPluginModule.setAliasWithResend(alias, resendAttributes);
   }
 
   /**
