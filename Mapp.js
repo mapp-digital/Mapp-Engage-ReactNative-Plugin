@@ -91,6 +91,16 @@ export class Mapp {
     return RNMappPluginModule.setAlias(alias);
   }
 
+    /**
+   * Sets user alias
+   *
+   * @param alias
+   * @param resendAttributes
+   */
+  static setAlias(alias: string, resendAttributes: bool): Promise<Boolean> {
+    return RNMappPluginModule.setAlias(alias, resendAttributes);
+  }
+
   /**
    * getAlias
    *
@@ -203,6 +213,22 @@ export class Mapp {
     if (Platform.OS === "ios") {
       return RNMappPluginModule.setShowNotificationsAtForeground(value);
     }
+  }
+
+   /**
+   * Set Custom Attributes
+   *
+   */
+  static setAttributes(attributes: object) {
+    return RNMappPluginModule.setAttributes(attributes);
+  }
+
+   /**
+   * Get Custom Attributes
+   *
+   */
+  static getAttributes(attributes: array): Promise<Object>  {
+    return RNMappPluginModule.getAttributes(attributes);
   }
 
   /**

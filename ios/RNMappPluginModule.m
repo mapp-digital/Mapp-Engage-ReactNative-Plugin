@@ -66,6 +66,14 @@ RCT_EXPORT_METHOD(setAlias:(NSString *) alias) {
     }];
 }
 
+RCT_EXPORT_METHOD(setAlias:(NSString *) alias withResendAttributes:(BOOL) resendAttributes) {
+    [[Appoxee shared] setDeviceAlias:alias withResendAttributes:resendAttributes withCompletionHandler:^(NSError * _Nullable appoxeeError, id  _Nullable data) {
+        if (appoxeeError != nil) {
+            NSLog(@"%@", appoxeeError.debugDescription);
+        }
+    }];
+}
+
 RCT_EXPORT_METHOD(setToken:(NSString *) token) {
     [[Appoxee shared] didRegisterForRemoteNotificationsWithDeviceToken:[[NSData alloc] initWithBase64EncodedString:token options:NSUTF8StringEncoding]];
 }
@@ -121,6 +129,23 @@ RCT_EXPORT_METHOD(incrementNumericKey: (NSString *) key value: (NSNumber *) numb
         if (appoxeeError != nil) {
             NSLog(@"%@", appoxeeError.debugDescription);
         }
+    }];
+}
+
+RCT_EXPORT_METHOD(setAttributes: (NSDictionary *)attributes)  {
+    [[Appoxee shared] setCustomAttributtes:attributes withCompletionHandler:^(NSError * _Nullable appoxeeError, id  _Nullable data) {
+        if (appoxeeError) {
+            NSLog(@"%@", appoxeeError.debugDescription);
+        }
+    }];
+}
+
+RCT_EXPORT_METHOD(getAttributes: (NSArray *)attributes and:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject)  {
+    [[Appoxee shared] getCustomAttributes:attributes withCompletionHandler:^(NSError * _Nullable appoxeeError, id  _Nullable data) {
+        if (appoxeeError) {
+            NSLog(@"%@", appoxeeError.debugDescription);
+        }
+        resolve((NSDictionary*)data[@"get"]);
     }];
 }
                   
