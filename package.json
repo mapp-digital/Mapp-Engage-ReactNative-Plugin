@@ -1,6 +1,6 @@
 {
   "name": "react-native-mapp-plugin",
-  "version": "1.4.0.6",
+  "version": "1.4.0",
   "description": "Mapp SDK for React Native.",
   "main": "index.js",
   "keywords": [
