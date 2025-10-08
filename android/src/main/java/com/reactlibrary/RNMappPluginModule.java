@@ -54,6 +54,7 @@ import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -297,8 +298,22 @@ public class RNMappPluginModule extends ReactContextBaseJavaModule {
 
     @ReactMethod
     public void setAttributes(ReadableMap attributes, Promise promise) {
-        if(attributes!=null){
-            HashMap internapMap=attributes.toHashMap();
+        if (attributes != null) {
+            Map<String, Object> internapMap = new HashMap<>();
+            attributes.getEntryIterator().forEachRemaining(entry -> {
+                Object value = entry.getValue() == null ? "" : entry.getValue();
+                String key = entry.getKey();
+
+                if (value instanceof Number) {
+                    internapMap.put(key, ((Number) value).doubleValue());
+                } else if (value instanceof Boolean) {
+                    internapMap.put(key, ((Boolean) value).booleanValue());
+                } else if (value instanceof Date) {
+                    internapMap.put(key, ((Date) value).getDate());
+                } else {
+                    internapMap.put(key, ((String) value));
+                }
+            });
             Appoxee.instance().setAttributes(internapMap);
         }
         promise.resolve(true);
@@ -306,19 +321,23 @@ public class RNMappPluginModule extends ReactContextBaseJavaModule {
 
     @ReactMethod
     public void getAttributes(ReadableArray keys, Promise promise) {
-        List<String> internalKeys=new ArrayList<>();
+        List<String> internalKeys = new ArrayList<>();
 
-        if(keys!=null && keys.size()>0) {
+        if (keys != null && keys.size() > 0) {
             for (int i = 0; i < keys.size(); i++) {
                 internalKeys.add(keys.getString(i));
             }
         }
 
-        if(internalKeys.size()>0) {
+        if (internalKeys.size() > 0) {
             Appoxee.instance().getCustomAttributes(internalKeys, new GetCustomAttributesCallback() {
                 @Override
                 public void onSuccess(Map<String, String> customAttributes) {
-                    promise.resolve(customAttributes);
+                    WritableMap resultMap = new WritableNativeMap();
+                    for (Map.Entry<String, String> entry : customAttributes.entrySet()) {
+                        resultMap.putString(entry.getKey(), entry.getValue());
+                    }
+                    promise.resolve(resultMap);
                 }
 
                 @Override
@@ -326,7 +345,7 @@ public class RNMappPluginModule extends ReactContextBaseJavaModule {
                     promise.reject(new Throwable(errorMessage));
                 }
             });
-        }else{
+        } else {
             promise.resolve(Collections.emptyMap());
         }
     }
