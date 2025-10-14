@@ -26,16 +26,16 @@
         </receiver>
         <activity
                 android:name=".HelperActivity"
-                android:exported="false"
+                android:exported="true"
+                android:taskAffinity=""
                 android:theme="@style/HelperActivityStyle">
-
             <intent-filter android:label="mapp">
 
                     <data android:scheme="apx" />
                     <data android:host="deeplink" />
 
                     <action android:name="com.appoxee.VIEW_DEEPLINK" />
-
+                    <action android:name="android.intent.action.VIEW" />
                     <category android:name="android.intent.category.DEFAULT" />
                     <category android:name="android.intent.category.BROWSABLE" />
                     <category android:name="${applicationId}" />
