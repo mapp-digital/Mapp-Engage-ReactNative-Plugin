@@ -86,19 +86,14 @@ export class Mapp {
    * Sets user alias
    *
    * @param alias
-   */
-  static setAlias(alias: string): Promise<Boolean> {
-    return RNMappPluginModule.setAlias(alias);
-  }
-
-    /**
-   * Sets user alias
-   *
-   * @param alias
    * @param resendAttributes
    */
-  static setAlias(alias: string, resendAttributes: bool): Promise<Boolean> {
-    return RNMappPluginModule.setAliasWithResend(alias, resendAttributes);
+  static setAlias(alias: string, resendAttributes: boolean): Promise<Boolean> {
+    if (resendAttributes !== undefined && resendAttributes !== null) {
+      return RNMappPluginModule.setAliasWithResend(alias, resendAttributes);
+    } else {
+      return RNMappPluginModule.setAlias(alias);
+    }
   }
 
   /**
@@ -215,7 +210,7 @@ export class Mapp {
     }
   }
 
-   /**
+  /**
    * Set Custom Attributes
    *
    */
@@ -223,11 +218,11 @@ export class Mapp {
     return RNMappPluginModule.setAttributes(attributes);
   }
 
-   /**
+  /**
    * Get Custom Attributes
    *
    */
-  static getAttributes(attributes: array): Promise<Object>  {
+  static getAttributes(attributes: array): Promise<Object> {
     return RNMappPluginModule.getAttributes(attributes);
   }
 
@@ -326,13 +321,21 @@ export class Mapp {
     return RNMappPluginModule.stopGeoFencing();
   }
 
-  static fetchLatestInboxMessage(): Promise<any>{
+  static fetchLatestInboxMessage(): Promise<any> {
     if (Platform.OS == "ios") {
-      print("fatch latest message for iOS part")
+      print("fatch latest message for iOS part");
       RNMappPluginModule.fetchLatestInboxMessage();
-      this.addInboxMessagesListener(messages => {
-        print("message arrived ", messages, " length", messages[messages.length - 1])
-        messages.sort((message1, message2) => message1["template_id"] > message2["template_id"]);
+      this.addInboxMessagesListener((messages) => {
+        print(
+          "message arrived ",
+          messages,
+          " length",
+          messages[messages.length - 1]
+        );
+        messages.sort(
+          (message1, message2) =>
+            message1["template_id"] > message2["template_id"]
+        );
         alert(JSON.stringify(messages[0]));
         return JSON.stringify(messages[0]);
       });
