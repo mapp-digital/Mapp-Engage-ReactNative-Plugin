@@ -1,3 +1,6 @@
+# Version 1.3.2
+- Resolved an issue introduced in version 1.3.1 where changes to the setAlias function declaration caused compatibility problems. The function has been updated to ensure backward compatibility.
+
 # Version 1.3.1
 *** Features ***
 - Updated react native version to 0.81.4
