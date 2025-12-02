@@ -25,7 +25,7 @@ Pod::Spec.new do |s|
   s.library = 'sqlite3'
   s.dependency "React" 
   s.dependency 'RCT-Folly'
-  s.dependency "MappSDK" , '~> 6.1.1'
+  s.dependency "MappSDK" , '~> 6.1.2'
   s.dependency "MappSDKInapp"
   s.dependency "MappSDKGeotargeting", '~> 6.0.7'
 
