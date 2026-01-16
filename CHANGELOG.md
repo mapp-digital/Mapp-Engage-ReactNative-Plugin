@@ -1,3 +1,18 @@
+## Version 1.3.5
+
+***Bug Fixes***
+
+-iOS: Fixed an issue where App Store links from Push messages could not be opened.
+
+-iOS: Fixed a bug where calling setAlias with resendAttributes = true did not resend cached custom attributes as expected.
+
+***Dependency Updates***
+
+-Aligned with Mapp Engage iOS SDK 6.1.2 and Mapp Engage Inapp iOS SDK 6.0.9.
+
+**Note:**
+-This release ensures correct link handling from Push messages and restores expected behavior when resending cached attributes during alias updates on iOS. The update is fully backward compatible and recommended for all iOS integrations using alias functionality.
+
 # Version 1.3.4
 - Updated native Mapp SDK versions; for Android - 6.1.3; for iOS - 6.1.1;
 **Bug Fixes**
