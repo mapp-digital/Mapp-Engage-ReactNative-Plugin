@@ -241,7 +241,7 @@ typedef void(^AppoxeeCompletionHandler)(NSError * _Nullable appoxeeError, id _Nu
  </code></pre>
  @param notificationSettings UIUserNotificationSettings instance.
  */
-- (void)didRegisterUserNotificationSettings:(nullable NSObject *)notificationSettings;
+- (void)didRegisterUserNotificationSettings:(nullable NSObject *)notificationSettings API_DEPRECATED("Use UserNotifications Framework's -[UNUserNotificationCenter requestAuthorizationWithOptions:completionHandler:]", ios(8.0, 10.0));
 
 #pragma mark - Push Handling iOS9
 
@@ -274,7 +274,7 @@ typedef void(^AppoxeeCompletionHandler)(NSError * _Nullable appoxeeError, id _Nu
  @param completionHandler The completionHandler argument passed by the application delegate.
  @return YES, if Appoxee handled the action, else returns NO. If the returned value is NO, you will need to call completionHandler(); after you finish handling the Push action.
  */
-- (BOOL)handleActionWithIdentifier:(nullable NSString *)identifier forRemoteNotification:(nullable NSDictionary *)userInfo completionHandler:(nonnull void (^)())completionHandler;
+- (BOOL)handleActionWithIdentifier:(nullable NSString *)identifier forRemoteNotification:(nullable NSDictionary *)userInfo completionHandler:(nonnull void (^)(void))completionHandler API_DEPRECATED("Use UserNotifications Framework's -[UNUserNotificationCenterDelegate didReceiveNotificationResponse:withCompletionHandler:]", ios(8.0, 10.0));
 
 /*
  
@@ -523,7 +523,7 @@ typedef void(^AppoxeeCompletionHandler)(NSError * _Nullable appoxeeError, id _Nu
  An NSString object representing an alias.
  @param handler Code Block to be executed when method completes with an NSError object and data as arguments.
  */
-- (void)removeDeviceAliasWithCompletionHandler:(nullable AppoxeeCompletionHandler)handler;
+- (void)removeDeviceAliasWithCompletionHandler:(nullable AppoxeeCompletionHandler)handler API_DEPRECATED("removeDeviceAliasWithCompletionHandler() is deprecated and will be removed in version 3.0.0. Use logout() instead.", ios(6.0, 8.0));
 
 /**
  Get an alias for a device.
@@ -875,3 +875,4 @@ typedef void(^AppoxeeCompletionHandler)(NSError * _Nullable appoxeeError, id _Nu
 - (void)refreshInboxWithCompletionHandler:(nullable AppoxeeCompletionHandler)handler;
 
 @end
+

@@ -1,3 +1,9 @@
+## Version 1.3.6
+
+***Dependency Updates***
+
+-Aligned with Mapp Engage iOS SDK 6.1.3
+
 ## Version 1.3.5
 
 ***Bug Fixes***
