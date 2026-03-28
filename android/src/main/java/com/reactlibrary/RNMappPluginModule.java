@@ -3,9 +3,11 @@ package com.reactlibrary;
 
 import android.Manifest;
 import android.app.Application;
-import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.os.Build;
+import android.os.Handler;
+import android.os.Looper;
+import android.util.DisplayMetrics;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -13,24 +15,12 @@ import androidx.core.app.NotificationManagerCompat;
 import androidx.core.content.ContextCompat;
 
 import com.appoxee.Appoxee;
-import com.appoxee.AppoxeeOptions;
-import com.appoxee.DeviceInfo;
-import com.appoxee.GetCustomAttributesCallback;
-import com.appoxee.internal.inapp.model.APXInboxMessage;
-import com.appoxee.internal.inapp.model.ApxInAppExtras;
-import com.appoxee.internal.inapp.model.InAppInboxCallback;
-import com.appoxee.internal.inapp.model.InAppStatistics;
-import com.appoxee.internal.inapp.model.MessageContext;
-import com.appoxee.internal.inapp.model.Tracking;
-import com.appoxee.internal.inapp.model.TrackingAttributes;
-import com.appoxee.internal.permission.PermissionHelper;
-import com.appoxee.internal.permission.PermissionsCallback;
-import com.appoxee.internal.permission.PermissionsManager;
-import com.appoxee.internal.service.AppoxeeServiceAdapter;
-import com.appoxee.internal.util.ResultCallback;
-import com.appoxee.push.NotificationMode;
-import com.appoxee.push.PushData;
-import com.facebook.react.ReactActivity;
+import com.appoxee.internal.model.response.DevicePayload;
+import com.appoxee.internal.model.response.inbox.InboxMessage;
+import com.appoxee.shared.AppoxeeObserver;
+import com.appoxee.shared.AppoxeeOptions;
+import com.appoxee.shared.MappResult;
+import com.appoxee.shared.NotificationMode;
 import com.facebook.react.bridge.Arguments;
 import com.facebook.react.bridge.Callback;
 import com.facebook.react.bridge.LifecycleEventListener;
@@ -56,15 +46,24 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
+import java.util.TimeZone;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Created by Aleksandar Marinkovic on 2019-05-15.
  * Copyright (c) 2019 MAPP.
+ * <p>
+ * Updated for Engage SDK v7:
+ * - All async operations use Call<T>.enqueue(MappCallback) instead of listener interfaces.
+ * - Push broadcast base class changed to LocalPushBroadcast via setPushBroadcast().
+ * - Ready/init observation changed to subscribe(AppoxeeObserver).
+ * - InApp statistics methods stubbed (v6 internal classes removed in v7).
  */
 @SuppressWarnings("ALL")
 @ReactModule(name = RNMappPluginModule.NAME)
@@ -93,89 +92,55 @@ public class RNMappPluginModule extends ReactContextBaseJavaModule {
         getReactApplicationContext().addLifecycleEventListener(new LifecycleEventListener() {
             @Override
             public void onHostResume() {
-//                Commented out for now.
-//                It prevents the app from channging registered channel with a new one.
-//                Appoxee.engage(application);
-//                Appoxee.setOrientation(application, ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
-//                Appoxee.instance().setReceiver(MyPushBroadcastReceiver.class);
             }
 
             @Override
             public void onHostPause() {
-
             }
 
             @Override
             public void onHostDestroy() {
-
             }
-
         });
 
         EventEmitter.shared().attachReactContext(getReactApplicationContext());
     }
 
-    private void reportResultWithCallback(Callback callback, String error, Object result) {
-        if (callback != null) {
-            if (error != null) {
-                callback.invoke(error);
-            } else {
-                callback.invoke(null, result);
-            }
-        }
-    }
+    // -------------------------------------------------------------------------
+    // Permissions
+    // -------------------------------------------------------------------------
 
     @ReactMethod
     public void requestGeofenceLocationPermission(Promise promise) {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
             promise.resolve(true);
-        } else {
-            if (getCurrentActivity() instanceof ReactActivity) {
-                int fineLocation = getCurrentActivity().checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION);
-                int backgroundLocation = getCurrentActivity().checkSelfPermission(Manifest.permission.ACCESS_BACKGROUND_LOCATION);
-
-                if (fineLocation != PermissionsManager.PERMISSION_GRANTED ||
-                        backgroundLocation != PermissionsManager.PERMISSION_GRANTED) {
-                    PermissionHelper.getInstance().openAppSystemSettings(getCurrentActivity());
-                    promise.resolve(false);
-                } else {
-                    promise.resolve(true);
-                }
-            } else {
-                promise.reject("Can't access activity for requesting permission!");
-            }
+            return;
         }
+        int fineLocation = ContextCompat.checkSelfPermission(reactContext, Manifest.permission.ACCESS_FINE_LOCATION);
+        int backgroundLocation = ContextCompat.checkSelfPermission(reactContext, Manifest.permission.ACCESS_BACKGROUND_LOCATION);
+        promise.resolve(fineLocation == PackageManager.PERMISSION_GRANTED
+                && backgroundLocation == PackageManager.PERMISSION_GRANTED);
     }
 
     @ReactMethod
     public void requestPostNotificationPermission(Promise promise) {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) {
             promise.resolve(true);
-        } else {
-            if (getCurrentActivity() instanceof ReactActivity) {
-                ReactActivity activity = (ReactActivity) getCurrentActivity();
-                Appoxee.instance().requestNotificationsPermission(activity, new PermissionsCallback() {
-                    @Override
-                    public void onPermissionsResult(Map<String, Integer> map) {
-                        if (map.containsKey(Manifest.permission.POST_NOTIFICATIONS)) {
-                            Integer result = map.get(Manifest.permission.POST_NOTIFICATIONS);
-                            promise.resolve(result == PermissionsManager.PERMISSION_GRANTED);
-                        } else {
-                            promise.resolve(false);
-                        }
-                    }
-                });
-            } else {
-                promise.reject("Can't access activity for requesting permission!");
-            }
+            return;
         }
+        int result = ContextCompat.checkSelfPermission(reactContext, Manifest.permission.POST_NOTIFICATIONS);
+        promise.resolve(result == PackageManager.PERMISSION_GRANTED);
     }
+
+    // -------------------------------------------------------------------------
+    // Remote message
+    // -------------------------------------------------------------------------
 
     @ReactMethod
     public void setRemoteMessage(String msgJson, Promise promise) {
         RemoteMessage remoteMessage = getRemoteMessage(msgJson);
         if (remoteMessage != null) {
-            Appoxee.instance().setRemoteMessage(remoteMessage);
+            Appoxee.instance().handlePushMessage(remoteMessage);
             promise.resolve(true);
         } else {
             promise.resolve(false);
@@ -184,19 +149,25 @@ public class RNMappPluginModule extends ReactContextBaseJavaModule {
 
     @ReactMethod
     public void isPushFromMapp(String msgJson, Promise promise) {
+        promise.resolve(isMappPush(msgJson));
+    }
+
+    static boolean isMappPush(@Nullable String msgJson) {
         try {
             JSONObject json = new JSONObject(msgJson);
-            boolean mappPush = json.has("data") && json.getJSONObject("data").has("p");
-            promise.resolve(mappPush);
+            return json.has("data") && json.getJSONObject("data").has("p");
         } catch (Exception e) {
-            promise.resolve(false);
+            return false;
         }
     }
 
+    // -------------------------------------------------------------------------
+    // Token
+    // -------------------------------------------------------------------------
+
     @ReactMethod
     public void setToken(String token, Promise promise) {
-        Appoxee.instance().setToken(token);
-        promise.resolve(true);
+        Appoxee.instance().updateFirebaseToken(token).enqueue(result -> promise.resolve(true));
     }
 
     @ReactMethod
@@ -204,355 +175,495 @@ public class RNMappPluginModule extends ReactContextBaseJavaModule {
         FirebaseMessaging.getInstance().getToken().addOnCompleteListener(new OnCompleteListener<String>() {
             @Override
             public void onComplete(@NonNull Task<String> task) {
-                String token = task.getResult();
-                promise.resolve(token);
+                promise.resolve(task.getResult());
             }
         });
     }
 
+    // -------------------------------------------------------------------------
+    // Alias
+    // -------------------------------------------------------------------------
+
     @ReactMethod
     public void setAlias(String alias, Promise promise) {
-        Appoxee.instance().setAlias(alias, false);
-        promise.resolve(true);
+        Appoxee.instance().setAlias(alias, false).enqueue(result -> promise.resolve(true));
     }
 
     @ReactMethod
     public void setAliasWithResend(String alias, boolean resendCustomAttributes, Promise promise) {
-        Appoxee.instance().setAlias(alias, resendCustomAttributes);
-        promise.resolve(true);
+        Appoxee.instance().setAlias(alias, resendCustomAttributes).enqueue(result -> promise.resolve(true));
     }
 
     @ReactMethod
+    public void getAlias(Promise promise) {
+        Appoxee.instance().getAlias().enqueue(result -> promise.resolve(result.getData()));
+    }
+
+    // -------------------------------------------------------------------------
+    // Engage / init
+    // -------------------------------------------------------------------------
+
+    @ReactMethod
+    @Deprecated(forRemoval = true)
     public void engage2() {
-        Appoxee.engage(Objects.requireNonNull(application));
+        Appoxee.engage(application,null);
     }
 
     @ReactMethod
     public void engage(String sdkKey, String googleProjectId, String server, String appID, String tenantID) {
-        AppoxeeOptions opt = new AppoxeeOptions();
-        opt.appID = appID;
-        opt.sdkKey = sdkKey;
-        opt.server = AppoxeeOptions.Server.valueOf(server);
-        if (server.equals("TEST") || server.equals("TEST55") || server.equals("TEST_55")) {
-            opt.cepURL = "https://jamie-test.shortest-route.com";
-        }
-        opt.notificationMode = NotificationMode.BACKGROUND_AND_FOREGROUND;
-        opt.tenantID = tenantID;
-        Appoxee.engage(Objects.requireNonNull(application), opt);
+        AppoxeeOptions opt = createOptions(server, sdkKey, appID, tenantID);
+        opt.setNotificationMode(NotificationMode.BACKGROUND_AND_FOREGROUND);
 
-        Appoxee.instance().addInitListener(new Appoxee.OnInitCompletedListener() {
+        new Handler(Looper.getMainLooper()).post(() -> {
+            Appoxee.engage(Objects.requireNonNull(application), opt);
+
+            Appoxee.instance().subscribe(new AppoxeeObserver() {
+                @Override
+                public void onReadyStatusChanged(boolean status, MappResult<DevicePayload> result) {
+                }
+            });
+
+            Appoxee.instance().setPushBroadcast(MyPushBroadcastReceiver.class);
+        });
+    }
+
+    @ReactMethod
+    public void engageTestServer(String cepURl, String sdkKey, String googleProjectId, String server,
+                                 String appID, String tenantID) {
+        AppoxeeOptions opt = createOptions(server, sdkKey, appID, tenantID);
+
+        new Handler(Looper.getMainLooper()).post(() -> {
+            Appoxee.engage(Objects.requireNonNull(application), opt);
+
+            Appoxee.instance().subscribe(new AppoxeeObserver() {
+                @Override
+                public void onReadyStatusChanged(boolean status, MappResult<DevicePayload> result) {
+                }
+            });
+
+            Appoxee.instance().setPushBroadcast(MyPushBroadcastReceiver.class);
+        });
+    }
+
+    static AppoxeeOptions createOptions(String server, String sdkKey, String appID, String tenantID) {
+        AppoxeeOptions.Server resolvedServer = resolveServer(server);
+        if (resolvedServer == null) {
+            throw new IllegalArgumentException(
+                    "Unsupported Mapp server '" + server
+                            + "'. Use L3, L3_US, EMC, EMC_US, CROC, TEST, TEST55, TEST61, or a full server URL."
+            );
+        }
+
+        return new AppoxeeOptions(resolvedServer, sdkKey, appID, tenantID);
+    }
+
+    @Nullable
+    static AppoxeeOptions.Server resolveServer(@Nullable String server) {
+        if (server == null) {
+            return null;
+        }
+
+        String normalizedServer = server.trim();
+        if (normalizedServer.isEmpty()) {
+            return null;
+        }
+
+        switch (normalizedServer.toUpperCase(Locale.ROOT)) {
+            case "L3":
+                return AppoxeeOptions.Server.L3;
+            case "L3_US":
+            case "L3US":
+                return AppoxeeOptions.Server.L3_US;
+            case "EMC":
+                return AppoxeeOptions.Server.EMC;
+            case "EMC_US":
+            case "EMCUS":
+                return AppoxeeOptions.Server.EMC_US;
+            case "CROC":
+                return AppoxeeOptions.Server.CROC;
+            case "TEST":
+                return AppoxeeOptions.Server.TEST;
+            case "TEST55":
+            case "TEST_55":
+                return AppoxeeOptions.Server.TEST_55;
+            case "TEST61":
+            case "TEST_61":
+                return AppoxeeOptions.Server.TEST_61;
+            default:
+                return AppoxeeOptions.Server.get(normalizedServer);
+        }
+    }
+
+    @ReactMethod
+    public void onInitCompletedListener(final Promise promise) {
+        Appoxee.instance().subscribe(new AppoxeeObserver() {
             @Override
-            public void onInitCompleted(boolean successful, Exception failReason) {
-                /**
-                 * OnInitCompleteListener must be attached;
-                 * Internally {@link AppoxeeServiceAdapter#getDeviceInfoDMC()} is called and
-                 * "user_id" created.
-                 * If "user_id" is null InApp messages are not working.
-                 */
+            public void onReadyStatusChanged(boolean status, MappResult<DevicePayload> result) {
+                promise.resolve(status);
             }
         });
-        Appoxee.setOrientation(application, ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
-        Appoxee.instance().setReceiver(MyPushBroadcastReceiver.class);
-    }
-
-    @ReactMethod
-    public void engageTestServer(String cepURl, String sdkKey, String googleProjectId, String server, String appID,
-                                 String tenantID) {
-        AppoxeeOptions opt = new AppoxeeOptions();
-        opt.appID = appID;
-        opt.sdkKey = sdkKey;
-        opt.server = AppoxeeOptions.Server.valueOf(server);
-        opt.cepURL = cepURl;
-        opt.tenantID = tenantID;
-        Appoxee.setOrientation(application, ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
-
-        Appoxee.engage(Objects.requireNonNull(application), opt);
-    }
-
-    @ReactMethod
-    public void setPushEnabled(boolean optIn) {
-        Appoxee.instance().setPushEnabled(optIn);
-
-    }
-
-    @ReactMethod
-    public void isPushEnabled(Promise promise) {
-        promise.resolve(Appoxee.instance().isPushEnabled());
     }
 
     @ReactMethod
     public void isReady(Promise promise) {
         promise.resolve(Appoxee.instance().isReady());
-
     }
 
+    // -------------------------------------------------------------------------
+    // Push opt-in / opt-out
+    // -------------------------------------------------------------------------
+
     @ReactMethod
-    public void onInitCompletedListener(final Promise promise) {
-        Appoxee.instance().addInitListener(new Appoxee.OnInitCompletedListener() {
-            @Override
-            public void onInitCompleted(boolean b, Exception e) {
-                promise.resolve(b);
-            }
+    public void setPushEnabled(boolean optIn) {
+        Appoxee.instance().enablePush(optIn, null).enqueue(result -> {
         });
     }
 
     @ReactMethod
+    public void isPushEnabled(Promise promise) {
+        Appoxee.instance().isPushEnabled().enqueue(result -> {
+            Boolean enabled = (result != null && result.isSuccess()) ? result.getData() : false;
+            promise.resolve(enabled != null ? enabled : false);
+        });
+    }
+
+    // -------------------------------------------------------------------------
+    // Custom attributes (bulk)
+    // -------------------------------------------------------------------------
+
+    @ReactMethod
     public void setAttributes(ReadableMap attributes, Promise promise) {
         if (attributes != null) {
-            Map<String, Object> internapMap = new HashMap<>();
+            Map<String, Object> internalMap = new HashMap<>();
             attributes.getEntryIterator().forEachRemaining(entry -> {
                 Object value = entry.getValue() == null ? "" : entry.getValue();
                 String key = entry.getKey();
-
                 if (value instanceof Number) {
-                    internapMap.put(key, ((Number) value).doubleValue());
+                    internalMap.put(key, ((Number) value).doubleValue());
                 } else if (value instanceof Boolean) {
-                    internapMap.put(key, ((Boolean) value).booleanValue());
+                    internalMap.put(key, (Boolean) value);
                 } else if (value instanceof Date) {
-                    internapMap.put(key, ((Date) value).getDate());
+                    internalMap.put(key, ((Date) value).getDate());
                 } else {
-                    internapMap.put(key, ((String) value));
+                    internalMap.put(key, value.toString());
                 }
             });
-            Appoxee.instance().setAttributes(internapMap);
+            Appoxee.instance().addCustomAttributes(internalMap).enqueue(result -> promise.resolve(true));
+        } else {
+            promise.resolve(true);
         }
-        promise.resolve(true);
     }
 
     @ReactMethod
     public void getAttributes(ReadableArray keys, Promise promise) {
         List<String> internalKeys = new ArrayList<>();
-
         if (keys != null && keys.size() > 0) {
             for (int i = 0; i < keys.size(); i++) {
                 internalKeys.add(keys.getString(i));
             }
         }
 
-        if (internalKeys.size() > 0) {
-            Appoxee.instance().getCustomAttributes(internalKeys, new GetCustomAttributesCallback() {
-                @Override
-                public void onSuccess(Map<String, String> customAttributes) {
+        if (!internalKeys.isEmpty()) {
+            Appoxee.instance().getCustomAttributes(new HashSet<>(internalKeys)).enqueue(result -> {
+                if (result != null && result.isSuccess()) {
+                    Map<String, Object> customAttributes = (Map<String, Object>) result.getData();
                     WritableMap resultMap = new WritableNativeMap();
-                    for (Map.Entry<String, String> entry : customAttributes.entrySet()) {
-                        resultMap.putString(entry.getKey(), entry.getValue());
+                    if (customAttributes != null) {
+                        for (Map.Entry<String, Object> entry : customAttributes.entrySet()) {
+                            resultMap.putString(entry.getKey(),
+                                    entry.getValue() != null ? entry.getValue().toString() : "");
+                        }
                     }
                     promise.resolve(resultMap);
-                }
-
-                @Override
-                public void onError(String errorMessage) {
-                    promise.reject(new Throwable(errorMessage));
+                } else {
+                    Throwable error = (result != null && result.getError() != null) ? result.getError() : new Throwable("Error getting attributes");
+                    promise.reject(error);
                 }
             });
         } else {
-            promise.resolve(Collections.emptyMap());
+            promise.resolve(new WritableNativeMap());
         }
     }
 
+    // -------------------------------------------------------------------------
+    // Custom attributes (single)
+    // -------------------------------------------------------------------------
+
     @ReactMethod
     public void setAttribute(String key, String value) {
-        Appoxee.instance().setAttribute(key, value);
-
+        Map<String, Object> attr = new HashMap<>();
+        attr.put(key, value);
+        Appoxee.instance().addCustomAttributes(attr).enqueue(result -> {
+        });
     }
 
     @ReactMethod
     public void setAttributeBoolean(String key, Boolean value) {
-        Appoxee.instance().setAttribute(key, value);
-
+        Map<String, Object> attr = new HashMap<>();
+        attr.put(key, value);
+        Appoxee.instance().addCustomAttributes(attr).enqueue(result -> {
+        });
     }
 
     @ReactMethod
     public void setAttributeInt(String key, Integer value) {
-        Appoxee.instance().setAttribute(key, value);
-
-    }
-
-    @ReactMethod
-    public void addTag(String tag) {
-        Appoxee.instance().addTag(tag);
-
-    }
-
-    @ReactMethod
-    public void removeTag(String tag) {
-        Appoxee.instance().removeTag(tag);
-
-    }
-
-    @ReactMethod
-    public void getTags(Promise promise) {
-
-        WritableArray array = Arguments.createArray();
-        for (String tag : Appoxee.instance().getTags()) {
-            array.pushString(tag);
-        }
-        promise.resolve(array);
+        Map<String, Object> attr = new HashMap<>();
+        attr.put(key, value);
+        Appoxee.instance().addCustomAttributes(attr).enqueue(result -> {
+        });
     }
 
     @ReactMethod
     public void removeAttribute(String attribute) {
-        Appoxee.instance().removeAttribute(attribute);
+        Appoxee.instance().removeCustomAttributes(Collections.singleton(attribute)).enqueue(result -> {
+        });
     }
 
     @ReactMethod
-    public void getAlias(Promise promise) {
-        promise.resolve(Appoxee.instance().getAlias());
+    public void getAttributeStringValue(String key, Promise promise) {
+        Appoxee.instance().getCustomAttributes(Collections.singleton(key)).enqueue(result -> {
+            if (result != null && result.isSuccess() && result.getData() != null) {
+                Map<String, Object> attrs = (Map<String, Object>) result.getData();
+                Object value = attrs.get(key);
+                promise.resolve(value != null ? value.toString() : null);
+            } else {
+                promise.resolve(null);
+            }
+        });
     }
+
+    // -------------------------------------------------------------------------
+    // Tags
+    // -------------------------------------------------------------------------
+
+    @ReactMethod
+    public void addTag(String tag) {
+        Appoxee.instance().addTags(Collections.singleton(tag)).enqueue(result -> {
+        });
+    }
+
+    @ReactMethod
+    public void removeTag(String tag) {
+        Appoxee.instance().removeTags(Collections.singleton(tag)).enqueue(result -> {
+        });
+    }
+
+    @ReactMethod
+    public void getTags(Promise promise) {
+        Appoxee.instance().getTags().enqueue(result -> {
+            WritableArray array = Arguments.createArray();
+            if (result != null && result.isSuccess() && result.getData() != null) {
+                for (String tag : result.getData()) {
+                    array.pushString(tag);
+                }
+            }
+            promise.resolve(array);
+        });
+    }
+
+    // -------------------------------------------------------------------------
+    // Device info
+    // -------------------------------------------------------------------------
 
     @ReactMethod
     public void getDeviceInfo(Promise promise) {
-        promise.resolve(getDeviceInfoJson(Appoxee.instance().getDeviceInfo()));
+        Appoxee.instance().getDevice().enqueue(result -> {
+            WritableMap deviceInfo = new WritableNativeMap();
+            try {
+                // Use dmcUserId from v7 DevicePayload as the device id
+                DevicePayload payload = (result != null && result.isSuccess()) ? result.getData() : null;
+                deviceInfo.putString("id", payload != null && payload.getDmcUserId() != null
+                        ? payload.getDmcUserId() : "");
+
+                // Reconstruct app/device metadata from Android APIs (removed from v7 DevicePayload)
+                try {
+                    String appVersion = reactContext.getPackageManager()
+                            .getPackageInfo(reactContext.getPackageName(), 0).versionName;
+                    deviceInfo.putString("appVersion", appVersion != null ? appVersion : "");
+                } catch (PackageManager.NameNotFoundException e) {
+                    deviceInfo.putString("appVersion", "");
+                }
+                deviceInfo.putString("sdkVersion", "7.0.0");
+                deviceInfo.putString("locale", Locale.getDefault().toString());
+                deviceInfo.putString("timezone", TimeZone.getDefault().getID());
+                deviceInfo.putString("deviceModel", Build.MODEL);
+                deviceInfo.putString("manufacturer", Build.MANUFACTURER);
+                deviceInfo.putString("osVersion", Build.VERSION.RELEASE);
+
+                DisplayMetrics dm = reactContext.getResources().getDisplayMetrics();
+                deviceInfo.putString("resolution", dm.widthPixels + "x" + dm.heightPixels);
+                deviceInfo.putString("density", String.valueOf(dm.density));
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            promise.resolve(deviceInfo);
+        });
     }
 
     @ReactMethod
-    public void getAttributeStringValue(String value, Promise promise) {
-        promise.resolve(Appoxee.instance().getAttributeStringValue(value));
+    public void getDeviceDmcInfo(final Promise promise) {
+        Appoxee.instance().getDevice().enqueue(result -> {
+            try {
+                DevicePayload payload = (result != null && result.isSuccess()) ? result.getData() : null;
+                WritableMap wm = new WritableNativeMap();
+                if (payload != null) {
+                    if (payload.getDmcUserId() != null)
+                        wm.putString("dmcUserId", payload.getDmcUserId());
+                    if (payload.getUdidHashed() != null)
+                        wm.putString("udidHashed", payload.getUdidHashed());
+                    if (payload.getPushTokenBk() != null)
+                        wm.putString("pushTokenBk", payload.getPushTokenBk());
+                    if (payload.getPushToken() != null)
+                        wm.putString("pushToken", payload.getPushToken());
+                    if (payload.getAlias() != null) wm.putString("alias", payload.getAlias());
+                }
+                promise.resolve(wm);
+            } catch (Exception e) {
+                promise.reject("Error getting DMC Info", e);
+            }
+        });
     }
+
+    @ReactMethod
+    public void isDeviceRegistered(Promise promise) {
+        // isDeviceRegistered() removed in v7; derive from DevicePayload presence
+        Appoxee.instance().getDevice().enqueue(result -> {
+            boolean registered = result != null && result.isSuccess()
+                    && result.getData() != null
+                    && result.getData().getDmcUserId() != null;
+            promise.resolve(registered);
+        });
+    }
+
+    // -------------------------------------------------------------------------
+    // Screen / badge
+    // -------------------------------------------------------------------------
 
     @ReactMethod
     public void lockScreenOrientation(Integer orientation) {
-        Appoxee.setOrientation(Objects.requireNonNull((Application) reactContext.getApplicationContext()), orientation);
+        // setOrientation() removed in SDK v7 — no-op
     }
 
     @ReactMethod
     public void removeBadgeNumber() {
-        Appoxee.removeBadgeNumber(Objects.requireNonNull((Application) reactContext.getApplicationContext()));
+        // removeBadgeNumber() removed in SDK v7 — no-op
     }
+
+    // -------------------------------------------------------------------------
+    // Geofencing
+    // -------------------------------------------------------------------------
 
     @ReactMethod
     public void startGeofencing(final Promise promise) {
-        Appoxee.instance().startGeoFencing(new ResultCallback<String>() {
-            @Override
-            public void onResult(@Nullable String result) {
-                promise.resolve(result);
+        Appoxee.instance().startGeofencing(0).enqueue(result -> {
+            if (result != null && result.isSuccess() && result.getData() != null) {
+                promise.resolve(result.getData().getStatus());
+            } else {
+                promise.resolve("GEOFENCE_GENERAL_ERROR");
             }
         });
     }
 
     @ReactMethod
     public void stopGeofencing(final Promise promise) {
-        Appoxee.instance().stopGeoFencing(new ResultCallback<String>() {
-            @Override
-            public void onResult(@Nullable String result) {
-                promise.resolve(result);
+        Appoxee.instance().stopGeofencing().enqueue(result -> {
+            if (result != null && result.isSuccess() && result.getData() != null) {
+                promise.resolve(result.getData().getStatus());
+            } else {
+                promise.resolve("GEOFENCE_GENERAL_ERROR");
             }
         });
     }
 
-    /**
-     * This method is deprecated in Java. Use method
-     * {@link #startGeofencing(ResultCallback)}}
-     */
+    @Deprecated
     @ReactMethod
-    @Deprecated()
     public void startGeoFencing() {
-        Appoxee.instance().startGeoFencing();
+        Appoxee.instance().startGeofencing(0).enqueue(result -> {
+        });
     }
 
-    /**
-     * Deprecated in Java. Use method {@link #stopGeofencing(ResultCallback)}
-     */
     @Deprecated
     @ReactMethod
     public void stopGeoFencing() {
-        Appoxee.instance().stopGeoFencing();
+        Appoxee.instance().stopGeofencing().enqueue(result -> {
+        });
     }
+
+    // -------------------------------------------------------------------------
+    // Inbox / InApp
+    // -------------------------------------------------------------------------
 
     @ReactMethod
     public void fetchLatestInboxMessage(final Promise promise) {
-
-        Appoxee.instance().fetchInboxMessages();
-
-        InAppInboxCallback inAppInboxCallback = new InAppInboxCallback();
-        inAppInboxCallback.addInAppInboxMessagesReceivedCallback(new InAppInboxCallback.onInAppInboxMessagesReceived() {
-            @Override
-            public void onInAppInboxMessages(List<APXInboxMessage> richMessages) {
-                WritableArray messagesArray = Arguments.createArray();
-                APXInboxMessage msg = null;
-                if (richMessages != null) {
-                    for (APXInboxMessage message : richMessages) {
-                        if (msg == null || message.getTemplateId() > msg.getTemplateId()) {
-                            msg = message;
-                        }
-                        messagesArray.pushMap(messageToJson(message));
-                    }
-                }
-                promise.resolve(msg != null ? messageToJson(msg) : null);
-            }
-
-            @Override
-            public void onInAppInboxMessage(final APXInboxMessage message) {
-                promise.resolve(messageToJson(message));
+        Appoxee.instance().fetchLatestInboxMessage().enqueue(result -> {
+            if (result != null && result.isSuccess()) {
+                promise.resolve(messageToJson(result.getData()));
+            } else {
+                promise.resolve(null);
             }
         });
     }
 
     @ReactMethod
     public void fetchInboxMessage(final Promise promise) {
-
-        Appoxee.instance().fetchInboxMessages();
-
-        InAppInboxCallback inAppInboxCallback = new InAppInboxCallback();
-        inAppInboxCallback.addInAppInboxMessagesReceivedCallback(new InAppInboxCallback.onInAppInboxMessagesReceived() {
-            @Override
-            public void onInAppInboxMessages(List<APXInboxMessage> richMessages) {
-                WritableArray messagesArray = Arguments.createArray();
-                if (richMessages != null)
-                    for (APXInboxMessage message : richMessages) {
+        Appoxee.instance().fetchInboxMessages().enqueue(result -> {
+            WritableArray messagesArray = Arguments.createArray();
+            if (result != null && result.isSuccess() && result.getData() != null) {
+                List<InboxMessage> messages = result.getData().getMessages();
+                if (messages != null) {
+                    for (InboxMessage message : messages) {
                         messagesArray.pushMap(messageToJson(message));
                     }
-                promise.resolve(messagesArray);
+                }
             }
-
-            @Override
-            public void onInAppInboxMessage(final APXInboxMessage message) {
-                promise.resolve(messageToJson(message));
-            }
+            promise.resolve(messagesArray);
         });
     }
 
     @ReactMethod
     public void triggerInApp(String key) {
-        Appoxee.instance().triggerInApp((getCurrentActivity()), key);
+        Appoxee.instance().triggerInApp(getCurrentActivity(), key).enqueue(result -> {
+        });
     }
 
+    /**
+     * Stubbed: InApp statistics internal classes were removed in v7.
+     * The @ReactMethod signature is preserved to avoid breaking the JS public API.
+     */
     @ReactMethod
     public void inAppMarkAsRead(Integer templateId, String eventId) {
-        Appoxee.instance().triggerStatistcs((getCurrentActivity()), getInAppStatisticsRequestObject(templateId,
-                eventId,
-                InAppStatistics.INBOX_INBOX_MESSAGE_READ_KEY, -1, null, null));
+        // no-op in v7
     }
 
+    /**
+     * @see #inAppMarkAsRead
+     */
     @ReactMethod
     public void inAppMarkAsUnRead(Integer templateId, String eventId) {
-        Appoxee.instance().triggerStatistcs((reactContext.getApplicationContext()),
-                getInAppStatisticsRequestObject(templateId,
-                        eventId,
-                        InAppStatistics.INBOX_INBOX_MESSAGE_UNREAD_KEY, -1, null, null));
+        // no-op in v7
     }
 
+    /**
+     * @see #inAppMarkAsRead
+     */
     @ReactMethod
     public void inAppMarkAsDeleted(Integer templateId, String eventId) {
-        Appoxee.instance().triggerStatistcs((reactContext.getApplicationContext()),
-                getInAppStatisticsRequestObject(templateId,
-                        eventId,
-                        InAppStatistics.INBOX_INBOX_MESSAGE_DELETED_KEY, -1, null, null));
+        // no-op in v7
     }
 
+    /**
+     * @see #inAppMarkAsRead
+     */
     @ReactMethod
     public void triggerStatistic(Integer templateId, String originalEventId,
                                  String trackingKey, int displayMillis,
                                  String reason, String link) {
-        Appoxee.instance()
-                .triggerStatistcs((reactContext.getApplicationContext()), getInAppStatisticsRequestObject(templateId,
-                        originalEventId, trackingKey, displayMillis, reason, link));
+        // no-op in v7
     }
 
-    @ReactMethod
-    public void isDeviceRegistered(Promise promise) {
-        promise.resolve(Appoxee.instance().isDeviceRegistered());
-    }
+    // -------------------------------------------------------------------------
+    // Event listeners (pass-through to EventEmitter)
+    // -------------------------------------------------------------------------
 
     @ReactMethod
     public void addAndroidListener(String eventName) {
@@ -564,7 +675,6 @@ public class RNMappPluginModule extends ReactContextBaseJavaModule {
         EventEmitter.shared().removeAndroidListeners(count);
     }
 
-    // Required for rn built in EventEmitter Calls.
     @ReactMethod
     public void addListener(String eventName) {
         addAndroidListener(eventName);
@@ -575,144 +685,72 @@ public class RNMappPluginModule extends ReactContextBaseJavaModule {
         removeAndroidListeners(count);
     }
 
+    // -------------------------------------------------------------------------
+    // Notifications
+    // -------------------------------------------------------------------------
+
     @ReactMethod
-    public void getDeviceDmcInfo(final Promise promise) {
-        try {
-            Map<String, String> map = Appoxee.instance().getDmcDeviceInfo();
-            WritableMap wm = new WritableNativeMap();
-            for (Map.Entry<String, String> item : map.entrySet()) {
-                wm.putString(item.getKey(), item.getValue());
-            }
-            promise.resolve(wm);
-        } catch (Exception e) {
-            promise.reject("Error getting DMC Info", e);
-        }
+    public void clearNotifications() {
+        NotificationManagerCompat.from(reactContext.getApplicationContext()).cancelAll();
     }
 
-    private static InAppStatistics getInAppStatisticsRequestObject(int templateId, String originalEventId,
-                                                                   String trackingKey, int displayMillis,
-                                                                   String reason, String link) {
-
-        InAppStatistics inAppStatistics = new InAppStatistics();
-        // This will be received from the respective Screens.
-        MessageContext mc = new MessageContext();
-        mc.setTemplateId(templateId);
-        mc.setOriginialEventid(originalEventId);
-        inAppStatistics.setMessageContext(mc);
-        Tracking tk = new Tracking();
-        tk.setTrackingKey(trackingKey);
-        TrackingAttributes ta = new TrackingAttributes();
-        int displayTime = displayMillis >= 0 ? displayMillis : -1;
-        if (displayTime > 0) {
-            ta.setTimeSinceDisplayMillis((long) displayMillis);
-        }
-        ta.setReason(reason);
-        ta.setLink(link);
-        tk.setTrackingAttributes(ta);
-        inAppStatistics.setTracking(tk);
-
-        return inAppStatistics;
-
+    @ReactMethod
+    public void clearNotification(int id) {
+        NotificationManagerCompat.from(reactContext.getApplicationContext()).cancel(id);
     }
 
-    private WritableMap messageToJson(APXInboxMessage msg) {
+    // -------------------------------------------------------------------------
+    // Session
+    // -------------------------------------------------------------------------
+
+    @ReactMethod
+    public void logOut(boolean pushEnabled) {
+        Appoxee.instance().logout(pushEnabled).enqueue(result -> {
+        });
+    }
+
+    // -------------------------------------------------------------------------
+    // Private helpers
+    // -------------------------------------------------------------------------
+
+    static WritableMap messageToJson(@Nullable InboxMessage msg) {
         WritableMap msgJson = new WritableNativeMap();
-
+        if (msg == null) return msgJson;
         try {
-            msgJson.putInt("templateId", msg.getTemplateId());
-            msgJson.putString("title", msg.getContent());
-            msgJson.putString("eventId", msg.getEventId());
-            if (msg.getExpirationDate() != null)
-                msgJson.putString("expirationDate", msg.getExpirationDate().toString());
-            if (msg.getIconUrl() != null)
-                msgJson.putString("iconURl", msg.getIconUrl());
-            if (msg.getStatus() != null)
-                msgJson.putString("status", msg.getStatus());
-            if (msg.getSubject() != null)
-                msgJson.putString("subject", msg.getSubject());
-            if (msg.getSummary() != null)
-                msgJson.putString("summary", msg.getSummary());
-            if (msg.getExtras() != null)
-                for (ApxInAppExtras apxInAppExtras : msg.getExtras())
-                    msgJson.putString(apxInAppExtras.getName(), apxInAppExtras.getValue());
-
+            msgJson.putInt("templateId", (int) (long) msg.getTemplateId());
+            msgJson.putString("title", msg.getContent() != null ? msg.getContent() : "");
+            if (msg.getSubject() != null) msgJson.putString("subject", msg.getSubject());
+            if (msg.getSummary() != null) msgJson.putString("summary", msg.getSummary());
+            if (msg.getIconUrl() != null) msgJson.putString("iconURl", msg.getIconUrl());
+            if (msg.getStatus() != null) msgJson.putString("status", msg.getStatus().name());
+            if (msg.getExpireDate() != null)
+                msgJson.putString("expirationDate", msg.getExpireDate().toString());
+            if (msg.getExtras() != null) {
+                for (Map.Entry<String, String> entry : msg.getExtras().entrySet()) {
+                    msgJson.putString(entry.getKey(), entry.getValue());
+                }
+            }
         } catch (Exception e) {
             e.printStackTrace();
         }
-
         return msgJson;
     }
 
-    private WritableMap getDeviceInfoJson(DeviceInfo deviceInfoList) {
-        WritableMap deviceInfo = new WritableNativeMap();
-        try {
-            deviceInfo.putString("id", deviceInfoList.id);
-            deviceInfo.putString("appVersion", deviceInfoList.appVersion);
-            deviceInfo.putString("sdkVersion", deviceInfoList.sdkVersion);
-            deviceInfo.putString("locale", deviceInfoList.locale);
-            deviceInfo.putString("timezone", deviceInfoList.timezone);
-            deviceInfo.putString("deviceModel", deviceInfoList.deviceModel);
-            deviceInfo.putString("manufacturer", deviceInfoList.manufacturer);
-            deviceInfo.putString("osVersion", deviceInfoList.osVersion);
-            deviceInfo.putString("resolution", deviceInfoList.resolution);
-            deviceInfo.putString("density", String.valueOf(deviceInfoList.density));
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+    static RemoteMessage getRemoteMessage(String jsonMsg) {
+        if (jsonMsg == null) return null;
 
-        return deviceInfo;
-    }
-
-    public static WritableMap getPushMessageToJSon(PushData pushData) {
-        WritableMap deviceInfo = new WritableNativeMap();
-        try {
-            deviceInfo.putString("id", String.valueOf(pushData.id));
-            deviceInfo.putString("title", pushData.title);
-            deviceInfo.putString("bigText", pushData.bigText);
-            deviceInfo.putString("sound", pushData.sound);
-            if (pushData.actionUri != null)
-                deviceInfo.putString("actionUri", pushData.actionUri.toString());
-            deviceInfo.putString("collapseKey", pushData.collapseKey);
-            deviceInfo.putInt("badgeNumber", pushData.badgeNumber);
-            deviceInfo.putString("silentType", pushData.silentType);
-            deviceInfo.putString("silentData", pushData.silentData);
-            deviceInfo.putString("category", pushData.category);
-            if (pushData.extraFields != null)
-                for (Map.Entry<String, String> entry : pushData.extraFields.entrySet()) {
-                    String key = entry.getKey();
-                    String value = entry.getValue();
-                    deviceInfo.putString(key, value);
-                }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        return deviceInfo;
-    }
-
-    private RemoteMessage getRemoteMessage(String jsonMsg) {
-        if (jsonMsg == null)
-            return null;
-
-        final String KEY_TOKEN = "token";
         final String KEY_COLLAPSE_KEY = "collapseKey";
         final String KEY_DATA = "data";
-        final String KEY_FROM = "from";
         final String KEY_MESSAGE_ID = "messageId";
         final String KEY_MESSAGE_TYPE = "messageType";
-        final String KEY_SENT_TIME = "sentTime";
-        final String KEY_ERROR = "error";
-        final String KEY_TO = "to";
         final String KEY_TTL = "ttl";
 
-        JSONObject json = null;
         try {
-            json = new JSONObject(jsonMsg);
-
-            String collapseKey = json.has(KEY_COLLAPSE_KEY) ? json.getString(KEY_COLLAPSE_KEY) : "";
-            String messageId = json.has(KEY_MESSAGE_ID) ? json.getString(KEY_MESSAGE_ID) : "";
-            String messageType = json.has(KEY_MESSAGE_TYPE) ? json.getString(KEY_MESSAGE_TYPE) : "";
-            int ttl = json.has(KEY_TTL) ? json.getInt(KEY_TTL) : 0;
+            JSONObject json = new JSONObject(jsonMsg);
+            String collapseKey = json.optString(KEY_COLLAPSE_KEY, "");
+            String messageId = json.optString(KEY_MESSAGE_ID, "");
+            String messageType = json.optString(KEY_MESSAGE_TYPE, "");
+            int ttl = json.optInt(KEY_TTL, 0);
             JSONObject data = json.has(KEY_DATA) ? json.getJSONObject(KEY_DATA) : null;
 
             RemoteMessage.Builder builder = new RemoteMessage.Builder("appoxee@gcm.googleapis.com")
@@ -727,37 +765,10 @@ public class RNMappPluginModule extends ReactContextBaseJavaModule {
                     builder.addData(k, data.getString(k));
                 }
             }
-
             return builder.build();
         } catch (JSONException e) {
             e.printStackTrace();
         }
         return null;
-    }
-
-    private boolean shouldRequestLocationPermissions() {
-        if (Build.VERSION.SDK_INT < 23) {
-            return false;
-        }
-
-        return ContextCompat.checkSelfPermission(getReactApplicationContext(),
-                Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_DENIED &&
-                ContextCompat.checkSelfPermission(getReactApplicationContext(),
-                        Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_DENIED;
-    }
-
-    @ReactMethod
-    public void clearNotifications() {
-        NotificationManagerCompat.from(reactContext.getApplicationContext()).cancelAll();
-    }
-
-    @ReactMethod
-    public void clearNotification(int id) {
-        NotificationManagerCompat.from(reactContext.getApplicationContext()).cancel(id);
-    }
-
-    @ReactMethod
-    public void logOut(boolean pushEnabled) {
-        Appoxee.instance().logOut(application, pushEnabled);
     }
 }

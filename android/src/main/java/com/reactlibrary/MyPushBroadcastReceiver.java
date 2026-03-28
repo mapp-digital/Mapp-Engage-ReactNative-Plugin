@@ -2,43 +2,50 @@ package com.reactlibrary;
 
 import android.util.Log;
 
-import com.appoxee.push.PushData;
-import com.appoxee.push.PushDataReceiver;
+import com.appoxee.shared.LocalPushBroadcast;
+import com.appoxee.shared.MappPush;
+
 /**
  * Created by Aleksandar Marinkovic on 2019-05-15.
  * Copyright (c) 2019 MAPP.
+ *
+ * Updated for Engage SDK v7: extends LocalPushBroadcast instead of PushDataReceiver.
  */
-public  class MyPushBroadcastReceiver extends PushDataReceiver {
-    @Override
-    public void onPushReceived(PushData pushData) {
-        Log.d("APX", "Push received " + pushData);
+public class MyPushBroadcastReceiver extends LocalPushBroadcast {
 
-        EventEmitter.shared().sendEvent(new PushNotificationEvent(pushData,"onPushReceived"));
-        super.onPushReceived(pushData);
+    @Override
+    public void onReceived(MappPush mappPush) {
+        Log.d("APX", "Push received " + mappPush);
+        EventEmitter.shared().sendEvent(new PushNotificationEvent(mappPush, "onPushReceived"));
     }
 
     @Override
-    public void onPushOpened(PushData pushData) {
-        Log.d("APX", "Push opened " + pushData);
-        EventEmitter.shared().sendEvent(new PushNotificationEvent(pushData,"onPushOpened"));
-       super.onPushOpened(pushData);
+    public void onOpened(MappPush mappPush) {
+        Log.d("APX", "Push opened " + mappPush);
+        EventEmitter.shared().sendEvent(new PushNotificationEvent(mappPush, "onPushOpened"));
     }
 
     @Override
-    public void onPushDismissed(PushData pushData) {
-        Log.d("APX", "Push dismissed " + pushData);
-        EventEmitter.shared().sendEvent(new PushNotificationEvent(pushData,"onPushDismissed"));
-        super.onPushDismissed(pushData);
+    public void onDismissed(MappPush mappPush) {
+        Log.d("APX", "Push dismissed " + mappPush);
+        EventEmitter.shared().sendEvent(new PushNotificationEvent(mappPush, "onPushDismissed"));
     }
-
 
     @Override
-    public void onSilentPush(PushData pushData) {
-        Log.d("APX", "Push Silent " + pushData);
-        EventEmitter.shared().sendEvent(new PushNotificationEvent(pushData,"onSilentPush"));
-        super.onSilentPush(pushData);
-
+    public void onSilent(MappPush mappPush) {
+        Log.d("APX", "Push silent " + mappPush);
+        EventEmitter.shared().sendEvent(new PushNotificationEvent(mappPush, "onSilentPush"));
     }
 
+    @Override
+    public void onButtonClick(MappPush mappPush) {
+        Log.d("APX", "Push button clicked " + mappPush);
+        EventEmitter.shared().sendEvent(new PushNotificationEvent(mappPush, "onPushButtonClicked"));
+    }
 
+    @Override
+    public void onRichPush(MappPush mappPush) {
+        Log.d("APX", "Rich push " + mappPush);
+        EventEmitter.shared().sendEvent(new PushNotificationEvent(mappPush, "onRichPush"));
+    }
 }

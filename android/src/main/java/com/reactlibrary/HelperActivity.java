@@ -27,7 +27,7 @@ public class HelperActivity extends Activity {
             return;
         }
 
-        if (intent.getAction() != null && !intent.getAction().equals("")) {
+        if (intent.getAction() != null && !intent.getAction().isEmpty()) {
             Intent launchIntent = getDefaultActivityIntent();
             launchIntent.setPackage(this.getPackageName());
             launchIntent.putExtra("action", intent.getAction());
@@ -56,7 +56,7 @@ public class HelperActivity extends Activity {
         String packageName = getPackageName();
 
         if (Objects.equals(name.getPackageName(), packageName)) {
-            if (intent.getAction() != null && !intent.getAction().equals("")) {
+            if (intent.getAction() != null && !intent.getAction().isEmpty()) {
                 EventEmitter.shared().sendEvent(new IntentNotificationEvent(Objects.requireNonNull(intent.getData()), intent.getAction()));
             }
         }

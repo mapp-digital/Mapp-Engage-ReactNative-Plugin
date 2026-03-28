@@ -1,0 +1,33 @@
+{
+  "permissions": {
+    "allow": [
+      "Read(//Users/semsudin.tafilovic/VSCodeProjects/Mapp-Engage-ReactNative-Plugin/$HOME/.gradle/**)",
+      "Bash(javap -classpath /Users/semsudin.tafilovic/.gradle/caches/8.14.3/transforms/c353e26cdccd7210da489dd3d0834a3d/transformed/firebase-messaging-25.0.1-api.jar com.google.firebase.messaging.RemoteMessage)",
+      "Bash(jar tf:*)",
+      "Bash(javap -classpath /Users/semsudin.tafilovic/.gradle/caches/8.14.3/transforms/c353e26cdccd7210da489dd3d0834a3d/transformed/firebase-messaging-25.0.1-api.jar \"com.google.firebase.messaging.RemoteMessage$Builder\")",
+      "Bash(javap -classpath /Users/semsudin.tafilovic/.gradle/caches/8.14.3/transforms/5a0bccd20ee778f6094c95104175f1d4/transformed/firebase-messaging-25.0.1-runtime.jar com.google.firebase.messaging.RemoteMessage$Builder)",
+      "Bash(for f:*)",
+      "Bash(do echo:*)",
+      "Bash(./gradlew testDebugUnitTest)",
+      "Bash(python3 -c \"import sys,html; print\\(html.unescape\\(sys.stdin.read\\(\\)\\)\\)\")",
+      "Bash(grep -v \"^$\")",
+      "Bash(npm install:*)",
+      "Bash(npm test:*)",
+      "Bash(npx jest:*)",
+      "Bash(javap -classpath /tmp/appoxee_inspect/extracted/classes.jar com.appoxee.Appoxee$Companion)",
+      "Read(//private/tmp/appoxee_inspect/extracted/**)",
+      "Bash(./gradlew testDebugUnitTest --tests \"com.reactlibrary.RNMappPluginModuleTest\")",
+      "Bash(./gradlew test:*)",
+      "Read(//Users/semsudin.tafilovic/.gradle/caches/**)",
+      "Read(//private/tmp/**)",
+      "Bash(jar xf:*)",
+      "Bash(javap -p com/appoxee/internal/network/Call.class)",
+      "Bash(javap -p com/appoxee/shared/MappCallback.class)",
+      "Bash(javap -p com/appoxee/shared/MappResult.class)",
+      "Bash(javap -p com/appoxee/Appoxee.class)",
+      "Bash(./gradlew testDebugUnitTest --tests \"com.reactlibrary.RNMappPluginModuleTest.getTags_resolvesEmptyArrayOnNullResult\" --info)",
+      "Bash(./gradlew testDebugUnitTest --tests \"com.reactlibrary.RNMappPluginModuleTest.getAttributes_emptyKeys_doesNotCallSDK\" --info)",
+      "Bash(./gradlew testDebugUnitTest --tests \"com.reactlibrary.RNMappPluginModuleTest\" --info)"
+    ]
+  }
+}

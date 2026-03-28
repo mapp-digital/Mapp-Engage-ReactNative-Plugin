@@ -8,8 +8,6 @@ import android.os.Bundle;
 
 
 
-import com.appoxee.Appoxee;
-
 /**
  * Created by Aleksandar Marinkovic on 1/30/19.
  * Copyright (c) 2019 MAPP.
@@ -27,14 +25,14 @@ public class ActivityListener extends Activity {
         launchIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
         launchIntent.setPackage(this.getPackageName());
         startActivity(launchIntent);
-        Appoxee.handleRichPush(this,intent);
+        // handleRichPush() removed in SDK v7
         finish();
     }
 
     @Override
     protected void onNewIntent(Intent intent) {
         super.onNewIntent(intent);
-        Appoxee.handleRichPush(this, intent);
+        // handleRichPush() removed in SDK v7
     }
 
     private Intent getDefaultActivityIntent() {

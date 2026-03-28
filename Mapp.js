@@ -142,6 +142,26 @@ export class Mapp {
     );
   }
 
+  static engageTestServer(
+    cepUrl: string,
+    sdkKey: string,
+    googleProjectId: string,
+    server: string,
+    appID: string,
+    tenantID: string
+  ) {
+    if (Platform.OS == "android") {
+      return RNMappPluginModule.engageTestServer(
+        cepUrl,
+        sdkKey,
+        googleProjectId,
+        server,
+        appID,
+        tenantID
+      );
+    }
+  }
+
   /**
    * On Init Completed Listener
    *

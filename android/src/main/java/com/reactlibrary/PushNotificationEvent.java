@@ -2,7 +2,7 @@ package com.reactlibrary;
 
 import androidx.annotation.NonNull;
 
-import com.appoxee.push.PushData;
+import com.appoxee.shared.MappPush;
 import com.facebook.react.bridge.WritableMap;
 
 /**
@@ -25,10 +25,10 @@ public class PushNotificationEvent implements Event {
         return RNUtils.getPushMessageToJSon(message, type);
     }
 
-    private final PushData message;
+    private final MappPush message;
     private final String type;
 
-    public PushNotificationEvent(@NonNull PushData message, String type) {
+    public PushNotificationEvent(@NonNull MappPush message, String type) {
         this.message = message;
         this.type = type;
     }
