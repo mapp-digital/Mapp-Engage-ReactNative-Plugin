@@ -242,7 +242,7 @@ public class RNMappPluginModule extends ReactContextBaseJavaModule {
         });
     }
 
-    private AppoxeeOptions createOptions(String server, String sdkKey, String appID, String tenantID) {
+    static AppoxeeOptions createOptions(String server, String sdkKey, String appID, String tenantID) {
         AppoxeeOptions.Server resolvedServer = resolveServer(server);
         if (resolvedServer == null) {
             throw new IllegalArgumentException(
@@ -255,7 +255,7 @@ public class RNMappPluginModule extends ReactContextBaseJavaModule {
     }
 
     @Nullable
-    private AppoxeeOptions.Server resolveServer(@Nullable String server) {
+    static AppoxeeOptions.Server resolveServer(@Nullable String server) {
         if (server == null) {
             return null;
         }
@@ -710,7 +710,7 @@ public class RNMappPluginModule extends ReactContextBaseJavaModule {
     // Private helpers
     // -------------------------------------------------------------------------
 
-    private WritableMap messageToJson(@Nullable InboxMessage msg) {
+    static WritableMap messageToJson(@Nullable InboxMessage msg) {
         WritableMap msgJson = new WritableNativeMap();
         if (msg == null) return msgJson;
         try {
@@ -733,7 +733,7 @@ public class RNMappPluginModule extends ReactContextBaseJavaModule {
         return msgJson;
     }
 
-    private RemoteMessage getRemoteMessage(String jsonMsg) {
+    static RemoteMessage getRemoteMessage(String jsonMsg) {
         if (jsonMsg == null) return null;
 
         final String KEY_COLLAPSE_KEY = "collapseKey";

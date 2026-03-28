@@ -7,7 +7,6 @@ pluginManagement {
     plugins {
         id("com.android.library") version("9.1.0") // 👈 for library
         id("com.facebook.react") version("0.84.1")  // 👈 for React Native
-        id("org.jetbrains.kotlin.android") version("2.1.20") // 👈 for Kotlin
     }
 }
 
@@ -21,4 +20,3 @@ dependencyResolutionManagement {
 includeBuild("../node_modules/@react-native/gradle-plugin")
 
 rootProject.name="MappEngagePlugin"
-include(":MappEngagePlugin")

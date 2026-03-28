@@ -10,6 +10,7 @@ import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.stream.Collectors;
 
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.fail;
 
 /**
@@ -33,6 +34,25 @@ public class RNMappPluginModuleApiSignatureTest {
             RNMappPluginModule.class.getDeclaredMethod(name, params);
         } catch (NoSuchMethodException e) {
             fail("Missing @ReactMethod: " + name + "(" + paramDesc + ")");
+        }
+    }
+
+    /**
+     * Asserts that the class declares a non-public helper method with the given
+     * name and parameter types. Fails if absent or if accidentally made public.
+     */
+    private void assertHelperMethod(String name, Class<?>... params) {
+        String paramDesc = Arrays.stream(params)
+                .map(Class::getSimpleName)
+                .collect(Collectors.joining(", "));
+        try {
+            Method m = RNMappPluginModule.class.getDeclaredMethod(name, params);
+            assertFalse(
+                    "Helper method " + name + "(" + paramDesc + ") should not be public",
+                    java.lang.reflect.Modifier.isPublic(m.getModifiers())
+            );
+        } catch (NoSuchMethodException e) {
+            fail("Missing helper method: " + name + "(" + paramDesc + ")");
         }
     }
 
@@ -121,5 +141,27 @@ public class RNMappPluginModuleApiSignatureTest {
 
         // --- Session ---
         assertMethod("logOut", boolean.class);
+    }
+
+    @Test
+    public void testPrivateHelperSignatures() {
+        // resolveServer(String) — core v7 server-name fix
+        assertHelperMethod("resolveServer", String.class);
+
+        // createOptions(String, String, String, String) — delegates to resolveServer
+        assertHelperMethod("createOptions",
+                String.class, String.class, String.class, String.class);
+
+        // getRemoteMessage(String) — JSON → RemoteMessage parsing
+        assertHelperMethod("getRemoteMessage", String.class);
+
+        // messageToJson(InboxMessage) — inbox message serialization
+        try {
+            Class<?> inboxMessageClass = Class.forName(
+                    "com.appoxee.internal.model.response.inbox.InboxMessage");
+            assertHelperMethod("messageToJson", inboxMessageClass);
+        } catch (ClassNotFoundException e) {
+            fail("InboxMessage class not on test classpath: " + e.getMessage());
+        }
     }
 }
