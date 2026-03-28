@@ -5,7 +5,12 @@
       "Bash(javap -classpath /Users/semsudin.tafilovic/.gradle/caches/8.14.3/transforms/c353e26cdccd7210da489dd3d0834a3d/transformed/firebase-messaging-25.0.1-api.jar com.google.firebase.messaging.RemoteMessage)",
       "Bash(jar tf:*)",
       "Bash(javap -classpath /Users/semsudin.tafilovic/.gradle/caches/8.14.3/transforms/c353e26cdccd7210da489dd3d0834a3d/transformed/firebase-messaging-25.0.1-api.jar \"com.google.firebase.messaging.RemoteMessage$Builder\")",
-      "Bash(javap -classpath /Users/semsudin.tafilovic/.gradle/caches/8.14.3/transforms/5a0bccd20ee778f6094c95104175f1d4/transformed/firebase-messaging-25.0.1-runtime.jar com.google.firebase.messaging.RemoteMessage$Builder)"
+      "Bash(javap -classpath /Users/semsudin.tafilovic/.gradle/caches/8.14.3/transforms/5a0bccd20ee778f6094c95104175f1d4/transformed/firebase-messaging-25.0.1-runtime.jar com.google.firebase.messaging.RemoteMessage$Builder)",
+      "Bash(for f:*)",
+      "Bash(do echo:*)",
+      "Bash(./gradlew testDebugUnitTest)",
+      "Bash(python3 -c \"import sys,html; print\\(html.unescape\\(sys.stdin.read\\(\\)\\)\\)\")",
+      "Bash(grep -v \"^$\")"
     ]
   }
 }
