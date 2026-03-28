@@ -4,7 +4,7 @@ package com.reactlibrary;
 
 import androidx.annotation.Nullable;
 
-import com.appoxee.push.PushData;
+import com.appoxee.shared.MappPush;
 import com.facebook.react.bridge.ReadableMap;
 import com.facebook.react.bridge.ReadableMapKeySetIterator;
 import com.facebook.react.bridge.ReadableType;
@@ -80,23 +80,23 @@ public class RNUtils {
         return jsonObject;
     }
 
-    public static WritableMap getPushMessageToJSon(PushData pushData, String type) {
+    public static WritableMap getPushMessageToJSon(MappPush mappPush, String type) {
         WritableMap deviceInfo = new WritableNativeMap();
         try {
-            deviceInfo.putString("id", String.valueOf(pushData.id));
-            deviceInfo.putString("title", pushData.title);
-            deviceInfo.putString("bigText", pushData.bigText);
-            deviceInfo.putString("sound", pushData.sound);
-            deviceInfo.putString("pushNotificationEventType",type);
-            if (pushData.actionUri != null)
-                deviceInfo.putString("actionUri", pushData.actionUri.toString());
-            deviceInfo.putString("collapseKey", pushData.collapseKey);
-            deviceInfo.putInt("badgeNumber", pushData.badgeNumber);
-            deviceInfo.putString("silentType", pushData.silentType);
-            deviceInfo.putString("silentData", pushData.silentData);
-            deviceInfo.putString("category", pushData.category);
-            if (pushData.extraFields != null)
-                for (Map.Entry<String, String> entry : pushData.extraFields.entrySet()) {
+            deviceInfo.putString("id", mappPush.getId() != null ? mappPush.getId() : "");
+            deviceInfo.putString("title", mappPush.getTitle() != null ? mappPush.getTitle() : "");
+            deviceInfo.putString("bigText", mappPush.getContent() != null ? mappPush.getContent() : "");
+            deviceInfo.putString("sound", "");
+            deviceInfo.putString("pushNotificationEventType", type);
+            if (mappPush.getActionUri() != null)
+                deviceInfo.putString("actionUri", mappPush.getActionUri().toString());
+            deviceInfo.putString("collapseKey", "");
+            deviceInfo.putInt("badgeNumber", 0);
+            deviceInfo.putString("silentType", mappPush.getSilentType() != null ? mappPush.getSilentType() : "");
+            deviceInfo.putString("silentData", mappPush.getSilentData() != null ? mappPush.getSilentData() : "");
+            deviceInfo.putString("category", mappPush.getCategory() != null ? mappPush.getCategory() : "");
+            if (mappPush.getExtraFields() != null)
+                for (Map.Entry<String, String> entry : mappPush.getExtraFields().entrySet()) {
                     String key = entry.getKey();
                     String value = entry.getValue();
                     deviceInfo.putString(key, value);

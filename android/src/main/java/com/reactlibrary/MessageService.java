@@ -5,38 +5,43 @@ import android.util.Log;
 import androidx.annotation.NonNull;
 
 import com.appoxee.Appoxee;
-import com.appoxee.internal.logger.LoggerFactory;
+import com.appoxee.shared.AppoxeeOptions;
 import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
 
-import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 
+/**
+ * Updated for Engage SDK v7:
+ * - isPushMessageFromMapp() replaces data.containsKey("p") check
+ * - handlePushMessage() replaces setRemoteMessage()
+ * - updateFirebaseToken() replaces setToken()
+ */
 public class MessageService extends FirebaseMessagingService {
+
     @Override
     public void onCreate() {
         super.onCreate();
-        Appoxee.engage(getApplication());
+        Appoxee.engage(getApplication(), null);
     }
 
     @Override
     public void onMessageReceived(@NonNull RemoteMessage remoteMessage) {
         Log.d("onMessageReceived", remoteMessage.toString());
-        Map<String, String> data = remoteMessage.getData();
-        if (data.containsKey("p")) {
+        if (Appoxee.instance().isPushMessageFromMapp(remoteMessage)) {
             waitInitialization();
-            Appoxee.instance().setRemoteMessage(remoteMessage);
+            Appoxee.instance().handlePushMessage(remoteMessage);
         } else {
             super.onMessageReceived(remoteMessage);
         }
     }
 
     @Override
-    public void onNewToken(@NonNull String s) {
+    public void onNewToken(@NonNull String token) {
         waitInitialization();
-        Appoxee.instance().setToken(s);
-        super.onNewToken(s);
+        Appoxee.instance().updateFirebaseToken(token).enqueue(result -> {});
+        super.onNewToken(token);
     }
 
     private void waitInitialization() {
@@ -47,7 +52,7 @@ public class MessageService extends FirebaseMessagingService {
                 limit--;
             }
         } catch (Exception e) {
-            LoggerFactory.getDevLogger().e(e.getMessage());
+            Log.e("MessageService", "waitInitialization interrupted", e);
         }
     }
 }
