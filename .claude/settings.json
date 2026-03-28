@@ -10,7 +10,10 @@
       "Bash(do echo:*)",
       "Bash(./gradlew testDebugUnitTest)",
       "Bash(python3 -c \"import sys,html; print\\(html.unescape\\(sys.stdin.read\\(\\)\\)\\)\")",
-      "Bash(grep -v \"^$\")"
+      "Bash(grep -v \"^$\")",
+      "Bash(npm install:*)",
+      "Bash(npm test:*)",
+      "Bash(npx jest:*)"
     ]
   }
 }
