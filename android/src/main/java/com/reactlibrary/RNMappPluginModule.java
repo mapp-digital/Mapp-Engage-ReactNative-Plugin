@@ -149,12 +149,15 @@ public class RNMappPluginModule extends ReactContextBaseJavaModule {
 
     @ReactMethod
     public void isPushFromMapp(String msgJson, Promise promise) {
+        promise.resolve(isMappPush(msgJson));
+    }
+
+    static boolean isMappPush(@Nullable String msgJson) {
         try {
             JSONObject json = new JSONObject(msgJson);
-            boolean mappPush = json.has("data") && json.getJSONObject("data").has("p");
-            promise.resolve(mappPush);
+            return json.has("data") && json.getJSONObject("data").has("p");
         } catch (Exception e) {
-            promise.resolve(false);
+            return false;
         }
     }
 
