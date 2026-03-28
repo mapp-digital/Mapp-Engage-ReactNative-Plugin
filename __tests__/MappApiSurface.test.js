@@ -112,4 +112,16 @@ describe("Mapp.js public static API surface", () => {
     assertStaticMethod("addListener");
     assertStaticMethod("removeListener");
   });
+
+  test("engageTestServer method", () => {
+    assertStaticMethod("engageTestServer");
+  });
+
+  test("setAlias routes to setAliasWithResend internally", () => {
+    expect(/setAliasWithResend\s*\(/.test(mappSource)).toBe(true);
+  });
+
+  test("setAlias dispatch uses resendAttributes guard", () => {
+    expect(/resendAttributes\s*!==\s*undefined/.test(mappSource)).toBe(true);
+  });
 });
