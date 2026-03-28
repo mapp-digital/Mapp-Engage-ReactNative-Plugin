@@ -13,7 +13,21 @@
       "Bash(grep -v \"^$\")",
       "Bash(npm install:*)",
       "Bash(npm test:*)",
-      "Bash(npx jest:*)"
+      "Bash(npx jest:*)",
+      "Bash(javap -classpath /tmp/appoxee_inspect/extracted/classes.jar com.appoxee.Appoxee$Companion)",
+      "Read(//private/tmp/appoxee_inspect/extracted/**)",
+      "Bash(./gradlew testDebugUnitTest --tests \"com.reactlibrary.RNMappPluginModuleTest\")",
+      "Bash(./gradlew test:*)",
+      "Read(//Users/semsudin.tafilovic/.gradle/caches/**)",
+      "Read(//private/tmp/**)",
+      "Bash(jar xf:*)",
+      "Bash(javap -p com/appoxee/internal/network/Call.class)",
+      "Bash(javap -p com/appoxee/shared/MappCallback.class)",
+      "Bash(javap -p com/appoxee/shared/MappResult.class)",
+      "Bash(javap -p com/appoxee/Appoxee.class)",
+      "Bash(./gradlew testDebugUnitTest --tests \"com.reactlibrary.RNMappPluginModuleTest.getTags_resolvesEmptyArrayOnNullResult\" --info)",
+      "Bash(./gradlew testDebugUnitTest --tests \"com.reactlibrary.RNMappPluginModuleTest.getAttributes_emptyKeys_doesNotCallSDK\" --info)",
+      "Bash(./gradlew testDebugUnitTest --tests \"com.reactlibrary.RNMappPluginModuleTest\" --info)"
     ]
   }
 }

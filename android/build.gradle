@@ -22,6 +22,7 @@ android {
     testOptions {
         unitTests {
             returnDefaultValues = true
+            includeAndroidResources = true
         }
     }
 }
@@ -39,7 +40,9 @@ dependencies {
     implementation("com.mapp.sdk:engage-android:7.0.1")
     testImplementation 'junit:junit:4.13.2'
     testImplementation 'org.mockito:mockito-core:5.14.2'
+    testImplementation 'org.mockito:mockito-inline:5.2.0'
     testImplementation 'org.json:json:20240303'
+    testImplementation 'org.robolectric:robolectric:4.13'
 }
 
 react {
