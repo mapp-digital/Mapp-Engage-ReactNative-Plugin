@@ -1,8 +1,21 @@
 ## Version 1.3.6
 
-***Dependency Updates***
+***Improvements***
 
--Aligned with Mapp Engage iOS SDK 6.1.3
+-iOS: Updated bundled Mapp Engage SDK binaries to version 6.1.3 (AppoxeeSDK.xcframework).
+
+-iOS: Updated CocoaPods integration to use vendored `.xcframework` and bundled resources directly from this plugin.
+
+-iOS: Removed direct CocoaPods dependencies on `MappSDK`, `MappSDKInapp`, and `MappSDKGeotargeting` from the podspec to keep native SDK versions aligned with the plugin package.
+
+***Compatibility***
+
+-No JavaScript API changes.
+
+-No Android SDK changes in this release.
+
+**Note:**
+-This is a packaging and dependency-alignment release focused on iOS integration consistency. No breaking changes are expected.
 
 ## Version 1.3.5
 

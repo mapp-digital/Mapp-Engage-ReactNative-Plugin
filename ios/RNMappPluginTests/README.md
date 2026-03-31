@@ -42,6 +42,10 @@ In Xcode's Project Navigator:
 
 ### 3. Add OCMock via CocoaPods
 
+> Note: OCMock's Swift Package uses unsafe build flags. Xcode blocks those
+> packages in test targets unless you explicitly allow unsafe flags (not
+> available in some Xcode versions). CocoaPods is the most reliable path here.
+
 Create (or update) `ios/Podfile`:
 
 ```ruby
