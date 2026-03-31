@@ -27,7 +27,11 @@
       "Bash(javap -p com/appoxee/Appoxee.class)",
       "Bash(./gradlew testDebugUnitTest --tests \"com.reactlibrary.RNMappPluginModuleTest.getTags_resolvesEmptyArrayOnNullResult\" --info)",
       "Bash(./gradlew testDebugUnitTest --tests \"com.reactlibrary.RNMappPluginModuleTest.getAttributes_emptyKeys_doesNotCallSDK\" --info)",
-      "Bash(./gradlew testDebugUnitTest --tests \"com.reactlibrary.RNMappPluginModuleTest\" --info)"
+      "Bash(./gradlew testDebugUnitTest --tests \"com.reactlibrary.RNMappPluginModuleTest\" --info)",
+      "Bash(find /Users/semsudin.tafilovic/VSCodeProjects/Mapp-Engage-ReactNative-Plugin/ios -type f \\\\\\(-name *.m -o -name *.mm -o -name *.swift -o -name *.h \\\\\\) ! -path */Frameworks/* ! -path */node_modules/*)",
+      "Bash(find /Users/semsudin.tafilovic/VSCodeProjects/Mapp-Engage-ReactNative-Plugin/ios/Frameworks -type f -name *.h)",
+      "Bash(xcodebuild -version)",
+      "Bash(pod --version)"
     ]
   }
 }
