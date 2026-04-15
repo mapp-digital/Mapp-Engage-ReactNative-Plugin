@@ -1,3 +1,14 @@
+## Version 1.4.0
+
+***Bug Fixes***
+
+- Android: `requestPostNotificationPermission` now requests the runtime notification permission instead of only checking its current state.
+- Android: If the runtime prompt is unavailable or the permission is blocked, the plugin now opens the app notification settings screen and resolves the promise in every path.
+
+***Dependency Updates***
+
+- Aligned with Mapp Engage Android SDK 7.0.2.
+
 ## Version 1.3.6
 
 ***Dependency Updates***

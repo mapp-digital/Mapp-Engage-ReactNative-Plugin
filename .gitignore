@@ -53,5 +53,4 @@ buck-out/
 yarn.lock
 *.tgz
 package-lock.json
-android/.settings/org.eclipse.buildship.core.prefs
-android/.settings/*
+android/.settings/

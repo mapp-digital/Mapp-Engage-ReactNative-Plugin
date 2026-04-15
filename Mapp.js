@@ -429,9 +429,10 @@ export class Mapp {
   }
 
   /**
-   * Check if permission for posting notifications on Android 13 and up is granted or not.
-   * If permission is not granted, then system dialog will be invoked and shown.
-   * @returns true if permission is granted, false if it is not
+   * Requests notification permission on Android 13 and up.
+   * If the runtime prompt is unavailable or the permission is blocked, native code
+   * falls back to opening the app notification settings screen.
+   * @returns true if permission is already granted or the user grants it, false otherwise
    */
   static requestPostNotificationPermission(): Promise<any> {
     if (Platform.OS == "android") {

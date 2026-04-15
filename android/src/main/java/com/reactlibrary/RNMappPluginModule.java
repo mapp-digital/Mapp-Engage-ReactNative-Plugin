@@ -2,12 +2,19 @@
 package com.reactlibrary;
 
 import android.Manifest;
+import android.app.Activity;
+import android.app.AlertDialog;
 import android.app.Application;
+import android.content.ActivityNotFoundException;
+import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
 import android.util.DisplayMetrics;
+import android.provider.Settings;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -17,6 +24,7 @@ import androidx.core.content.ContextCompat;
 import com.appoxee.Appoxee;
 import com.appoxee.internal.model.response.DevicePayload;
 import com.appoxee.internal.model.response.inbox.InboxMessage;
+import com.appoxee.sdk.BuildConfig;
 import com.appoxee.shared.AppoxeeObserver;
 import com.appoxee.shared.AppoxeeOptions;
 import com.appoxee.shared.MappResult;
@@ -34,6 +42,8 @@ import com.facebook.react.bridge.WritableArray;
 import com.facebook.react.bridge.WritableMap;
 import com.facebook.react.bridge.WritableNativeMap;
 import com.facebook.react.module.annotations.ReactModule;
+import com.facebook.react.modules.core.PermissionAwareActivity;
+import com.facebook.react.modules.core.PermissionListener;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.messaging.FirebaseMessaging;
@@ -67,13 +77,16 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 @SuppressWarnings("ALL")
 @ReactModule(name = RNMappPluginModule.NAME)
-public class RNMappPluginModule extends ReactContextBaseJavaModule {
+public class RNMappPluginModule extends ReactContextBaseJavaModule implements PermissionListener {
 
     public static final String NAME = "RNMappPluginModule";
+    private static final int POST_NOTIFICATION_PERMISSION_REQUEST_CODE = 1001;
     private final ReactApplicationContext reactContext;
     private Map<Callback, String> mFeedSubscriberMap = new ConcurrentHashMap<>();
     private Map<Callback, Boolean> mCallbackWasCalledMap = new ConcurrentHashMap<>();
+    private final Map<Integer, Promise> notificationPermissionPromises = new ConcurrentHashMap<>();
     private Application application = null;
+    private int nextNotificationPermissionRequestCode = POST_NOTIFICATION_PERMISSION_REQUEST_CODE;
 
     public RNMappPluginModule(ReactApplicationContext reactContext) {
         super(reactContext);
@@ -129,7 +142,107 @@ public class RNMappPluginModule extends ReactContextBaseJavaModule {
             return;
         }
         int result = ContextCompat.checkSelfPermission(reactContext, Manifest.permission.POST_NOTIFICATIONS);
-        promise.resolve(result == PackageManager.PERMISSION_GRANTED);
+        if (result == PackageManager.PERMISSION_GRANTED) {
+            promise.resolve(true);
+            return;
+        }
+
+        Activity activity = getCurrentActivity();
+        if (!(activity instanceof PermissionAwareActivity)) {
+            showNotificationSettingsPrompt(activity, promise);
+            return;
+        }
+
+        int requestCode = nextNotificationPermissionRequestCode++;
+        notificationPermissionPromises.put(requestCode, promise);
+        try {
+            ((PermissionAwareActivity) activity).requestPermissions(
+                    new String[]{Manifest.permission.POST_NOTIFICATIONS},
+                    requestCode,
+                    this
+            );
+        } catch (IllegalStateException e) {
+            notificationPermissionPromises.remove(requestCode);
+            showNotificationSettingsPrompt(activity, promise);
+        }
+    }
+
+    @Override
+    public boolean onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        Promise promise = notificationPermissionPromises.remove(requestCode);
+        if (promise == null) {
+            return false;
+        }
+
+        boolean granted = grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED;
+        if (granted) {
+            promise.resolve(true);
+            return true;
+        }
+
+        Activity activity = getCurrentActivity();
+        if (activity instanceof PermissionAwareActivity
+                && !((PermissionAwareActivity) activity).shouldShowRequestPermissionRationale(Manifest.permission.POST_NOTIFICATIONS)) {
+            showNotificationSettingsPrompt(activity, promise);
+            return true;
+        }
+
+        promise.resolve(false);
+        return true;
+    }
+
+    private void showNotificationSettingsPrompt(@Nullable Activity activity, Promise promise) {
+        if (activity == null) {
+            resolveWithNotificationSettingsFallback(promise);
+            return;
+        }
+
+        activity.runOnUiThread(() -> {
+            try {
+                new AlertDialog.Builder(activity)
+                        .setTitle("Notifications disabled")
+                        .setMessage("Notification permission is required. Open app settings to enable it manually.")
+                        .setCancelable(true)
+                        .setPositiveButton("Open settings", (DialogInterface dialog, int which) -> {
+                            resolveWithNotificationSettingsFallback(promise);
+                        })
+                        .setNegativeButton("Cancel", (DialogInterface dialog, int which) -> promise.resolve(false))
+                        .show();
+            } catch (RuntimeException e) {
+                resolveWithNotificationSettingsFallback(promise);
+            }
+        });
+    }
+
+    private void openNotificationSettings() {
+        Intent intent;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            intent = new Intent(Settings.ACTION_APP_NOTIFICATION_SETTINGS);
+            intent.putExtra(Settings.EXTRA_APP_PACKAGE, reactContext.getPackageName());
+        } else {
+            intent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
+            intent.setData(Uri.fromParts("package", reactContext.getPackageName(), null));
+        }
+
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        try {
+            reactContext.startActivity(intent);
+        } catch (ActivityNotFoundException e) {
+            Intent fallbackIntent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
+            fallbackIntent.setData(Uri.fromParts("package", reactContext.getPackageName(), null));
+            fallbackIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            reactContext.startActivity(fallbackIntent);
+        }
+    }
+
+    private void resolveWithNotificationSettingsFallback(Promise promise) {
+        try {
+            openNotificationSettings();
+        } catch (RuntimeException e) {
+            // Best effort only: the caller still gets a definitive outcome.
+        } finally {
+            promise.resolve(false);
+        }
     }
 
     // -------------------------------------------------------------------------
@@ -483,7 +596,7 @@ public class RNMappPluginModule extends ReactContextBaseJavaModule {
                 } catch (PackageManager.NameNotFoundException e) {
                     deviceInfo.putString("appVersion", "");
                 }
-                deviceInfo.putString("sdkVersion", "7.0.0");
+                deviceInfo.putString("sdkVersion", BuildConfig.VERSION_NAME);
                 deviceInfo.putString("locale", Locale.getDefault().toString());
                 deviceInfo.putString("timezone", TimeZone.getDefault().getID());
                 deviceInfo.putString("deviceModel", Build.MODEL);
