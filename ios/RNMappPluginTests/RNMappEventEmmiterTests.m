@@ -43,6 +43,13 @@ static NSString *const kPushMessage          = @"com.mapp.rich_message_received"
 static NSString *const kErrorMessage         = @"com.mapp.error_message";
 static NSString *const kInappMessage         = @"com.mapp.inapp_message";
 
+@interface RNMappTestPushAction : NSObject
+@property (nonatomic, copy, nullable) NSString *categoryName;
+@end
+
+@implementation RNMappTestPushAction
+@end
+
 
 @interface RNMappEventEmmiterTests : XCTestCase
 
@@ -232,7 +239,7 @@ static NSString *const kInappMessage         = @"com.mapp.inapp_message";
 // =============================================================================
 
 - (void)test_getPushMessage_populatesAvailableFields {
-    id mockPush = OCMClassMock([APXPushNotification class]);
+    APXPushNotification *mockPush = OCMClassMock([APXPushNotification class]);
     OCMStub([mockPush title]).andReturn(@"Push Title");
     OCMStub([mockPush alert]).andReturn(@"Push Alert");
     OCMStub([mockPush body]).andReturn(@"Push Body");
@@ -241,11 +248,10 @@ static NSString *const kInappMessage         = @"com.mapp.inapp_message";
     OCMStub([mockPush subtitle]).andReturn(@"subtitle");
     OCMStub([mockPush extraFields]).andReturn(@{@"key": @"val"});
     OCMStub([mockPush isRich]).andReturn(YES);
-    OCMStub([mockPush isSilent]).andReturn(NO);
+    OCMStub([mockPush isSilent]).andReturn(YES);
     OCMStub([mockPush isTriggerUpdate]).andReturn(NO);
-    id mockAction = OCMClassMock([NSObject class]);
-    OCMStub([mockAction categoryName]).andReturn(nil);
-    OCMStub([mockPush pushAction]).andReturn(mockAction);
+    RNMappTestPushAction *action = [[RNMappTestPushAction alloc] init];
+    OCMStub([mockPush pushAction]).andReturn(action);
 
     NSDictionary *result = [self.emitter getPushMessage:mockPush];
 
@@ -255,15 +261,14 @@ static NSString *const kInappMessage         = @"com.mapp.inapp_message";
     XCTAssertEqualObjects(result[@"id"],     @99);
     XCTAssertEqualObjects(result[@"badge"],  @1);
     XCTAssertEqualObjects(result[@"isRich"], @"true");
-    XCTAssertEqualObjects(result[@"isSilent"], @"false");
+    XCTAssertEqualObjects(result[@"isSilent"], @"true");
 }
 
 - (void)test_getPushMessage_returnsEmptyDictForNilFields {
-    id mockPush = OCMClassMock([APXPushNotification class]);
+    APXPushNotification *mockPush = OCMClassMock([APXPushNotification class]);
     // All properties return nil / 0 by default from OCMClassMock
-    id mockAction = OCMClassMock([NSObject class]);
-    OCMStub([mockAction categoryName]).andReturn(nil);
-    OCMStub([mockPush pushAction]).andReturn(mockAction);
+    RNMappTestPushAction *action = [[RNMappTestPushAction alloc] init];
+    OCMStub([mockPush pushAction]).andReturn(action);
 
     NSDictionary *result = [self.emitter getPushMessage:mockPush];
 
@@ -277,9 +282,9 @@ static NSString *const kInappMessage         = @"com.mapp.inapp_message";
 
 - (void)test_didReceiveInappMessage_withExtraData_emitsCorrectEvent {
     NSDictionary *extraData = @{@"foo": @"bar"};
-    OCMExpect([self.partialMockEmitter
+    OCMExpect(([self.partialMockEmitter
                sendEventWithName:kInappMessage
-               body:@{@"id": @"5", @"extraData": extraData}]);
+               body:@{@"id": @"5", @"extraData": extraData}]));
 
     id mockInapp = OCMClassMock([AppoxeeInapp class]);
     [self.emitter appoxeeInapp:mockInapp
@@ -290,9 +295,9 @@ static NSString *const kInappMessage         = @"com.mapp.inapp_message";
 }
 
 - (void)test_didReceiveInappMessage_withoutExtraData_emitsEventWithIdOnly {
-    OCMExpect([self.partialMockEmitter
+    OCMExpect(([self.partialMockEmitter
                sendEventWithName:kInappMessage
-               body:@{@"id": @"5"}]);
+               body:@{@"id": @"5"}]));
 
     id mockInapp = OCMClassMock([AppoxeeInapp class]);
     [self.emitter appoxeeInapp:mockInapp
@@ -307,9 +312,9 @@ static NSString *const kInappMessage         = @"com.mapp.inapp_message";
 // =============================================================================
 
 - (void)test_didReceiveDeepLink_emitsDeepLinkEvent {
-    OCMExpect([self.partialMockEmitter
+    OCMExpect(([self.partialMockEmitter
                sendEventWithName:kDeepLink
-               body:@{@"action": @"10", @"url": @"https://link.example", @"event_trigger": @"tap"}]);
+               body:@{@"action": @"10", @"url": @"https://link.example", @"event_trigger": @"tap"}]));
 
     [self.emitter didReceiveDeepLinkWithIdentifier:@10
                                  withMessageString:@"https://link.example"
@@ -333,9 +338,9 @@ static NSString *const kInappMessage         = @"com.mapp.inapp_message";
 // =============================================================================
 
 - (void)test_didReceiveCustomLink_emitsCustomLinkEvent {
-    OCMExpect([self.partialMockEmitter
+    OCMExpect(([self.partialMockEmitter
                sendEventWithName:kCustomLink
-               body:@{@"id": @"7", @"message": @"custom://action"}]);
+               body:@{@"id": @"7", @"message": @"custom://action"}]));
 
     [self.emitter didReceiveCustomLinkWithIdentifier:@7
                                   withMessageString:@"custom://action"];
@@ -346,7 +351,10 @@ static NSString *const kInappMessage         = @"com.mapp.inapp_message";
 - (void)test_didReceiveCustomLink_doesNotEmitWhenParamsAreNil {
     OCMReject([self.partialMockEmitter sendEventWithName:[OCMArg any] body:[OCMArg any]]);
 
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wnonnull"
     [self.emitter didReceiveCustomLinkWithIdentifier:nil withMessageString:nil];
+#pragma clang diagnostic pop
 
     OCMVerifyAll(self.partialMockEmitter);
 }

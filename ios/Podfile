@@ -1,0 +1,10 @@
+platform :ios, '13.0'
+
+target 'RNMappPlugin' do
+  # Add existing dependencies here if needed.
+end
+
+target 'RNMappPluginTests' do
+  inherit! :search_paths
+  pod 'OCMock'
+end

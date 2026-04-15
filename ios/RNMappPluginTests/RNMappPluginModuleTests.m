@@ -320,8 +320,8 @@
 - (void)test_getAlias_resolvesWithAliasReturnedBySdk {
     NSString *expectedAlias = @"device-alias-123";
     OCMStub([self.mockAppoxee
-             getDeviceAliasWithCompletionHandler:[OCMArg invokeBlockWithArgs:
-                                                  [NSNull null], expectedAlias, nil]]);
+             getDeviceAliasWithCompletionHandler:([OCMArg invokeBlockWithArgs:
+                                                  [NSNull null], expectedAlias, nil])]);
     XCTestExpectation *exp = [self expectationWithDescription:@"resolve"];
 
     [self.module getAlias:^(id result) {
@@ -337,8 +337,8 @@
 - (void)test_getAlias_rejectsWhenSdkReturnsError {
     NSError *sdkError = [NSError errorWithDomain:@"AppoxeeError" code:1 userInfo:nil];
     OCMStub([self.mockAppoxee
-             getDeviceAliasWithCompletionHandler:[OCMArg invokeBlockWithArgs:
-                                                  sdkError, [NSNull null], nil]]);
+             getDeviceAliasWithCompletionHandler:([OCMArg invokeBlockWithArgs:
+                                                  sdkError, [NSNull null], nil])]);
     XCTestExpectation *exp = [self expectationWithDescription:@"reject"];
 
     [self.module getAlias:^(id result) {
@@ -387,8 +387,8 @@
 
 - (void)test_isPushEnabled_resolvesWithSdkValue {
     OCMStub([self.mockAppoxee
-             isPushEnabled:[OCMArg invokeBlockWithArgs:
-                            [NSNull null], @YES, nil]]);
+             isPushEnabled:([OCMArg invokeBlockWithArgs:
+                            [NSNull null], @YES, nil])]);
     XCTestExpectation *exp = [self expectationWithDescription:@"resolve"];
 
     [self.module isPushEnabled:^(id result) {
@@ -404,8 +404,8 @@
 - (void)test_isPushEnabled_rejectsOnError {
     NSError *sdkError = [NSError errorWithDomain:@"AppoxeeError" code:2 userInfo:nil];
     OCMStub([self.mockAppoxee
-             isPushEnabled:[OCMArg invokeBlockWithArgs:
-                            sdkError, [NSNull null], nil]]);
+             isPushEnabled:([OCMArg invokeBlockWithArgs:
+                            sdkError, [NSNull null], nil])]);
     XCTestExpectation *exp = [self expectationWithDescription:@"reject"];
 
     [self.module isPushEnabled:^(id result) {
@@ -507,8 +507,8 @@
     NSDictionary *returnedData = @{@"get": @{@"color": @"red"}};
     OCMStub([self.mockAppoxee
              getCustomAttributes:keys
-             withCompletionHandler:[OCMArg invokeBlockWithArgs:
-                                    [NSNull null], returnedData, nil]]);
+             withCompletionHandler:([OCMArg invokeBlockWithArgs:
+                                    [NSNull null], returnedData, nil])]);
     XCTestExpectation *exp = [self expectationWithDescription:@"resolve"];
 
     [self.module getAttributes:keys and:^(id result) {
@@ -525,8 +525,8 @@
     NSDictionary *returnedData = @{@"color": @"red"};
     OCMStub([self.mockAppoxee
              fetchCustomFieldByKey:@"color"
-             withCompletionHandler:[OCMArg invokeBlockWithArgs:
-                                    [NSNull null], returnedData, nil]]);
+             withCompletionHandler:([OCMArg invokeBlockWithArgs:
+                                    [NSNull null], returnedData, nil])]);
     XCTestExpectation *exp = [self expectationWithDescription:@"resolve"];
 
     [self.module getAttributeStringValue:@"color"
@@ -544,8 +544,8 @@
     NSDictionary *returnedData = @{@"age": @30};
     OCMStub([self.mockAppoxee
              fetchCustomFieldByKey:@"age"
-             withCompletionHandler:[OCMArg invokeBlockWithArgs:
-                                    [NSNull null], returnedData, nil]]);
+             withCompletionHandler:([OCMArg invokeBlockWithArgs:
+                                    [NSNull null], returnedData, nil])]);
     XCTestExpectation *exp = [self expectationWithDescription:@"resolve"];
 
     [self.module getAttributeStringValue:@"age"
@@ -563,8 +563,8 @@
     NSError *sdkError = [NSError errorWithDomain:@"AppoxeeError" code:3 userInfo:nil];
     OCMStub([self.mockAppoxee
              fetchCustomFieldByKey:[OCMArg any]
-             withCompletionHandler:[OCMArg invokeBlockWithArgs:
-                                    sdkError, [NSNull null], nil]]);
+             withCompletionHandler:([OCMArg invokeBlockWithArgs:
+                                    sdkError, [NSNull null], nil])]);
     XCTestExpectation *exp = [self expectationWithDescription:@"reject"];
 
     [self.module getAttributeStringValue:@"key"
@@ -605,8 +605,8 @@
 - (void)test_getTags_resolvesWithTagArrayFromSdk {
     NSArray *tags = @[@"sports", @"news"];
     OCMStub([self.mockAppoxee
-             fetchDeviceTags:[OCMArg invokeBlockWithArgs:
-                              [NSNull null], tags, nil]]);
+             fetchDeviceTags:([OCMArg invokeBlockWithArgs:
+                              [NSNull null], tags, nil])]);
     XCTestExpectation *exp = [self expectationWithDescription:@"resolve"];
 
     [self.module getTags:^(id result) {
@@ -622,8 +622,8 @@
 - (void)test_getTags_rejectsOnError {
     NSError *sdkError = [NSError errorWithDomain:@"AppoxeeError" code:4 userInfo:nil];
     OCMStub([self.mockAppoxee
-             fetchDeviceTags:[OCMArg invokeBlockWithArgs:
-                              sdkError, [NSNull null], nil]]);
+             fetchDeviceTags:([OCMArg invokeBlockWithArgs:
+                              sdkError, [NSNull null], nil])]);
     XCTestExpectation *exp = [self expectationWithDescription:@"reject"];
 
     [self.module getTags:^(id result) {
@@ -651,8 +651,8 @@
     OCMStub([mockDevice osName]).andReturn(@"iOS");
 
     OCMStub([self.mockAppoxee
-             deviceInformationwithCompletionHandler:[OCMArg invokeBlockWithArgs:
-                                                     [NSNull null], mockDevice, nil]]);
+             deviceInformationwithCompletionHandler:([OCMArg invokeBlockWithArgs:
+                                                     [NSNull null], mockDevice, nil])]);
     XCTestExpectation *exp = [self expectationWithDescription:@"resolve"];
 
     [self.module getDeviceInfo:^(id result) {
@@ -669,8 +669,8 @@
 - (void)test_getDeviceInfo_rejectsOnError {
     NSError *sdkError = [NSError errorWithDomain:@"AppoxeeError" code:5 userInfo:nil];
     OCMStub([self.mockAppoxee
-             deviceInformationwithCompletionHandler:[OCMArg invokeBlockWithArgs:
-                                                     sdkError, [NSNull null], nil]]);
+             deviceInformationwithCompletionHandler:([OCMArg invokeBlockWithArgs:
+                                                     sdkError, [NSNull null], nil])]);
     XCTestExpectation *exp = [self expectationWithDescription:@"reject"];
 
     [self.module getDeviceInfo:^(id result) {
