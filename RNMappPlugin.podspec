@@ -16,6 +16,7 @@ Pod::Spec.new do |s|
   s.source       = { :git => "https://github.com/MappCloud/React-native-plugin", :tag => "#{s.version}" }
 
   s.source_files = "ios/**/*.{h,c,m,swift}"
+  s.exclude_files = "ios/RNMappPluginTests/**/*"
   s.vendored_framework = "ios/Frameworks/AppoxeeSDK.xcframework", "ios/Frameworks/AppoxeeLocationServices.xcframework", "ios/Frameworks/AppoxeeInapp.xcframework"
   s.resources = "ios/Frameworks/AppoxeeSDKResources.bundle", "ios/Frameworks/AppoxeeInappResources.bundle"
   s.preserve_path = "ios/Frameworks/"
@@ -27,4 +28,3 @@ Pod::Spec.new do |s|
   s.dependency 'RCT-Folly'
 
 end
-
