@@ -1,6 +1,5 @@
 #import "RNMappPluginModule.h"
 #import "RNMappEventEmmiter.h"
-#import <UIKit/UIKit.h>
 
 
 @implementation RNMappPluginModule

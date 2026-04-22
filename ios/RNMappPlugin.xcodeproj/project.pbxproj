@@ -7,32 +7,12 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		7872AC8DCDD58D1B6512A78F /* libPods-RNMappPlugin.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 473CD1829B445FA0647C512C /* libPods-RNMappPlugin.a */; };
 		8F910C0825ED4EC40024DA9D /* RNMappEventEmmiter.m in Sources */ = {isa = PBXBuildFile; fileRef = 8F910C0525ED4EC30024DA9D /* RNMappEventEmmiter.m */; };
 		8F910C0925ED4EC40024DA9D /* RNMappPluginModule.m in Sources */ = {isa = PBXBuildFile; fileRef = 8F910C0725ED4EC40024DA9D /* RNMappPluginModule.m */; };
 		8F910C0E25ED4F010024DA9D /* AppoxeeInapp.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8F910C0D25ED4F010024DA9D /* AppoxeeInapp.framework */; };
 		8F910C1025ED4F040024DA9D /* AppoxeeLocationServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8F910C0F25ED4F040024DA9D /* AppoxeeLocationServices.framework */; };
 		8F910C1225ED4F070024DA9D /* AppoxeeSDK.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8F910C1125ED4F070024DA9D /* AppoxeeSDK.framework */; };
-		A341F01F2F7BE0FB004CB77E /* RNMappPluginTests.m in Sources */ = {isa = PBXBuildFile; fileRef = A341F01E2F7BE0FB004CB77E /* RNMappPluginTests.m */; };
-		A341F0202F7BE0FB004CB77E /* RNMappEventEmmiterTests.m in Sources */ = {isa = PBXBuildFile; fileRef = A341F01C2F7BE0FB004CB77E /* RNMappEventEmmiterTests.m */; };
-		A341F0212F7BE0FB004CB77E /* RNMappPluginModuleTests.m in Sources */ = {isa = PBXBuildFile; fileRef = A341F01D2F7BE0FB004CB77E /* RNMappPluginModuleTests.m */; };
-		A341F0222F7BE0FB004CB77E /* README.md in Resources */ = {isa = PBXBuildFile; fileRef = A341F01B2F7BE0FB004CB77E /* README.md */; };
-		A341F0252F7BE1E5004CB77E /* RNMappReactStubs.m in Sources */ = {isa = PBXBuildFile; fileRef = A341F0242F7BE1E5004CB77E /* RNMappReactStubs.m */; };
-		A341F0282F7C0002004CB77E /* RNMappAppoxeeStubs.m in Sources */ = {isa = PBXBuildFile; fileRef = A341F0272F7C0002004CB77E /* RNMappAppoxeeStubs.m */; };
-		A34512602F7BD053008D9BF6 /* libRNMappPlugin.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 134814201AA4EA6300B7C361 /* libRNMappPlugin.a */; };
-		A3F1B4B32F7C6A3D00C2C1A1 /* libOCMock.a in Frameworks */ = {isa = PBXBuildFile; fileRef = A3F1B4B22F7C6A3D00C2C1A1 /* libOCMock.a */; };
-		F789F8B2095666A09A31038D /* libPods-RNMappPluginTests.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 0298DF050E8BAE9EBCA18994 /* libPods-RNMappPluginTests.a */; };
 /* End PBXBuildFile section */
-
-/* Begin PBXContainerItemProxy section */
-		A34512612F7BD053008D9BF6 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 58B511D31A9E6C8500147676 /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = 58B511DA1A9E6C8500147676;
-			remoteInfo = RNMappPlugin;
-		};
-/* End PBXContainerItemProxy section */
 
 /* Begin PBXCopyFilesBuildPhase section */
 		58B511D91A9E6C8500147676 /* CopyFiles */ = {
@@ -47,11 +27,7 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
-		0298DF050E8BAE9EBCA18994 /* libPods-RNMappPluginTests.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-RNMappPluginTests.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		134814201AA4EA6300B7C361 /* libRNMappPlugin.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libRNMappPlugin.a; sourceTree = BUILT_PRODUCTS_DIR; };
-		473CD1829B445FA0647C512C /* libPods-RNMappPlugin.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-RNMappPlugin.a"; sourceTree = BUILT_PRODUCTS_DIR; };
-				A3F1B4B22F7C6A3D00C2C1A1 /* libOCMock.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libOCMock.a"; sourceTree = BUILT_PRODUCTS_DIR; };
-		4B7CF61C341C2D5D1983B70C /* Pods-RNMappPluginTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-RNMappPluginTests.debug.xcconfig"; path = "Target Support Files/Pods-RNMappPluginTests/Pods-RNMappPluginTests.debug.xcconfig"; sourceTree = "<group>"; };
 		8F910C0425ED4EC30024DA9D /* RNMappEventEmmiter.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RNMappEventEmmiter.h; sourceTree = "<group>"; };
 		8F910C0525ED4EC30024DA9D /* RNMappEventEmmiter.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RNMappEventEmmiter.m; sourceTree = "<group>"; };
 		8F910C0625ED4EC30024DA9D /* RNMappPluginModule.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RNMappPluginModule.h; sourceTree = "<group>"; };
@@ -59,19 +35,6 @@
 		8F910C0D25ED4F010024DA9D /* AppoxeeInapp.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AppoxeeInapp.framework; path = Frameworks/AppoxeeInapp.framework; sourceTree = "<group>"; };
 		8F910C0F25ED4F040024DA9D /* AppoxeeLocationServices.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AppoxeeLocationServices.framework; path = Frameworks/AppoxeeLocationServices.framework; sourceTree = "<group>"; };
 		8F910C1125ED4F070024DA9D /* AppoxeeSDK.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AppoxeeSDK.framework; path = Frameworks/AppoxeeSDK.framework; sourceTree = "<group>"; };
-		96FEA8E46A77E95DE1F0CA75 /* Pods-RNMappPlugin.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-RNMappPlugin.debug.xcconfig"; path = "Target Support Files/Pods-RNMappPlugin/Pods-RNMappPlugin.debug.xcconfig"; sourceTree = "<group>"; };
-		A341F01B2F7BE0FB004CB77E /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
-		A341F01C2F7BE0FB004CB77E /* RNMappEventEmmiterTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = RNMappEventEmmiterTests.m; sourceTree = "<group>"; };
-		A341F01D2F7BE0FB004CB77E /* RNMappPluginModuleTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = RNMappPluginModuleTests.m; sourceTree = "<group>"; };
-		A341F01E2F7BE0FB004CB77E /* RNMappPluginTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = RNMappPluginTests.m; sourceTree = "<group>"; };
-		A341F0232F7BE1E1004CB77E /* RNMappReactStubs.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = RNMappReactStubs.h; sourceTree = "<group>"; };
-		A341F0242F7BE1E5004CB77E /* RNMappReactStubs.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = RNMappReactStubs.m; sourceTree = "<group>"; };
-		A341F0262F7BFFF7004CB77E /* RNMappAppoxeeStubs.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = RNMappAppoxeeStubs.h; sourceTree = "<group>"; };
-		A341F0272F7C0002004CB77E /* RNMappAppoxeeStubs.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = RNMappAppoxeeStubs.m; sourceTree = "<group>"; };
-		A345125C2F7BD053008D9BF6 /* RNMappPluginTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = RNMappPluginTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
-		A345126C2F7BD0B5008D9BF6 /* RNMappPluginTests.xctestplan */ = {isa = PBXFileReference; lastKnownFileType = text; path = RNMappPluginTests.xctestplan; sourceTree = "<group>"; };
-		B8F743C28555348BC63A605D /* Pods-RNMappPlugin.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-RNMappPlugin.release.xcconfig"; path = "Target Support Files/Pods-RNMappPlugin/Pods-RNMappPlugin.release.xcconfig"; sourceTree = "<group>"; };
-		CB08C6665F2EB5CBA7DD35D6 /* Pods-RNMappPluginTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-RNMappPluginTests.release.xcconfig"; path = "Target Support Files/Pods-RNMappPluginTests/Pods-RNMappPluginTests.release.xcconfig"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -82,17 +45,6 @@
 				8F910C0E25ED4F010024DA9D /* AppoxeeInapp.framework in Frameworks */,
 				8F910C1025ED4F040024DA9D /* AppoxeeLocationServices.framework in Frameworks */,
 				8F910C1225ED4F070024DA9D /* AppoxeeSDK.framework in Frameworks */,
-				7872AC8DCDD58D1B6512A78F /* libPods-RNMappPlugin.a in Frameworks */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		A34512592F7BD053008D9BF6 /* Frameworks */ = {
-			isa = PBXFrameworksBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				A34512602F7BD053008D9BF6 /* libRNMappPlugin.a in Frameworks */,
-				A3F1B4B32F7C6A3D00C2C1A1 /* libOCMock.a in Frameworks */,
-				F789F8B2095666A09A31038D /* libPods-RNMappPluginTests.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -110,32 +62,13 @@
 		58B511D21A9E6C8500147676 = {
 			isa = PBXGroup;
 			children = (
-				A345126C2F7BD0B5008D9BF6 /* RNMappPluginTests.xctestplan */,
 				8F910C0425ED4EC30024DA9D /* RNMappEventEmmiter.h */,
 				8F910C0525ED4EC30024DA9D /* RNMappEventEmmiter.m */,
 				8F910C0625ED4EC30024DA9D /* RNMappPluginModule.h */,
 				8F910C0725ED4EC40024DA9D /* RNMappPluginModule.m */,
-				A345125D2F7BD053008D9BF6 /* RNMappPluginTests */,
 				134814211AA4EA7D00B7C361 /* Products */,
 				8F910C0C25ED4F010024DA9D /* Frameworks */,
-				A345125C2F7BD053008D9BF6 /* RNMappPluginTests.xctest */,
-				69FCF50E8AEF1DC585F50BF0 /* Pods */,
-				A341F0232F7BE1E1004CB77E /* RNMappReactStubs.h */,
-				A341F0242F7BE1E5004CB77E /* RNMappReactStubs.m */,
-				A341F0262F7BFFF7004CB77E /* RNMappAppoxeeStubs.h */,
-				A341F0272F7C0002004CB77E /* RNMappAppoxeeStubs.m */,
 			);
-			sourceTree = "<group>";
-		};
-		69FCF50E8AEF1DC585F50BF0 /* Pods */ = {
-			isa = PBXGroup;
-			children = (
-				96FEA8E46A77E95DE1F0CA75 /* Pods-RNMappPlugin.debug.xcconfig */,
-				B8F743C28555348BC63A605D /* Pods-RNMappPlugin.release.xcconfig */,
-				4B7CF61C341C2D5D1983B70C /* Pods-RNMappPluginTests.debug.xcconfig */,
-				CB08C6665F2EB5CBA7DD35D6 /* Pods-RNMappPluginTests.release.xcconfig */,
-			);
-			path = Pods;
 			sourceTree = "<group>";
 		};
 		8F910C0C25ED4F010024DA9D /* Frameworks */ = {
@@ -144,22 +77,8 @@
 				8F910C1125ED4F070024DA9D /* AppoxeeSDK.framework */,
 				8F910C0F25ED4F040024DA9D /* AppoxeeLocationServices.framework */,
 				8F910C0D25ED4F010024DA9D /* AppoxeeInapp.framework */,
-				473CD1829B445FA0647C512C /* libPods-RNMappPlugin.a */,
-				0298DF050E8BAE9EBCA18994 /* libPods-RNMappPluginTests.a */,
-				A3F1B4B22F7C6A3D00C2C1A1 /* libOCMock.a */,
 			);
 			name = Frameworks;
-			sourceTree = "<group>";
-		};
-		A345125D2F7BD053008D9BF6 /* RNMappPluginTests */ = {
-			isa = PBXGroup;
-			children = (
-				A341F01B2F7BE0FB004CB77E /* README.md */,
-				A341F01C2F7BE0FB004CB77E /* RNMappEventEmmiterTests.m */,
-				A341F01D2F7BE0FB004CB77E /* RNMappPluginModuleTests.m */,
-				A341F01E2F7BE0FB004CB77E /* RNMappPluginTests.m */,
-			);
-			path = RNMappPluginTests;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -169,7 +88,6 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 58B511EF1A9E6C8500147676 /* Build configuration list for PBXNativeTarget "RNMappPlugin" */;
 			buildPhases = (
-				25DB34A86C3AFB01B10D5F21 /* [CP] Check Pods Manifest.lock */,
 				58B511D71A9E6C8500147676 /* Sources */,
 				58B511D81A9E6C8500147676 /* Frameworks */,
 				58B511D91A9E6C8500147676 /* CopyFiles */,
@@ -183,25 +101,6 @@
 			productReference = 134814201AA4EA6300B7C361 /* libRNMappPlugin.a */;
 			productType = "com.apple.product-type.library.static";
 		};
-		A345125B2F7BD053008D9BF6 /* RNMappPluginTests */ = {
-			isa = PBXNativeTarget;
-			buildConfigurationList = A34512652F7BD053008D9BF6 /* Build configuration list for PBXNativeTarget "RNMappPluginTests" */;
-			buildPhases = (
-				A954D8836A2AD5D6B919201A /* [CP] Check Pods Manifest.lock */,
-				A34512582F7BD053008D9BF6 /* Sources */,
-				A34512592F7BD053008D9BF6 /* Frameworks */,
-				A345125A2F7BD053008D9BF6 /* Resources */,
-			);
-			buildRules = (
-			);
-			dependencies = (
-				A34512622F7BD053008D9BF6 /* PBXTargetDependency */,
-			);
-			name = RNMappPluginTests;
-			productName = RNMappPluginTests;
-			productReference = A345125C2F7BD053008D9BF6 /* RNMappPluginTests.xctest */;
-			productType = "com.apple.product-type.bundle.unit-test";
-		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -213,11 +112,6 @@
 				TargetAttributes = {
 					58B511DA1A9E6C8500147676 = {
 						CreatedOnToolsVersion = 6.1.1;
-					};
-					A345125B2F7BD053008D9BF6 = {
-						CreatedOnToolsVersion = 26.3;
-						DevelopmentTeam = LERY366S7C;
-						ProvisioningStyle = Automatic;
 					};
 				};
 			};
@@ -235,100 +129,21 @@
 			projectRoot = "";
 			targets = (
 				58B511DA1A9E6C8500147676 /* RNMappPlugin */,
-				A345125B2F7BD053008D9BF6 /* RNMappPluginTests */,
 			);
 		};
 /* End PBXProject section */
-
-/* Begin PBXResourcesBuildPhase section */
-		A345125A2F7BD053008D9BF6 /* Resources */ = {
-			isa = PBXResourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				A341F0222F7BE0FB004CB77E /* README.md in Resources */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-/* End PBXResourcesBuildPhase section */
-
-/* Begin PBXShellScriptBuildPhase section */
-		25DB34A86C3AFB01B10D5F21 /* [CP] Check Pods Manifest.lock */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputFileListPaths = (
-			);
-			inputPaths = (
-				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
-				"${PODS_ROOT}/Manifest.lock",
-			);
-			name = "[CP] Check Pods Manifest.lock";
-			outputFileListPaths = (
-			);
-			outputPaths = (
-				"$(DERIVED_FILE_DIR)/Pods-RNMappPlugin-checkManifestLockResult.txt",
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
-			showEnvVarsInLog = 0;
-		};
-		A954D8836A2AD5D6B919201A /* [CP] Check Pods Manifest.lock */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputFileListPaths = (
-			);
-			inputPaths = (
-				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
-				"${PODS_ROOT}/Manifest.lock",
-			);
-			name = "[CP] Check Pods Manifest.lock";
-			outputFileListPaths = (
-			);
-			outputPaths = (
-				"$(DERIVED_FILE_DIR)/Pods-RNMappPluginTests-checkManifestLockResult.txt",
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
-			showEnvVarsInLog = 0;
-		};
-/* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		58B511D71A9E6C8500147676 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				A341F0282F7C0002004CB77E /* RNMappAppoxeeStubs.m in Sources */,
-				A341F0252F7BE1E5004CB77E /* RNMappReactStubs.m in Sources */,
 				8F910C0925ED4EC40024DA9D /* RNMappPluginModule.m in Sources */,
 				8F910C0825ED4EC40024DA9D /* RNMappEventEmmiter.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		A34512582F7BD053008D9BF6 /* Sources */ = {
-			isa = PBXSourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				A341F01F2F7BE0FB004CB77E /* RNMappPluginTests.m in Sources */,
-				A341F0202F7BE0FB004CB77E /* RNMappEventEmmiterTests.m in Sources */,
-				A341F0212F7BE0FB004CB77E /* RNMappPluginModuleTests.m in Sources */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 /* End PBXSourcesBuildPhase section */
-
-/* Begin PBXTargetDependency section */
-		A34512622F7BD053008D9BF6 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = 58B511DA1A9E6C8500147676 /* RNMappPlugin */;
-			targetProxy = A34512612F7BD053008D9BF6 /* PBXContainerItemProxy */;
-		};
-/* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
 		58B511ED1A9E6C8500147676 /* Debug */ = {
@@ -414,7 +229,6 @@
 		};
 		58B511F01A9E6C8500147676 /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 96FEA8E46A77E95DE1F0CA75 /* Pods-RNMappPlugin.debug.xcconfig */;
 			buildSettings = {
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
@@ -435,7 +249,6 @@
 		};
 		58B511F11A9E6C8500147676 /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = B8F743C28555348BC63A605D /* Pods-RNMappPlugin.release.xcconfig */;
 			buildSettings = {
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
@@ -451,112 +264,6 @@
 				OTHER_LDFLAGS = "-ObjC";
 				PRODUCT_NAME = RNMappPlugin;
 				SKIP_INSTALL = YES;
-			};
-			name = Release;
-		};
-		A34512632F7BD053008D9BF6 /* Debug */ = {
-			isa = XCBuildConfiguration;
-			baseConfigurationReference = 4B7CF61C341C2D5D1983B70C /* Pods-RNMappPluginTests.debug.xcconfig */;
-			buildSettings = {
-				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
-				CLANG_ANALYZER_NONNULL = YES;
-				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
-				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
-				CLANG_ENABLE_OBJC_WEAK = YES;
-				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
-				CLANG_WARN_COMMA = YES;
-				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
-				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
-				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
-				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
-				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
-				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
-				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
-				CLANG_WARN_STRICT_PROTOTYPES = YES;
-				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
-				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
-				DEBUG_INFORMATION_FORMAT = dwarf;
-				DEVELOPMENT_TEAM = LERY366S7C;
-				ENABLE_USER_SCRIPT_SANDBOXING = YES;
-				FRAMEWORK_SEARCH_PATHS = (
-					"$(inherited)",
-					"$(PROJECT_DIR)/Frameworks",
-				);
-				GCC_C_LANGUAGE_STANDARD = gnu17;
-				GENERATE_INFOPLIST_FILE = YES;
-				HEADER_SEARCH_PATHS = (
-					"$(inherited)",
-					/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include,
-					"$(SRCROOT)/../node_modules/react-native/React",
-					"$(SRCROOT)/Frameworks/AppoxeeSDK.xcframework/ios-arm64_x86_64-simulator/Headers",
-					"$(SRCROOT)/Frameworks/AppoxeeInapp.xcframework/ios-arm64_x86_64-simulator/Headers",
-					"$(SRCROOT)/Frameworks/AppoxeeLocationServices.xcframework/ios-arm64_x86_64-simulator/Headers",
-				);
-				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
-				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
-				MARKETING_VERSION = 1.0;
-				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
-				MTL_FAST_MATH = YES;
-				OTHER_LDFLAGS = "-ObjC";
-				PRODUCT_BUNDLE_IDENTIFIER = com.test.RNMappPluginTests;
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				STRING_CATALOG_GENERATE_SYMBOLS = NO;
-				SWIFT_EMIT_LOC_STRINGS = NO;
-				TARGETED_DEVICE_FAMILY = "1,2";
-			};
-			name = Debug;
-		};
-		A34512642F7BD053008D9BF6 /* Release */ = {
-			isa = XCBuildConfiguration;
-			baseConfigurationReference = CB08C6665F2EB5CBA7DD35D6 /* Pods-RNMappPluginTests.release.xcconfig */;
-			buildSettings = {
-				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
-				CLANG_ANALYZER_NONNULL = YES;
-				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
-				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
-				CLANG_ENABLE_OBJC_WEAK = YES;
-				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
-				CLANG_WARN_COMMA = YES;
-				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
-				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
-				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
-				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
-				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
-				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
-				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
-				CLANG_WARN_STRICT_PROTOTYPES = YES;
-				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
-				CODE_SIGN_STYLE = Automatic;
-				COPY_PHASE_STRIP = NO;
-				CURRENT_PROJECT_VERSION = 1;
-				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
-				DEVELOPMENT_TEAM = LERY366S7C;
-				ENABLE_USER_SCRIPT_SANDBOXING = YES;
-				FRAMEWORK_SEARCH_PATHS = (
-					"$(inherited)",
-					"$(PROJECT_DIR)/Frameworks",
-				);
-				GCC_C_LANGUAGE_STANDARD = gnu17;
-				GENERATE_INFOPLIST_FILE = YES;
-				HEADER_SEARCH_PATHS = (
-					"$(inherited)",
-					/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include,
-					"$(SRCROOT)/../node_modules/react-native/React",
-					"$(SRCROOT)/Frameworks/AppoxeeSDK.xcframework/ios-arm64_x86_64-simulator/Headers",
-					"$(SRCROOT)/Frameworks/AppoxeeInapp.xcframework/ios-arm64_x86_64-simulator/Headers",
-					"$(SRCROOT)/Frameworks/AppoxeeLocationServices.xcframework/ios-arm64_x86_64-simulator/Headers",
-				);
-				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
-				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
-				MARKETING_VERSION = 1.0;
-				MTL_FAST_MATH = YES;
-				OTHER_LDFLAGS = "-ObjC";
-				PRODUCT_BUNDLE_IDENTIFIER = com.test.RNMappPluginTests;
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				STRING_CATALOG_GENERATE_SYMBOLS = NO;
-				SWIFT_EMIT_LOC_STRINGS = NO;
-				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Release;
 		};
@@ -577,15 +284,6 @@
 			buildConfigurations = (
 				58B511F01A9E6C8500147676 /* Debug */,
 				58B511F11A9E6C8500147676 /* Release */,
-			);
-			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
-		};
-		A34512652F7BD053008D9BF6 /* Build configuration list for PBXNativeTarget "RNMappPluginTests" */ = {
-			isa = XCConfigurationList;
-			buildConfigurations = (
-				A34512632F7BD053008D9BF6 /* Debug */,
-				A34512642F7BD053008D9BF6 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
