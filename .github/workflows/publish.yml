@@ -1,0 +1,95 @@
+name: Publish to npm
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
+on:
+  workflow_dispatch:
+    inputs:
+      deployment_mode:
+        description: "Choose dry-run to validate or publish for real deployment."
+        required: true
+        default: dry-run
+        type: choice
+        options:
+          - dry-run
+          - publish
+      tag:
+        description: "Optional tag override (example: v1.4.0). Leave empty to use v<package.json version>."
+        required: false
+        type: string
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      id-token: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          registry-url: "https://registry.npmjs.org"
+
+      - name: Resolve release tag
+        id: release_tag
+        run: |
+          if [ -n "${{ inputs.tag }}" ]; then
+            TAG="${{ inputs.tag }}"
+          else
+            VERSION="$(node -p "require('./package.json').version")"
+            TAG="v${VERSION}"
+          fi
+
+          if [[ ! "$TAG" =~ ^v[0-9].* ]]; then
+            echo "Resolved tag must start with 'v' (example: v1.4.0), got: $TAG"
+            exit 1
+          fi
+
+          echo "tag=$TAG" >> "$GITHUB_OUTPUT"
+          echo "Using release tag: $TAG"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Test
+        run: npm test
+
+      - name: Validate package contents
+        run: npm pack --dry-run
+
+      - name: Publish to npm (dry-run)
+        if: ${{ inputs.deployment_mode == 'dry-run' }}
+        run: npm publish --provenance --access public --dry-run
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Publish to npm
+        if: ${{ inputs.deployment_mode == 'publish' }}
+        run: npm publish --provenance --access public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Ensure git tag exists
+        if: ${{ inputs.deployment_mode == 'publish' }}
+        run: |
+          TAG="${{ steps.release_tag.outputs.tag }}"
+          git fetch --tags
+          if git rev-parse "$TAG" >/dev/null 2>&1; then
+            echo "Tag $TAG already exists."
+          else
+            git tag "$TAG"
+            git push origin "$TAG"
+          fi
+
+      - name: Create GitHub release
+        if: ${{ inputs.deployment_mode == 'publish' }}
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.release_tag.outputs.tag }}
+          generate_release_notes: true
