@@ -32,15 +32,15 @@ jobs:
         with:
           node-version: 24
           registry-url: "https://registry.npmjs.org"
-          cache: "npm"
 
       - name: Resolve release tag
         id: release_tag
         run: |
+          VERSION="$(node -p "require('./package.json').version")"
+
           if [ -n "${{ inputs.tag }}" ]; then
             TAG="${{ inputs.tag }}"
           else
-            VERSION="$(node -p "require('./package.json').version")"
             TAG="v${VERSION}"
           fi
 
@@ -50,7 +50,10 @@ jobs:
           fi
 
           echo "tag=$TAG" >> "$GITHUB_OUTPUT"
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "release_title=Mapp Engage RN - $VERSION" >> "$GITHUB_OUTPUT"
           echo "Using release tag: $TAG"
+          echo "Using release title: Mapp Engage RN - $VERSION"
 
       - name: Install dependencies
         run: npm install --no-audit --no-fund
@@ -73,21 +76,36 @@ jobs:
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
-      - name: Ensure git tag exists
+      - name: Recreate GitHub tag and release
         if: ${{ inputs.deployment_mode == 'publish' }}
         run: |
           TAG="${{ steps.release_tag.outputs.tag }}"
+          RELEASE_TITLE="${{ steps.release_tag.outputs.release_title }}"
+
           git fetch --tags
+
+          while IFS= read -r RELEASE_TAG; do
+            if [ -n "$RELEASE_TAG" ]; then
+              echo "Deleting existing GitHub release for tag $RELEASE_TAG."
+              gh release delete "$RELEASE_TAG" --yes --cleanup-tag
+            fi
+          done < <(gh release list --limit 1000 --json tagName,name --jq ".[] | select(.tagName == \"$TAG\" or .name == \"$RELEASE_TITLE\") | .tagName")
+
           if git rev-parse "$TAG" >/dev/null 2>&1; then
-            echo "Tag $TAG already exists."
-          else
-            git tag "$TAG"
-            git push origin "$TAG"
+            echo "Deleting existing local tag $TAG."
+            git tag -d "$TAG"
           fi
 
-      - name: Create GitHub release
-        if: ${{ inputs.deployment_mode == 'publish' }}
-        uses: softprops/action-gh-release@v2
-        with:
-          tag_name: ${{ steps.release_tag.outputs.tag }}
-          generate_release_notes: true
+          if git ls-remote --exit-code --tags origin "refs/tags/$TAG" >/dev/null 2>&1; then
+            echo "Deleting existing remote tag $TAG."
+            git push origin ":refs/tags/$TAG"
+          fi
+
+          git tag "$TAG"
+          git push origin "refs/tags/$TAG"
+
+          gh release create "$TAG" \
+            --title "$RELEASE_TITLE" \
+            --generate-notes
+        env:
+          GH_TOKEN: ${{ github.token }}
