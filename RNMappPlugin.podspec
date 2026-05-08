@@ -25,6 +25,5 @@ Pod::Spec.new do |s|
   s.frameworks = "WebKit"
   s.library = 'sqlite3'
   s.dependency "React" 
-  s.dependency 'RCT-Folly'
 
 end
