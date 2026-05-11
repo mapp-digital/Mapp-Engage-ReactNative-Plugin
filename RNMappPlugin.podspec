@@ -9,11 +9,11 @@ Pod::Spec.new do |s|
   s.description  = <<-DESC
                     Mapp SDK for React Native
                    DESC
-  s.homepage     = "https://github.com/MappCloud/React-native-plugin"
+  s.homepage     = "https://github.com/mapp-digital/Mapp-Engage-ReactNative-Plugin"
   s.license      = "MIT"
   s.author      = "Mapp"
   s.platforms    = { :ios => "10.0" }
-  s.source       = { :git => "https://github.com/MappCloud/React-native-plugin", :tag => "#{s.version}" }
+  s.source       = { :git => "https://github.com/mapp-digital/Mapp-Engage-ReactNative-Plugin", :tag => "#{s.version}" }
 
   s.source_files = "ios/**/*.{h,c,m,swift}"
   s.exclude_files = "ios/RNMappPluginTests/**/*"

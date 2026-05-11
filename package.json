@@ -74,10 +74,10 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/MappCloud/React-native-plugin.git"
+    "url": "git+https://github.com/mapp-digital/Mapp-Engage-ReactNative-Plugin.git"
   },
   "bugs": {
-    "url": "https://github.com/MappCloud/React-native-plugin/issues"
+    "url": "https://github.com/mapp-digital/Mapp-Engage-ReactNative-Plugin/issues"
   },
-  "homepage": "https://github.com/MappCloud/React-native-plugin#readme"
+  "homepage": "https://github.com/mapp-digital/Mapp-Engage-ReactNative-Plugin#readme"
 }
