@@ -7,7 +7,10 @@ import {
   Platform
 } from 'react-native';
 
-const RNMappPluginModule = NativeModules.RNMappPluginModule;
+import NativeRNMappPluginModule from './specs/NativeRNMappPluginModule';
+
+const RNMappPluginModule =
+  NativeRNMappPluginModule || NativeModules.RNMappPluginModule;
 
 class MappEventEmitter extends NativeEventEmitter {
 

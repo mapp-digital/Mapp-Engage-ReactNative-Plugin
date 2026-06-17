@@ -6,8 +6,10 @@ import { NativeModules, Platform } from "react-native";
 import CustomEvent from "./CustomEvent.js";
 
 import MappEventEmitter from "./MappEventEmitter.js";
+import NativeRNMappPluginModule from "./specs/NativeRNMappPluginModule";
 
-const { RNMappPluginModule } = NativeModules;
+const RNMappPluginModule =
+  NativeRNMappPluginModule || NativeModules.RNMappPluginModule;
 const EventEmitter = new MappEventEmitter();
 
 const IOS_INIT = "com.mapp.init";

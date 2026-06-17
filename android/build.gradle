@@ -1,15 +1,16 @@
-plugins {
-    id("com.android.library")
-    id("com.facebook.react") // This is required for New Architecture & Codegen
+apply plugin: "com.android.library"
+
+def getExtOrDefault = { name, fallback ->
+    rootProject.ext.has(name) ? rootProject.ext.get(name) : fallback
 }
 
 android {
     namespace "com.reactlibrary"
-    compileSdk = 36
+    compileSdk = getExtOrDefault("compileSdkVersion", 36)
 
     defaultConfig {
-        minSdk = 24
-        targetSdk = 36
+        minSdk = getExtOrDefault("minSdkVersion", 24)
+        targetSdk = getExtOrDefault("targetSdkVersion", 36)
         versionCode = 1
         versionName = "1.0"
     }
@@ -28,25 +29,34 @@ android {
 }
 
 dependencies {
-    implementation "com.facebook.react:react-android:0.84.1"
-    implementation 'com.google.code.gson:gson:2.13.2'
+    //noinspection GradleDynamicVersion
+    implementation "com.facebook.react:react-native:+"
+    constraints {
+        implementation("androidx.core:core") {
+            version {
+                strictly "1.18.0"
+            }
+            because "androidx.core 1.19.0 requires AGP 9.1+, while React Native dependencies currently require the app to stay on AGP 8"
+        }
+        implementation("androidx.core:core-ktx") {
+            version {
+                strictly "1.18.0"
+            }
+            because "androidx.core-ktx 1.19.0 requires AGP 9.1+, while React Native dependencies currently require the app to stay on AGP 8"
+        }
+    }
+    implementation 'com.google.code.gson:gson:2.14.0'
     implementation 'androidx.appcompat:appcompat:1.7.1'
-    implementation 'androidx.lifecycle:lifecycle-viewmodel-ktx:2.10.0'
-    implementation platform('com.google.firebase:firebase-bom:34.11.0')
+    implementation 'androidx.lifecycle:lifecycle-viewmodel-ktx:2.8.7'
+    implementation platform('com.google.firebase:firebase-bom:33.16.0')
     implementation('com.google.firebase:firebase-messaging')
     api('com.google.android.gms:play-services-location:21.3.0')
-    implementation 'androidx.media:media:1.7.1'
+    implementation 'androidx.media:media:1.8.0'
     implementation 'androidx.legacy:legacy-support-v13:1.0.0'
-    implementation("com.mapp.sdk:engage-android:7.0.2")
+    implementation("com.mapp.sdk:engage-android:7.1.0")
     testImplementation 'junit:junit:4.13.2'
-    testImplementation 'org.mockito:mockito-core:5.14.2'
+    testImplementation 'org.mockito:mockito-core:5.23.0'
     testImplementation 'org.mockito:mockito-inline:5.2.0'
-    testImplementation 'org.json:json:20240303'
-    testImplementation 'org.robolectric:robolectric:4.13'
-}
-
-react {
-    jsRootDir = rootDir
-    libraryName = "RNMappPlugin"
-    codegenJavaPackageName = "com.reactlibrary"
+    testImplementation 'org.json:json:20260522'
+    testImplementation 'org.robolectric:robolectric:4.16.1'
 }

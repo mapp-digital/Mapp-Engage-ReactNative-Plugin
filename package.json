@@ -1,6 +1,6 @@
 {
   "name": "react-native-mapp-plugin",
-  "version": "1.4.0",
+  "version": "1.4.1.4",
   "description": "Mapp SDK for React Native.",
   "main": "index.js",
   "files": [
@@ -17,6 +17,7 @@
     "ios/RNMappPlugin.xcodeproj/project.pbxproj",
     "ios/RNMappPluginModule.h",
     "ios/RNMappPluginModule.m",
+    "android/src/main/jni/",
     "specs/",
     "CHANGELOG.md",
     "CustomEvent.js",
@@ -59,6 +60,15 @@
     "generate:codegen": "react-native codegen specs",
     "build:android": "cd android && ./gradlew assembleDebug",
     "test": "jest"
+  },
+  "codegenConfig": {
+    "name": "RNMappPlugin",
+    "type": "modules",
+    "jsSrcsDir": "./specs",
+    "includesGeneratedCode": true,
+    "android": {
+      "javaPackageName": "com.reactlibrary"
+    }
   },
   "jest": {
     "testEnvironment": "node",

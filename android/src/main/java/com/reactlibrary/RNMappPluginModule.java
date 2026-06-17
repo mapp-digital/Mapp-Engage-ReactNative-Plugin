@@ -23,7 +23,7 @@ import androidx.core.content.ContextCompat;
 
 import com.appoxee.Appoxee;
 import com.appoxee.internal.model.response.DevicePayload;
-import com.appoxee.internal.model.response.inbox.InboxMessage;
+import com.appoxee.shared.InboxMessage;
 import com.appoxee.sdk.BuildConfig;
 import com.appoxee.shared.AppoxeeObserver;
 import com.appoxee.shared.AppoxeeOptions;
@@ -34,7 +34,6 @@ import com.facebook.react.bridge.Callback;
 import com.facebook.react.bridge.LifecycleEventListener;
 import com.facebook.react.bridge.Promise;
 import com.facebook.react.bridge.ReactApplicationContext;
-import com.facebook.react.bridge.ReactContextBaseJavaModule;
 import com.facebook.react.bridge.ReactMethod;
 import com.facebook.react.bridge.ReadableArray;
 import com.facebook.react.bridge.ReadableMap;
@@ -77,7 +76,7 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 @SuppressWarnings("ALL")
 @ReactModule(name = RNMappPluginModule.NAME)
-public class RNMappPluginModule extends ReactContextBaseJavaModule implements PermissionListener {
+public class RNMappPluginModule extends NativeRNMappPluginModuleSpec implements PermissionListener {
 
     public static final String NAME = "RNMappPluginModule";
     private static final int POST_NOTIFICATION_PERMISSION_REQUEST_CODE = 1001;
@@ -511,7 +510,7 @@ public class RNMappPluginModule extends ReactContextBaseJavaModule implements Pe
     }
 
     @ReactMethod
-    public void setAttributeBoolean(String key, Boolean value) {
+    public void setAttributeBoolean(String key, boolean value) {
         Map<String, Object> attr = new HashMap<>();
         attr.put(key, value);
         Appoxee.instance().addCustomAttributes(attr).enqueue(result -> {
@@ -519,9 +518,9 @@ public class RNMappPluginModule extends ReactContextBaseJavaModule implements Pe
     }
 
     @ReactMethod
-    public void setAttributeInt(String key, Integer value) {
+    public void setAttributeInt(String key, double value) {
         Map<String, Object> attr = new HashMap<>();
-        attr.put(key, value);
+        attr.put(key, (int) value);
         Appoxee.instance().addCustomAttributes(attr).enqueue(result -> {
         });
     }
@@ -653,7 +652,7 @@ public class RNMappPluginModule extends ReactContextBaseJavaModule implements Pe
     // -------------------------------------------------------------------------
 
     @ReactMethod
-    public void lockScreenOrientation(Integer orientation) {
+    public void lockScreenOrientation(double orientation) {
         // setOrientation() removed in SDK v7 — no-op
     }
 
@@ -744,7 +743,7 @@ public class RNMappPluginModule extends ReactContextBaseJavaModule implements Pe
      * The @ReactMethod signature is preserved to avoid breaking the JS public API.
      */
     @ReactMethod
-    public void inAppMarkAsRead(Integer templateId, String eventId) {
+    public void inAppMarkAsRead(double templateId, String eventId) {
         // no-op in v7
     }
 
@@ -752,7 +751,7 @@ public class RNMappPluginModule extends ReactContextBaseJavaModule implements Pe
      * @see #inAppMarkAsRead
      */
     @ReactMethod
-    public void inAppMarkAsUnRead(Integer templateId, String eventId) {
+    public void inAppMarkAsUnRead(double templateId, String eventId) {
         // no-op in v7
     }
 
@@ -760,7 +759,7 @@ public class RNMappPluginModule extends ReactContextBaseJavaModule implements Pe
      * @see #inAppMarkAsRead
      */
     @ReactMethod
-    public void inAppMarkAsDeleted(Integer templateId, String eventId) {
+    public void inAppMarkAsDeleted(double templateId, String eventId) {
         // no-op in v7
     }
 
@@ -768,8 +767,8 @@ public class RNMappPluginModule extends ReactContextBaseJavaModule implements Pe
      * @see #inAppMarkAsRead
      */
     @ReactMethod
-    public void triggerStatistic(Integer templateId, String originalEventId,
-                                 String trackingKey, int displayMillis,
+    public void triggerStatistic(double templateId, String originalEventId,
+                                 String trackingKey, double displayMillis,
                                  String reason, String link) {
         // no-op in v7
     }
@@ -784,8 +783,8 @@ public class RNMappPluginModule extends ReactContextBaseJavaModule implements Pe
     }
 
     @ReactMethod
-    public void removeAndroidListeners(int count) {
-        EventEmitter.shared().removeAndroidListeners(count);
+    public void removeAndroidListeners(double count) {
+        EventEmitter.shared().removeAndroidListeners((int) count);
     }
 
     @ReactMethod
@@ -794,7 +793,7 @@ public class RNMappPluginModule extends ReactContextBaseJavaModule implements Pe
     }
 
     @ReactMethod
-    public void removeListeners(Integer count) {
+    public void removeListeners(double count) {
         removeAndroidListeners(count);
     }
 
@@ -808,8 +807,8 @@ public class RNMappPluginModule extends ReactContextBaseJavaModule implements Pe
     }
 
     @ReactMethod
-    public void clearNotification(int id) {
-        NotificationManagerCompat.from(reactContext.getApplicationContext()).cancel(id);
+    public void clearNotification(double id) {
+        NotificationManagerCompat.from(reactContext.getApplicationContext()).cancel((int) id);
     }
 
     // -------------------------------------------------------------------------

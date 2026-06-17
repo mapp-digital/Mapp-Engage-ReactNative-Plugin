@@ -1,7 +1,10 @@
 module.exports = {
-  dependencies: {
-    'react-native-mapp-plugin': {
-      root: __dirname,
+  dependency: {
+    platforms: {
+      android: {
+        libraryName: 'RNMappPlugin',
+        cmakeListsPath: 'src/main/jni/CMakeLists.txt',
+      },
     },
   },
 };
