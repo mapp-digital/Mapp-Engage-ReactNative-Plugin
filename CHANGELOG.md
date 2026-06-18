@@ -1,3 +1,14 @@
+## Version 1.4.1
+
+***Dependency Updates***
+
+- Android: Aligned with Mapp Engage Android SDK 7.1.0.
+- iOS: Aligned with Mapp Engage Inapp iOS SDK 6.0.11, which provides improved in-app statistics.
+
+***Architecture***
+
+- Android: Updated plugin to support New Architecture (TurboModule).
+
 ## Version 1.4.0
 
 ***Bug Fixes***

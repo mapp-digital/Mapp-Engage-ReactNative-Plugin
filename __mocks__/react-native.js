@@ -105,6 +105,7 @@ module.exports = {
   NativeModules: { RNMappPluginModule: mockNativeModule },
   NativeEventEmitter: jest.fn(() => mockEventEmitter),
   Platform: mockPlatform,
+  TurboModuleRegistry: { get: jest.fn(() => mockNativeModule) },
   // Export for direct use in tests
   _mockNativeModule: mockNativeModule,
   _mockPlatform: mockPlatform,
