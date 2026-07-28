@@ -8,7 +8,7 @@
 
 ***Dependency Updates***
 
-- Android: Aligned with Mapp Engage Android SDK 7.1.0.
+- Android: Aligned with Mapp Engage Android SDK 7.1.1.
 - iOS: Aligned with Mapp Engage Inapp iOS SDK 6.0.11, which provides improved in-app statistics.
 
 ***Architecture***
