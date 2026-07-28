@@ -1,3 +1,9 @@
+## Version 1.4.2
+
+***Dependency Updates***
+
+- Android: Aligned with Mapp Engage Android SDK 7.1.2.
+
 ## Version 1.4.1
 
 ***Dependency Updates***
