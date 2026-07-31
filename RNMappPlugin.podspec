@@ -17,7 +17,7 @@ Pod::Spec.new do |s|
 
   s.source_files = "ios/**/*.{h,c,m,swift}"
   s.exclude_files = "ios/RNMappPluginTests/**/*"
-  s.vendored_framework = "ios/Frameworks/AppoxeeSDK.xcframework", "ios/Frameworks/AppoxeeLocationServices.xcframework", "ios/Frameworks/AppoxeeInapp.xcframework"
+  s.vendored_framework = "ios/Frameworks/AppoxeeLocationServices.xcframework", "ios/Frameworks/AppoxeeInapp.xcframework"
   s.resources = "ios/Frameworks/AppoxeeSDKResources.bundle", "ios/Frameworks/AppoxeeInappResources.bundle"
   s.preserve_path = "ios/Frameworks/"
   s.public_header_files = "ios/Frameworks/AppoxeeSDK.xcframework/ios-arm64/Headers/", "ios/Frameworks/AppoxeeLocationServices.xcframework/ios-arm64/Headers/", "ios/Frameworks/AppoxeeInapp.xcframework/ios-arm64/Headers/"
