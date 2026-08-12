@@ -1,0 +1,36 @@
+name: Expo support validation
+
+on:
+  pull_request:
+  push:
+    branches: [master]
+
+jobs:
+  javascript-and-package:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm install --no-audit --no-fund
+      - run: npm run build:plugin
+      - run: npm test -- --runInBand
+      - run: npm pack --dry-run
+
+  android-native:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 22
+          cache: npm
+      - uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: 17
+      - run: npm install --no-audit --no-fund
+      - run: ./gradlew test --no-daemon --console=plain
+        working-directory: android
