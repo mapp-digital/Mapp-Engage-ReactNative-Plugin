@@ -1,8 +1,19 @@
 apply plugin: "com.android.library"
 
+import groovy.json.JsonSlurper
+
 def getExtOrDefault = { name, fallback ->
     rootProject.ext.has(name) ? rootProject.ext.get(name) : fallback
 }
+
+def reactNativePackage = [
+    file("../node_modules/react-native/package.json"),
+    file("../../react-native/package.json")
+].find { it.exists() }
+if (reactNativePackage == null) {
+    throw new GradleException("react-native-mapp-plugin could not resolve react-native/package.json")
+}
+def resolvedReactNativeVersion = new JsonSlurper().parse(reactNativePackage).version
 
 android {
     namespace "com.reactlibrary"
@@ -29,8 +40,7 @@ android {
 }
 
 dependencies {
-    //noinspection GradleDynamicVersion
-    implementation "com.facebook.react:react-native:+"
+    implementation "com.facebook.react:react-android:${resolvedReactNativeVersion}"
     constraints {
         implementation("androidx.core:core") {
             version {
@@ -48,7 +58,6 @@ dependencies {
     implementation 'com.google.code.gson:gson:2.14.0'
     implementation 'androidx.appcompat:appcompat:1.7.1'
     implementation 'androidx.lifecycle:lifecycle-viewmodel-ktx:2.8.7'
-    implementation platform('com.google.firebase:firebase-bom:33.16.0')
     implementation('com.google.firebase:firebase-messaging')
     api('com.google.android.gms:play-services-location:21.3.0')
     implementation 'androidx.media:media:1.8.0'

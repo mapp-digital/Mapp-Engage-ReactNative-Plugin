@@ -94,8 +94,8 @@ public class RNMappPluginModuleApiSignatureTest {
 
         // --- Custom attributes (single) ---
         assertMethod("setAttribute", String.class, String.class);
-        assertMethod("setAttributeBoolean", String.class, Boolean.class);
-        assertMethod("setAttributeInt", String.class, Integer.class);
+        assertMethod("setAttributeBoolean", String.class, boolean.class);
+        assertMethod("setAttributeInt", String.class, double.class);
         assertMethod("removeAttribute", String.class);
         assertMethod("getAttributeStringValue", String.class, Promise.class);
 
@@ -110,7 +110,7 @@ public class RNMappPluginModuleApiSignatureTest {
         assertMethod("isDeviceRegistered", Promise.class);
 
         // --- Screen / badge ---
-        assertMethod("lockScreenOrientation", Integer.class);
+        assertMethod("lockScreenOrientation", double.class);
         assertMethod("removeBadgeNumber");
 
         // --- Geofencing ---
@@ -123,21 +123,21 @@ public class RNMappPluginModuleApiSignatureTest {
         assertMethod("fetchLatestInboxMessage", Promise.class);
         assertMethod("fetchInboxMessage", Promise.class);
         assertMethod("triggerInApp", String.class);
-        assertMethod("inAppMarkAsRead", Integer.class, String.class);
-        assertMethod("inAppMarkAsUnRead", Integer.class, String.class);
-        assertMethod("inAppMarkAsDeleted", Integer.class, String.class);
+        assertMethod("inAppMarkAsRead", double.class, String.class);
+        assertMethod("inAppMarkAsUnRead", double.class, String.class);
+        assertMethod("inAppMarkAsDeleted", double.class, String.class);
         assertMethod("triggerStatistic",
-                Integer.class, String.class, String.class, int.class, String.class, String.class);
+                double.class, String.class, String.class, double.class, String.class, String.class);
 
         // --- Event listeners ---
         assertMethod("addAndroidListener", String.class);
-        assertMethod("removeAndroidListeners", int.class);
+        assertMethod("removeAndroidListeners", double.class);
         assertMethod("addListener", String.class);
-        assertMethod("removeListeners", Integer.class);
+        assertMethod("removeListeners", double.class);
 
         // --- Notifications ---
         assertMethod("clearNotifications");
-        assertMethod("clearNotification", int.class);
+        assertMethod("clearNotification", double.class);
 
         // --- Session ---
         assertMethod("logOut", boolean.class);
@@ -158,7 +158,7 @@ public class RNMappPluginModuleApiSignatureTest {
         // messageToJson(InboxMessage) — inbox message serialization
         try {
             Class<?> inboxMessageClass = Class.forName(
-                    "com.appoxee.internal.model.response.inbox.InboxMessage");
+                    "com.appoxee.shared.InboxMessage");
             assertHelperMethod("messageToJson", inboxMessageClass);
         } catch (ClassNotFoundException e) {
             fail("InboxMessage class not on test classpath: " + e.getMessage());
