@@ -131,10 +131,6 @@ export class Mapp {
     appID: string,
     tenantID: string
   ) {
-    if (Platform.OS == "ios") {
-      RNMappPluginModule.autoengage(server);
-      return RNMappPluginModule.engageInapp(server);
-    }
     return RNMappPluginModule.engage(
       sdkKey,
       googleProjectId,
