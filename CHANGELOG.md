@@ -1,3 +1,17 @@
+## Version 1.5.1
+
+***Bug Fixes***
+
+- Android: Failed Firebase token registration now rejects with `FCM_REGISTRATION_FAILED` instead of crashing while reading a failed task result.
+- Android: All Mapp engage calls run on the main looper. Background Firebase callbacks wait for a bounded engage attempt and safely return failure after SDK errors, timeout, or interruption.
+- Android/Expo: Mapp and custom push ownership now remove the SDK v7 Firebase service and remain idempotent when prebuild runs repeatedly or changes mode.
+- Android: Exported Expo SDK 57 compatibility constraints stabilize WorkManager, Lifecycle, AndroidX Core, Play Services Location, and Kotlin stdlib for API 36/AGP 8.12/Kotlin 2.1.20 builds.
+- Android: Coroutines remain aligned at 1.11.0 to preserve the Mapp 7.1.2 native in-app dismissal ABI.
+
+***Compatibility***
+
+- Verified baseline: Expo SDK 57, React Native 0.86, New Architecture, Android API 36, AGP 8.12, Kotlin 2.1.20, and JDK 21.
+
 ## Version 1.4.2
 
 ***Dependency Updates***

@@ -4,6 +4,11 @@ exports.withMappEngageAndroid = void 0;
 exports.updatePushHandling = updatePushHandling;
 const config_plugins_1 = require("@expo/config-plugins");
 const messageService = 'com.reactlibrary.MessageService';
+const sdkMessagingServices = [
+    'com.appoxee.shared.MappMessagingService',
+    'com.appoxee.push.fcm.MappMessagingService',
+];
+const managedMessagingServices = [messageService, ...sdkMessagingServices];
 const fineLocation = 'android.permission.ACCESS_FINE_LOCATION';
 const backgroundLocation = 'android.permission.ACCESS_BACKGROUND_LOCATION';
 function removeAll(items, predicate) {
@@ -13,11 +18,20 @@ function updatePushHandling(androidManifest, pushHandling) {
     const manifest = androidManifest.manifest;
     const application = config_plugins_1.AndroidConfig.Manifest.getMainApplicationOrThrow(androidManifest);
     application.service = removeAll(application.service, service => {
-        return service.$?.['android:name'] === messageService && service.$?.['tools:node'] === 'remove';
+        return managedMessagingServices.includes(service.$?.['android:name'])
+            && service.$?.['tools:node'] === 'remove';
     });
+    manifest.$ = manifest.$ ?? {};
+    manifest.$['xmlns:tools'] = 'http://schemas.android.com/tools';
+    for (const serviceName of sdkMessagingServices) {
+        application.service.push({
+            $: {
+                'android:name': serviceName,
+                'tools:node': 'remove',
+            },
+        });
+    }
     if (pushHandling === 'custom') {
-        manifest.$ = manifest.$ ?? {};
-        manifest.$['xmlns:tools'] = 'http://schemas.android.com/tools';
         application.service.push({
             $: {
                 'android:name': messageService,

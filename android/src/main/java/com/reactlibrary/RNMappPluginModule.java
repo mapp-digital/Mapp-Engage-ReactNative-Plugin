@@ -11,8 +11,6 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Build;
-import android.os.Handler;
-import android.os.Looper;
 import android.util.DisplayMetrics;
 import android.provider.Settings;
 
@@ -337,9 +335,22 @@ public class RNMappPluginModule extends NativeRNMappPluginModuleSpec implements 
         FirebaseMessaging.getInstance().getToken().addOnCompleteListener(new OnCompleteListener<String>() {
             @Override
             public void onComplete(@NonNull Task<String> task) {
-                promise.resolve(task.getResult());
+                settleTokenTask(task, promise);
             }
         });
+    }
+
+    static void settleTokenTask(@NonNull Task<String> task, @NonNull Promise promise) {
+        if (task.isSuccessful()) {
+            promise.resolve(task.getResult());
+            return;
+        }
+
+        Exception exception = task.getException();
+        String message = exception != null && exception.getMessage() != null
+                ? exception.getMessage()
+                : "FCM registration failed";
+        promise.reject("FCM_REGISTRATION_FAILED", message, exception);
     }
 
     // -------------------------------------------------------------------------
@@ -368,7 +379,7 @@ public class RNMappPluginModule extends NativeRNMappPluginModuleSpec implements 
     @ReactMethod
     @Deprecated(forRemoval = true)
     public void engage2() {
-        Appoxee.engage(application,null);
+        MappEngagementDispatcher.engageAsync(Objects.requireNonNull(application), null, null);
     }
 
     @ReactMethod
@@ -376,9 +387,7 @@ public class RNMappPluginModule extends NativeRNMappPluginModuleSpec implements 
         AppoxeeOptions opt = createOptions(server, sdkKey, appID, tenantID);
         opt.setNotificationMode(NotificationMode.BACKGROUND_AND_FOREGROUND);
 
-        new Handler(Looper.getMainLooper()).post(() -> {
-            Appoxee.engage(Objects.requireNonNull(application), opt);
-
+        MappEngagementDispatcher.engageAsync(Objects.requireNonNull(application), opt, () -> {
             Appoxee.instance().subscribe(new AppoxeeObserver() {
                 @Override
                 public void onReadyStatusChanged(boolean status, MappResult<DevicePayload> result) {
@@ -394,9 +403,7 @@ public class RNMappPluginModule extends NativeRNMappPluginModuleSpec implements 
                                  String appID, String tenantID) {
         AppoxeeOptions opt = createOptions(server, sdkKey, appID, tenantID);
 
-        new Handler(Looper.getMainLooper()).post(() -> {
-            Appoxee.engage(Objects.requireNonNull(application), opt);
-
+        MappEngagementDispatcher.engageAsync(Objects.requireNonNull(application), opt, () -> {
             Appoxee.instance().subscribe(new AppoxeeObserver() {
                 @Override
                 public void onReadyStatusChanged(boolean status, MappResult<DevicePayload> result) {

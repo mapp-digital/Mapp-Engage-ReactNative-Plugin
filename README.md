@@ -85,9 +85,9 @@ Mapp.engage('ANDROID_SDK_KEY', 'FCM_PROJECT_ID', 'EMC', 'APP_ID', 'TENANT_ID');
 
 ### Android push ownership
 
-`pushHandling: "mapp"` is the default. It requires `expo.android.googleServicesFile` and retains `com.reactlibrary.MessageService` as the FCM callback owner.
+`pushHandling: "mapp"` is the default. It requires `expo.android.googleServicesFile` and retains `com.reactlibrary.MessageService` as the sole normal-priority Mapp FCM callback owner. The config plugin removes the Mapp SDK v7 service (`com.appoxee.shared.MappMessagingService`) from the merged app manifest.
 
-Use `pushHandling: "custom"` when another integration, such as a client-owned `FirebaseMessagingService`, owns callbacks. The plugin adds a manifest merger rule that removes only `com.reactlibrary.MessageService`. From native Android code, use `com.reactlibrary.MappPushHelper`:
+Use `pushHandling: "custom"` when another integration, such as a client-owned `FirebaseMessagingService`, owns callbacks. The plugin removes both its `MessageService` and the Mapp SDK service so the consumer service owns callbacks. Repeated prebuilds and switching modes clean up stale generated markers. From native Android code, use `com.reactlibrary.MappPushHelper`:
 
 ```java
 @Override public void onMessageReceived(RemoteMessage message) {
@@ -111,13 +111,20 @@ Set `enableGeofencing` on each platform that needs it. Android then adds fine/ba
 
 | Component | Tested baseline |
 | --- | --- |
-| Expo SDK | 56 |
-| React Native | 0.85 (Expo SDK 56) |
+| Expo SDK | 57 |
+| React Native | 0.86 (Expo SDK 57) |
 | New Architecture | Enabled |
 | Android min / compile / target SDK | 24 / 36 / 36 |
+| Android Gradle Plugin / Kotlin / JDK | 8.12 / 2.1.20 / 21 |
 | iOS deployment target | 16.4 (library minimum: 15.1) |
 | Mapp Android SDK | 7.1.2 |
 | Mapp iOS SDKs | Vendored xcframeworks in this package |
+
+Mapp Engage Android 7.1.2 currently publishes Android dependencies newer than the Expo SDK 57 toolchain can consume. This release exports bounded compatibility constraints for AndroidX Core 1.18.0, WorkManager 2.10.5, Lifecycle 2.10.0, Play Services Location 21.3.0, and Kotlin stdlib 2.1.20. These pins can be removed after the Mapp Android publication adopts the Expo-compatible versions.
+
+Coroutines are intentionally different: Mapp's native in-app UI was compiled against kotlinx-coroutines 1.11.0 and calls an ABI absent from 1.10.x. The plugin therefore exports the coroutines 1.11.0 BOM and strict constraints. Do not downgrade coroutines to 1.10.x; dismissing or replacing a native in-app message can otherwise crash with `Job.cancel$default` `NoSuchMethodError`.
+
+Use JDK 21 for Android builds on this baseline. The config plugin does not alter a consumer's Gradle daemon JVM configuration.
 
 The separately maintained [sample application](https://github.com/MappCloud/React-Native-Test-Application/) is the physical-device integration consumer. Record its tested revision here when its Expo CNG migration is released.
 

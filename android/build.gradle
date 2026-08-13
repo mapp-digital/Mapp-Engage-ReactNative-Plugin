@@ -41,18 +41,56 @@ android {
 
 dependencies {
     implementation "com.facebook.react:react-android:${resolvedReactNativeVersion}"
+    api platform("org.jetbrains.kotlinx:kotlinx-coroutines-bom:1.11.0")
+    api enforcedPlatform("org.jetbrains.kotlin:kotlin-bom:2.1.20")
     constraints {
-        implementation("androidx.core:core") {
+        api("androidx.core:core") {
             version {
                 strictly "1.18.0"
             }
             because "androidx.core 1.19.0 requires AGP 9.1+, while React Native dependencies currently require the app to stay on AGP 8"
         }
-        implementation("androidx.core:core-ktx") {
+        api("androidx.core:core-ktx") {
             version {
                 strictly "1.18.0"
             }
-            because "androidx.core-ktx 1.19.0 requires AGP 9.1+, while React Native dependencies currently require the app to stay on AGP 8"
+                because "androidx.core-ktx 1.19.0 requires AGP 9.1+, while React Native dependencies currently require the app to stay on AGP 8"
+        }
+        ["work-runtime", "work-runtime-ktx"].each { module ->
+            api("androidx.work:${module}") {
+                version { strictly "2.10.5" }
+                because "Expo SDK 57 uses AGP 8.12 and cannot consume WorkManager 2.11 metadata"
+            }
+        }
+        [
+            "lifecycle-common",
+            "lifecycle-common-java8",
+            "lifecycle-livedata-core",
+            "lifecycle-livedata-core-ktx",
+            "lifecycle-process",
+            "lifecycle-runtime",
+            "lifecycle-runtime-android",
+            "lifecycle-runtime-ktx",
+            "lifecycle-service",
+            "lifecycle-viewmodel",
+            "lifecycle-viewmodel-android",
+            "lifecycle-viewmodel-ktx",
+            "lifecycle-viewmodel-savedstate"
+        ].each { module ->
+            api("androidx.lifecycle:${module}") {
+                version { strictly "2.10.0" }
+                because "Expo SDK 57 uses AGP 8.12 and cannot consume Lifecycle 2.11 metadata"
+            }
+        }
+        api("com.google.android.gms:play-services-location") {
+            version { strictly "21.3.0" }
+            because "21.4.0 requires an Android toolchain newer than the Expo SDK 57 baseline"
+        }
+        ["kotlinx-coroutines-android", "kotlinx-coroutines-core", "kotlinx-coroutines-core-jvm"].each { module ->
+            api("org.jetbrains.kotlinx:${module}") {
+                version { strictly "1.11.0" }
+                because "Mapp Engage 7.1.2 native in-app UI requires the coroutines 1.11 Job ABI"
+            }
         }
     }
     implementation 'com.google.code.gson:gson:2.14.0'
@@ -62,10 +100,93 @@ dependencies {
     api('com.google.android.gms:play-services-location:21.3.0')
     implementation 'androidx.media:media:1.8.0'
     implementation 'androidx.legacy:legacy-support-v13:1.0.0'
-    implementation("com.mapp.sdk:engage-android:7.1.2")
+    implementation("com.mapp.sdk:engage-android:7.1.2") {
+        exclude group: "androidx.lifecycle", module: "lifecycle-extensions"
+    }
     testImplementation 'junit:junit:4.13.2'
     testImplementation 'org.mockito:mockito-core:5.23.0'
     testImplementation 'org.mockito:mockito-inline:5.2.0'
     testImplementation 'org.json:json:20260522'
     testImplementation 'org.robolectric:robolectric:4.16.1'
+}
+
+tasks.register("verifyExpo57RuntimeDependencies") {
+    group = "verification"
+    description = "Checks the Expo SDK 57 runtime pins and Mapp's required coroutines ABI."
+    doLast {
+        def expected = [
+            "androidx.core:core": "1.18.0",
+            "androidx.core:core-ktx": "1.18.0",
+            "androidx.work:work-runtime": "2.10.5",
+            "androidx.lifecycle:lifecycle-runtime": "2.10.0",
+            "com.google.android.gms:play-services-location": "21.3.0",
+            "org.jetbrains.kotlin:kotlin-stdlib": "2.1.20",
+            "org.jetbrains.kotlinx:kotlinx-coroutines-android": "1.11.0",
+            "org.jetbrains.kotlinx:kotlinx-coroutines-core-jvm": "1.11.0"
+        ]
+        def artifacts = configurations.debugRuntimeClasspath.resolvedConfiguration.resolvedArtifacts
+        def selected = configurations.debugRuntimeClasspath.incoming.resolutionResult.allComponents
+                .findAll { it.moduleVersion != null }
+                .collectEntries { component ->
+            [("${component.moduleVersion.group}:${component.moduleVersion.name}".toString()): component.moduleVersion.version]
+        }
+        expected.each { module, version ->
+            if (selected[module] != version) {
+                throw new GradleException("Expected ${module}:${version}, resolved ${selected[module] ?: 'nothing'}")
+            }
+        }
+        selected.findAll { module, ignored -> module.startsWith("androidx.lifecycle:") }.each { module, version ->
+            if (module != "androidx.lifecycle:lifecycle-extensions" && version != "2.10.0") {
+                throw new GradleException("Expected Lifecycle 2.10.0, resolved ${module}:${version}")
+            }
+        }
+        if (selected.containsKey("androidx.lifecycle:lifecycle-extensions")) {
+            throw new GradleException("lifecycle-extensions must not be present in the runtime graph")
+        }
+
+        def coroutineJar = artifacts.find {
+            it.moduleVersion.id.group == "org.jetbrains.kotlinx"
+                    && it.moduleVersion.id.name == "kotlinx-coroutines-core-jvm"
+        }?.file
+        if (coroutineJar == null) {
+            throw new GradleException("Could not inspect kotlinx-coroutines-core-jvm")
+        }
+        def javap = new ProcessBuilder(
+                "${System.getProperty('java.home')}/bin/javap",
+                "-classpath",
+                coroutineJar.absolutePath,
+                "kotlinx.coroutines.Job"
+        ).redirectErrorStream(true).start()
+        def javapOutput = javap.inputStream.getText("UTF-8")
+        if (javap.waitFor() != 0) {
+            throw new GradleException("Unable to inspect the resolved coroutines Job ABI:\n${javapOutput}")
+        }
+        if (!javapOutput.contains('cancel$default(kotlinx.coroutines.Job, java.util.concurrent.CancellationException, int, java.lang.Object)')) {
+            throw new GradleException("Resolved coroutines Job is missing Mapp's required cancel\$default ABI")
+        }
+
+        def apiElements = configurations.getByName("releaseApiElements")
+        def exportedConstraints = apiElements.allDependencyConstraints.collect {
+            "${it.group}:${it.name}:${it.versionConstraint.strictVersion}".toString()
+        }
+        [
+            "androidx.work:work-runtime:2.10.5",
+            "androidx.lifecycle:lifecycle-runtime:2.10.0",
+            "org.jetbrains.kotlinx:kotlinx-coroutines-core-jvm:1.11.0"
+        ].each { constraint ->
+            if (!exportedConstraints.contains(constraint)) {
+                throw new GradleException("Compatibility constraint is not exported: ${constraint}")
+            }
+        }
+        def exportedDependencies = apiElements.allDependencies.collect {
+            "${it.group}:${it.name}:${it.version}".toString()
+        }
+        if (!exportedDependencies.contains("org.jetbrains.kotlin:kotlin-bom:2.1.20")) {
+            throw new GradleException("The Expo Kotlin compatibility platform is not exported")
+        }
+    }
+}
+
+tasks.named("check").configure {
+    dependsOn("verifyExpo57RuntimeDependencies")
 }

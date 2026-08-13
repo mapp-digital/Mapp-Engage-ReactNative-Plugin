@@ -30,7 +30,7 @@ jobs:
       - uses: actions/setup-java@v5
         with:
           distribution: temurin
-          java-version: 17
+          java-version: 21
       - run: npm install --no-audit --no-fund
-      - run: ./gradlew test --no-daemon --console=plain
+      - run: ./gradlew test verifyExpo57RuntimeDependencies assembleDebug --no-daemon --console=plain
         working-directory: android

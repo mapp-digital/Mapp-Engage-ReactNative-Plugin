@@ -1,6 +1,7 @@
 package com.reactlibrary;
 
 import android.app.Application;
+import android.os.Handler;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
@@ -22,8 +23,12 @@ public final class MappPushHelper {
     private MappPushHelper() {}
 
     /** Engage Mapp using AppoxeeConfig/native defaults if it has not been engaged yet. */
-    public static void initialize(@NonNull Application application) {
-        Appoxee.engage(application, null);
+    public static boolean initialize(@NonNull Application application) {
+        return MappEngagementDispatcher.engageBlocking(application, null);
+    }
+
+    static boolean initialize(@NonNull Application application, @NonNull Handler handler, long timeoutMillis) {
+        return MappEngagementDispatcher.engageBlocking(application, null, handler, timeoutMillis);
     }
 
     /** Return true only when the native Mapp SDK identifies this payload as its own. */
@@ -38,7 +43,21 @@ public final class MappPushHelper {
 
     /** Forward a Mapp message. Returns false for non-Mapp payloads or SDK failures. */
     public static boolean handleMessage(@NonNull Application application, @NonNull RemoteMessage remoteMessage) {
-        initialize(application);
+        return handleMessage(application, remoteMessage, null, MappEngagementDispatcher.ENGAGE_TIMEOUT_MILLIS);
+    }
+
+    static boolean handleMessage(
+            @NonNull Application application,
+            @NonNull RemoteMessage remoteMessage,
+            Handler handler,
+            long timeoutMillis
+    ) {
+        boolean initialized = handler == null
+                ? initialize(application)
+                : initialize(application, handler, timeoutMillis);
+        if (!initialized) {
+            return false;
+        }
         if (!isMappMessage(remoteMessage) || !waitUntilReady()) {
             return false;
         }
@@ -53,10 +72,24 @@ public final class MappPushHelper {
 
     /** Forward a refreshed native FCM token without requiring JavaScript. */
     public static boolean handleNewToken(@NonNull Application application, @NonNull String token) {
+        return handleNewToken(application, token, null, MappEngagementDispatcher.ENGAGE_TIMEOUT_MILLIS);
+    }
+
+    static boolean handleNewToken(
+            @NonNull Application application,
+            @NonNull String token,
+            Handler handler,
+            long timeoutMillis
+    ) {
         if (token.trim().isEmpty()) {
             return false;
         }
-        initialize(application);
+        boolean initialized = handler == null
+                ? initialize(application)
+                : initialize(application, handler, timeoutMillis);
+        if (!initialized) {
+            return false;
+        }
         if (!waitUntilReady()) {
             return false;
         }
@@ -91,4 +124,3 @@ public final class MappPushHelper {
         return false;
     }
 }
-
