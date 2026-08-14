@@ -6,8 +6,10 @@ import android.os.Looper;
 import com.appoxee.Appoxee;
 import com.appoxee.internal.network.Call;
 import com.appoxee.shared.AppoxeeOptions;
+import com.appoxee.shared.InboxMessage;
 import com.appoxee.shared.MappCallback;
 import com.appoxee.shared.MappResult;
+import com.appoxee.shared.MessageStatus;
 import com.appoxee.shared.NotificationMode;
 
 import org.junit.After;
@@ -833,23 +835,36 @@ public class RNMappPluginModuleTest {
     }
 
     // =========================================================================
-    // InApp no-ops (v7 stubs) — smoke tests: must not throw
+    // Inbox message status updates
     // =========================================================================
 
     @Test
-    public void inAppMarkAsRead_doesNotThrow() {
-        module.inAppMarkAsRead(1, "eventId");
-        // no-op in v7 — just verifying no exception
+    public void inAppMarkAsRead_fetchesMessageAndUpdatesReadStatus() {
+        verifyInboxStatusUpdate(MessageStatus.READ, () ->
+                module.inAppMarkAsRead(42, "eventId"));
     }
 
     @Test
-    public void inAppMarkAsUnRead_doesNotThrow() {
-        module.inAppMarkAsUnRead(1, "eventId");
+    public void inAppMarkAsUnRead_fetchesMessageAndUpdatesUnreadStatus() {
+        verifyInboxStatusUpdate(MessageStatus.UNREAD, () ->
+                module.inAppMarkAsUnRead(42, "eventId"));
     }
 
     @Test
-    public void inAppMarkAsDeleted_doesNotThrow() {
-        module.inAppMarkAsDeleted(1, "eventId");
+    public void inAppMarkAsDeleted_fetchesMessageAndUpdatesDeletedStatus() {
+        verifyInboxStatusUpdate(MessageStatus.DELETED, () ->
+                module.inAppMarkAsDeleted(42, "eventId"));
+    }
+
+    @Test
+    public void inAppStatusUpdate_doesNotUpdateWhenMessageFetchFails() {
+        Call<InboxMessage> fetchCall = mockCall();
+        stubCallEnqueue(fetchCall, null);
+        when(mockAppoxeeInstance.fetchInboxMessage(42L)).thenReturn(fetchCall);
+
+        module.inAppMarkAsRead(42, "eventId");
+
+        verify(mockAppoxeeInstance, never()).updateInboxMessageStatus(any(), any());
     }
 
     @Test
@@ -1039,6 +1054,21 @@ public class RNMappPluginModuleTest {
     @SuppressWarnings("unchecked")
     private static <T> Call<T> mockCall() {
         return mock(Call.class);
+    }
+
+    private void verifyInboxStatusUpdate(MessageStatus status, Runnable action) {
+        InboxMessage message = mock(InboxMessage.class);
+        Call<InboxMessage> fetchCall = mockCall();
+        Call<Boolean> updateCall = mockCall();
+        stubCallEnqueue(fetchCall, successResult(message));
+        when(mockAppoxeeInstance.fetchInboxMessage(42L)).thenReturn(fetchCall);
+        when(mockAppoxeeInstance.updateInboxMessageStatus(message, status)).thenReturn(updateCall);
+
+        action.run();
+
+        verify(mockAppoxeeInstance).fetchInboxMessage(42L);
+        verify(mockAppoxeeInstance).updateInboxMessageStatus(message, status);
+        verify(updateCall).enqueue(any());
     }
 
     /**

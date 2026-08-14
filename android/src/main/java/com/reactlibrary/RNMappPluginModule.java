@@ -22,6 +22,7 @@ import androidx.core.content.ContextCompat;
 import com.appoxee.Appoxee;
 import com.appoxee.internal.model.response.DevicePayload;
 import com.appoxee.shared.InboxMessage;
+import com.appoxee.shared.MessageStatus;
 import com.appoxee.sdk.BuildConfig;
 import com.appoxee.shared.AppoxeeObserver;
 import com.appoxee.shared.AppoxeeOptions;
@@ -795,33 +796,41 @@ public class RNMappPluginModule extends NativeRNMappPluginModuleSpec implements 
         });
     }
 
+    @ReactMethod
+    public void inAppMarkAsRead(double templateId, String eventId) {
+        updateInboxMessageStatus((long) templateId, MessageStatus.READ);
+    }
+
+    @ReactMethod
+    public void inAppMarkAsUnRead(double templateId, String eventId) {
+        updateInboxMessageStatus((long) templateId, MessageStatus.UNREAD);
+    }
+
+    @ReactMethod
+    public void inAppMarkAsDeleted(double templateId, String eventId) {
+        updateInboxMessageStatus((long) templateId, MessageStatus.DELETED);
+    }
+
+    /**
+     * Mapp Engage v7 updates inbox state using the SDK's InboxMessage object,
+     * so fetch the message by template ID before sending the status update.
+     * The legacy eventId argument is not required by the v7 API.
+     */
+    private void updateInboxMessageStatus(long templateId, MessageStatus status) {
+        final Appoxee appoxee = Appoxee.instance();
+        appoxee.fetchInboxMessage(templateId).enqueue(fetchResult -> {
+            if (fetchResult == null || !fetchResult.isSuccess() || fetchResult.getData() == null) {
+                return;
+            }
+
+            appoxee.updateInboxMessageStatus(fetchResult.getData(), status).enqueue(updateResult -> {
+            });
+        });
+    }
+
     /**
      * Stubbed: InApp statistics internal classes were removed in v7.
      * The @ReactMethod signature is preserved to avoid breaking the JS public API.
-     */
-    @ReactMethod
-    public void inAppMarkAsRead(double templateId, String eventId) {
-        // no-op in v7
-    }
-
-    /**
-     * @see #inAppMarkAsRead
-     */
-    @ReactMethod
-    public void inAppMarkAsUnRead(double templateId, String eventId) {
-        // no-op in v7
-    }
-
-    /**
-     * @see #inAppMarkAsRead
-     */
-    @ReactMethod
-    public void inAppMarkAsDeleted(double templateId, String eventId) {
-        // no-op in v7
-    }
-
-    /**
-     * @see #inAppMarkAsRead
      */
     @ReactMethod
     public void triggerStatistic(double templateId, String originalEventId,
