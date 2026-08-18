@@ -2,6 +2,12 @@
 
 Mapp Engage native SDK integration for React Native CLI and Expo development builds.
 
+## Upgrading from 1.4.x
+
+Version 2.0 raises the minimum iOS target to 15.1 and changes Android dependency constraints, permission handling, push ownership, and inbox status updates.
+
+See the [1.4.2 to 2.0.0 migration guide](MIGRATION_2.0.md) before upgrading.
+
 ## Expo (CNG)
 
 Expo Go is not supported because it cannot load this package's custom native code. Use Continuous Native Generation (CNG) with `expo-dev-client`; generated `android/` and `ios/` directories do not need manual changes.
