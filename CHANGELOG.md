@@ -6,7 +6,7 @@
 - Exported strict Android compatibility constraints for the supported Expo SDK 57 toolchain and Mapp Engage 7.1.2 runtime ABI.
 - Changed Android geofence permission handling, FCM service ownership, and inbox status updates.
 - Deprecated `engage2()`, `startGeoFencing()`, and `stopGeoFencing()` in favor of their supported replacements.
-- See the [1.4.2 to 2.0.0 migration guide](MIGRATION_2.0.md) for required application changes and method-level behavior differences.
+- Review the [breaking changes](BREAKING_CHANGES.md), then follow the [1.4.2 to 2.0.0 migration guide](MIGRATION_2.0.md) for required application changes.
 
 ***Bug Fixes***
 

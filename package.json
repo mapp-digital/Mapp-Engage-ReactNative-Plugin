@@ -21,6 +21,7 @@
     "plugin/build/",
     "android/src/main/jni/",
     "specs/",
+    "BREAKING_CHANGES.md",
     "CHANGELOG.md",
     "MIGRATION_2.0.md",
     "CustomEvent.js",

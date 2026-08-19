@@ -2,6 +2,8 @@
 
 This guide covers upgrading from the latest published 1.4.x release, 1.4.2. The public JavaScript method names and signatures remain available, but 2.0.0 changes platform requirements, Android dependency resolution, push ownership, and the behavior of several existing methods.
 
+Read [Breaking changes in 2.0.0](BREAKING_CHANGES.md) first to determine which changes affect your application.
+
 ## Migration checklist
 
 1. Raise the application deployment target to iOS 15.1 or newer.

@@ -6,7 +6,7 @@ Mapp Engage native SDK integration for React Native CLI and Expo development bui
 
 Version 2.0 raises the minimum iOS target to 15.1 and changes Android dependency constraints, permission handling, push ownership, and inbox status updates.
 
-See the [1.4.2 to 2.0.0 migration guide](MIGRATION_2.0.md) before upgrading.
+Review the [breaking changes](BREAKING_CHANGES.md) and follow the [1.4.2 to 2.0.0 migration guide](MIGRATION_2.0.md) before upgrading.
 
 ## Expo (CNG)
 
