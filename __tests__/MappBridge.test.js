@@ -118,11 +118,11 @@ describe("engage (Android)", () => {
 describe("engage (iOS)", () => {
   beforeEach(() => { platform.OS = "ios"; });
 
-  test("calls autoengage and engageInapp with server, not the 5-param engage", () => {
+  test("uses the generated TurboModule engage method; native iOS reads credentials from the generated plist", () => {
     Mapp.engage("sdkKey", "projectId", "L3", "appId", "tenantId");
-    expect(native.autoengage).toHaveBeenCalledWith("L3");
-    expect(native.engageInapp).toHaveBeenCalledWith("L3");
-    expect(native.engage).not.toHaveBeenCalled();
+    expect(native.engage).toHaveBeenCalledWith("sdkKey", "projectId", "L3", "appId", "tenantId");
+    expect(native.autoengage).not.toHaveBeenCalled();
+    expect(native.engageInapp).not.toHaveBeenCalled();
   });
 });
 

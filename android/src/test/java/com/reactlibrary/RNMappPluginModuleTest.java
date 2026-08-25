@@ -6,8 +6,10 @@ import android.os.Looper;
 import com.appoxee.Appoxee;
 import com.appoxee.internal.network.Call;
 import com.appoxee.shared.AppoxeeOptions;
+import com.appoxee.shared.InboxMessage;
 import com.appoxee.shared.MappCallback;
 import com.appoxee.shared.MappResult;
+import com.appoxee.shared.MessageStatus;
 import com.appoxee.shared.NotificationMode;
 
 import org.junit.After;
@@ -25,6 +27,7 @@ import com.facebook.react.bridge.Promise;
 import com.facebook.react.bridge.ReactApplicationContext;
 import com.facebook.react.bridge.ReadableArray;
 import com.facebook.react.bridge.ReadableMap;
+import com.google.android.gms.tasks.Task;
 
 import java.util.Collections;
 import java.util.Set;
@@ -42,7 +45,9 @@ import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 /**
@@ -93,11 +98,31 @@ public class RNMappPluginModuleTest {
 
     @Test
     public void engage_callsAppoxeeEngageOnMainThread() {
+        mockedAppoxee.when(() -> Appoxee.engage(any(), any())).thenAnswer(invocation -> {
+            assertEquals(Looper.getMainLooper(), Looper.myLooper());
+            return null;
+        });
+
         module.engage("myKey", "projectId", "L3", "appId", "tenantId");
         Shadows.shadowOf(Looper.getMainLooper()).idle();
 
         mockedAppoxee.verify(() ->
                 Appoxee.engage(eq(RuntimeEnvironment.getApplication()), any(AppoxeeOptions.class))
+        );
+    }
+
+    @Test
+    public void engage2_callsAppoxeeEngageOnMainThread() {
+        mockedAppoxee.when(() -> Appoxee.engage(any(), any())).thenAnswer(invocation -> {
+            assertEquals(Looper.getMainLooper(), Looper.myLooper());
+            return null;
+        });
+
+        module.engage2();
+        Shadows.shadowOf(Looper.getMainLooper()).idle();
+
+        mockedAppoxee.verify(() ->
+                Appoxee.engage(eq(RuntimeEnvironment.getApplication()), eq(null))
         );
     }
 
@@ -208,6 +233,11 @@ public class RNMappPluginModuleTest {
 
     @Test
     public void engageTestServer_callsAppoxeeEngageWithCorrectOptions() {
+        mockedAppoxee.when(() -> Appoxee.engage(any(), any())).thenAnswer(invocation -> {
+            assertEquals(Looper.getMainLooper(), Looper.myLooper());
+            return null;
+        });
+
         module.engageTestServer("cepUrl", "myKey", "projectId", "TEST", "appId", "tenantId");
         Shadows.shadowOf(Looper.getMainLooper()).idle();
 
@@ -232,6 +262,52 @@ public class RNMappPluginModuleTest {
                         opt.getNotificationMode() != NotificationMode.BACKGROUND_AND_FOREGROUND
                 ))
         );
+    }
+
+    // =========================================================================
+    // getToken() result settlement
+    // =========================================================================
+
+    @Test
+    public void settleTokenTask_resolvesSuccessfulTokenExactlyOnce() {
+        Task<String> task = mock(Task.class);
+        Promise promise = mock(Promise.class);
+        when(task.isSuccessful()).thenReturn(true);
+        when(task.getResult()).thenReturn("fcm-token");
+
+        RNMappPluginModule.settleTokenTask(task, promise);
+
+        verify(promise, times(1)).resolve("fcm-token");
+        verifyNoMoreInteractions(promise);
+        verify(task, never()).getException();
+    }
+
+    @Test
+    public void settleTokenTask_rejectsFailureWithOriginalDetailsExactlyOnce() {
+        Task<String> task = mock(Task.class);
+        Promise promise = mock(Promise.class);
+        Exception cause = new IllegalStateException("Firebase unavailable");
+        when(task.isSuccessful()).thenReturn(false);
+        when(task.getException()).thenReturn(cause);
+
+        RNMappPluginModule.settleTokenTask(task, promise);
+
+        verify(promise, times(1)).reject("FCM_REGISTRATION_FAILED", "Firebase unavailable", cause);
+        verifyNoMoreInteractions(promise);
+        verify(task, never()).getResult();
+    }
+
+    @Test
+    public void settleTokenTask_usesFallbackMessageWhenFailureHasNoCause() {
+        Task<String> task = mock(Task.class);
+        Promise promise = mock(Promise.class);
+        when(task.isSuccessful()).thenReturn(false);
+        when(task.getException()).thenReturn(null);
+
+        RNMappPluginModule.settleTokenTask(task, promise);
+
+        verify(promise).reject("FCM_REGISTRATION_FAILED", "FCM registration failed", (Throwable) null);
+        verifyNoMoreInteractions(promise);
     }
 
     // =========================================================================
@@ -759,23 +835,36 @@ public class RNMappPluginModuleTest {
     }
 
     // =========================================================================
-    // InApp no-ops (v7 stubs) — smoke tests: must not throw
+    // Inbox message status updates
     // =========================================================================
 
     @Test
-    public void inAppMarkAsRead_doesNotThrow() {
-        module.inAppMarkAsRead(1, "eventId");
-        // no-op in v7 — just verifying no exception
+    public void inAppMarkAsRead_fetchesMessageAndUpdatesReadStatus() {
+        verifyInboxStatusUpdate(MessageStatus.READ, () ->
+                module.inAppMarkAsRead(42, "eventId"));
     }
 
     @Test
-    public void inAppMarkAsUnRead_doesNotThrow() {
-        module.inAppMarkAsUnRead(1, "eventId");
+    public void inAppMarkAsUnRead_fetchesMessageAndUpdatesUnreadStatus() {
+        verifyInboxStatusUpdate(MessageStatus.UNREAD, () ->
+                module.inAppMarkAsUnRead(42, "eventId"));
     }
 
     @Test
-    public void inAppMarkAsDeleted_doesNotThrow() {
-        module.inAppMarkAsDeleted(1, "eventId");
+    public void inAppMarkAsDeleted_fetchesMessageAndUpdatesDeletedStatus() {
+        verifyInboxStatusUpdate(MessageStatus.DELETED, () ->
+                module.inAppMarkAsDeleted(42, "eventId"));
+    }
+
+    @Test
+    public void inAppStatusUpdate_doesNotUpdateWhenMessageFetchFails() {
+        Call<InboxMessage> fetchCall = mockCall();
+        stubCallEnqueue(fetchCall, null);
+        when(mockAppoxeeInstance.fetchInboxMessage(42L)).thenReturn(fetchCall);
+
+        module.inAppMarkAsRead(42, "eventId");
+
+        verify(mockAppoxeeInstance, never()).updateInboxMessageStatus(any(), any());
     }
 
     @Test
@@ -965,6 +1054,21 @@ public class RNMappPluginModuleTest {
     @SuppressWarnings("unchecked")
     private static <T> Call<T> mockCall() {
         return mock(Call.class);
+    }
+
+    private void verifyInboxStatusUpdate(MessageStatus status, Runnable action) {
+        InboxMessage message = mock(InboxMessage.class);
+        Call<InboxMessage> fetchCall = mockCall();
+        Call<Boolean> updateCall = mockCall();
+        stubCallEnqueue(fetchCall, successResult(message));
+        when(mockAppoxeeInstance.fetchInboxMessage(42L)).thenReturn(fetchCall);
+        when(mockAppoxeeInstance.updateInboxMessageStatus(message, status)).thenReturn(updateCall);
+
+        action.run();
+
+        verify(mockAppoxeeInstance).fetchInboxMessage(42L);
+        verify(mockAppoxeeInstance).updateInboxMessageStatus(message, status);
+        verify(updateCall).enqueue(any());
     }
 
     /**

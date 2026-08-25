@@ -54,3 +54,4 @@ yarn.lock
 *.tgz
 package-lock.json
 android/.settings/
+expo_plan

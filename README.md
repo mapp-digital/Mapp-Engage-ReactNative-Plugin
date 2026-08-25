@@ -1,93 +1,156 @@
-
 # react-native-mapp-plugin
 
-## Getting started
-[Site](https://mapp.com/) |
-[Docs](https://mapp-wiki.atlassian.net/wiki/spaces/MIC/pages/1154875400/React+Native+Integration+for+Mapp+Cloud) 
-|[TestApk](https://github.com/MappCloud/React-Native-Test-Application/) 
+Mapp Engage native SDK integration for React Native CLI and Expo development builds.
 
-### Installation from npm:
+## Upgrading from 1.4.x
 
-`$ npm install react-native-mapp-plugin --save`
+Version 2.0 raises the minimum iOS target to 15.1 and changes Android dependency constraints, permission handling, push ownership, and inbox status updates.
 
-### Mostly automatic installation
+Review the [breaking changes](BREAKING_CHANGES.md) and follow the [1.4.2 to 2.0.0 migration guide](MIGRATION_2.0.md) before upgrading.
 
-For the old version of RN, 
-`$ react-native link react-native-mapp-plugin`
+## Expo (CNG)
 
-### Manual installation
+Expo Go is not supported because it cannot load this package's custom native code. Use Continuous Native Generation (CNG) with `expo-dev-client`; generated `android/` and `ios/` directories do not need manual changes.
 
-
-#### iOS
-
-1) Install pods
+```bash
+npx expo install react-native-mapp-plugin expo-dev-client
 ```
+
+Configure the installed package by name in `app.json` (values shown are examples):
+
+```json
+{
+  "expo": {
+    "name": "Mapp app",
+    "slug": "mapp-app",
+    "newArchEnabled": true,
+    "ios": {
+      "bundleIdentifier": "com.example.mappapp"
+    },
+    "android": {
+      "package": "com.example.mappapp",
+      "googleServicesFile": "./google-services.json"
+    },
+    "plugins": [
+      [
+        "react-native-mapp-plugin",
+        {
+          "android": {
+            "enableGeofencing": false,
+            "pushHandling": "mapp"
+          },
+          "ios": {
+            "appId": "MAPP_APP_ID",
+            "dmcSystemId": 123,
+            "sdkKey": "MAPP_SDK_KEY",
+            "isEu": true,
+            "inAppServerUrl": "MAPP_INAPP_SERVER_URL",
+            "openLandingPageInsideApp": false,
+            "customFields": ["customString", "customNumber", "customDate"],
+            "mediaTimeout": 5,
+            "enableGeofencing": false
+          }
+        }
+      ]
+    ]
+  }
+}
+```
+
+The Android package must match the Firebase Android application in `google-services.json`. For iOS, configure an APNs-enabled App ID, matching bundle identifier, and Apple/EAS signing credentials. Values embedded in app config and native resources are public application configuration; do not put service-account keys or signing secrets there.
+
+Generate and run development builds:
+
+```bash
+npx expo prebuild --clean
+npx expo run:android
+npx expo run:ios
+
+# Cloud builds, after configuring EAS
+eas build --profile development --platform all
+eas build --profile preview --platform all
+eas build --profile production --platform all
+```
+
+Changing plugin options or native dependencies requires a new binary. JavaScript-only changes may use EAS Update.
+
+### Initialization
+
+Register event listeners at application startup, then initialize Mapp. On iOS the generated `AppoxeeConfig.plist` is the credential source of truth; the existing `engage` arguments remain relevant to Android.
+
+```js
+import { Mapp, MappEventEmitter } from 'react-native-mapp-plugin';
+
+const events = new MappEventEmitter();
+const subscription = events.addListener('com.mapp.deep_link_received', event => {
+  // Route the deep link.
+});
+
+Mapp.engage('ANDROID_SDK_KEY', 'FCM_PROJECT_ID', 'EMC', 'APP_ID', 'TENANT_ID');
+```
+
+### Android push ownership
+
+`pushHandling: "mapp"` is the default. It requires `expo.android.googleServicesFile` and retains `com.reactlibrary.MessageService` as the sole normal-priority Mapp FCM callback owner. The config plugin removes the Mapp SDK v7 service (`com.appoxee.shared.MappMessagingService`) from the merged app manifest.
+
+Use `pushHandling: "custom"` when another integration, such as a client-owned `FirebaseMessagingService`, owns callbacks. The plugin removes both its `MessageService` and the Mapp SDK service so the consumer service owns callbacks. Repeated prebuilds and switching modes clean up stale generated markers. From native Android code, use `com.reactlibrary.MappPushHelper`:
+
+```java
+@Override public void onMessageReceived(RemoteMessage message) {
+  if (!MappPushHelper.handleMessage(getApplication(), message)) {
+    // Handle non-Mapp messages here.
+  }
+}
+
+@Override public void onNewToken(String token) {
+  MappPushHelper.handleNewToken(getApplication(), token);
+}
+```
+
+`Mapp.setRemoteMessage(...)` remains available when JavaScript is guaranteed to be alive. The native helper is required for reliable background and terminated delivery. `expo-notifications` coexistence must use custom ownership and explicit native forwarding; successful manifest merging alone does not forward payloads.
+
+### Geofencing
+
+Set `enableGeofencing` on each platform that needs it. Android then adds fine/background location permissions and `Mapp.requestGeofenceLocationPermission()` requests foreground permission before background permission. On iOS, also supply non-empty `locationWhenInUsePermission` and `locationAlwaysPermission` messages. Only request location access when your user-facing feature and store policy justify it.
+
+### Tested compatibility
+
+| Component | Tested baseline |
+| --- | --- |
+| Expo SDK | 57 |
+| React Native | 0.86 (Expo SDK 57) |
+| New Architecture | Enabled |
+| Android min / compile / target SDK | 24 / 36 / 36 |
+| Android Gradle Plugin / Kotlin / JDK | 8.12 / 2.1.20 / 21 |
+| iOS deployment target | 16.4 (library minimum: 15.1) |
+| Mapp Android SDK | 7.1.2 |
+| Mapp iOS SDKs | Vendored xcframeworks in this package |
+
+Mapp Engage Android 7.1.2 currently publishes Android dependencies newer than the Expo SDK 57 toolchain can consume. This release exports bounded compatibility constraints for AndroidX Core 1.18.0, WorkManager 2.10.5, Lifecycle 2.10.0, Play Services Location 21.3.0, and Kotlin stdlib 2.1.20. These pins can be removed after the Mapp Android publication adopts the Expo-compatible versions.
+
+Coroutines are intentionally different: Mapp's native in-app UI was compiled against kotlinx-coroutines 1.11.0 and calls an ABI absent from 1.10.x. The plugin therefore exports the coroutines 1.11.0 BOM and strict constraints. Do not downgrade coroutines to 1.10.x; dismissing or replacing a native in-app message can otherwise crash with `Job.cancel$default` `NoSuchMethodError`.
+
+Use JDK 21 for Android builds on this baseline. The config plugin does not alter a consumer's Gradle daemon JVM configuration.
+
+The separately maintained [sample application](https://github.com/MappCloud/React-Native-Test-Application/) is the physical-device integration consumer. Record its tested revision here when its Expo CNG migration is released.
+
+## React Native CLI
+
+```bash
+npm install react-native-mapp-plugin
 cd ios && pod install
 ```
 
-2) Add the following capabilities for your application target:
-  - Push Notification
-  - Background Modes > Remote Notifications
-  - Background Modes > Location updates
+Modern React Native autolinking discovers the Android package and CocoaPod automatically. Do not run `react-native link`, edit `settings.gradle`, or add `compile project(...)`.
 
-3) Create a plist `AppoxeeConfig.plist` and include it in your application’s target:
-```
-<?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
-<plist version="1.0">
-<dict>
-    <key>inapp</key>
-    <dict>
-        <key>custom_fields</key>
-        <array>
-            <string>customString</string>
-            <string>customNumber</string>
-            <string>customDate</string>
-        </array>
-        <key>media_timeout</key>
-        <integer>5</integer>
-    </dict>
-    <key>sdk</key>
-    <dict>
-        <key>app_id</key>
-        <string>your app id</string>
-        <key>dmc_system_id</key>
-        <integer>your dmc id</integer>
-        <key>sdk_key</key>
-        <string>your sdk key</string>
-        <key>is_eu</key>
-        <true/>
-        <key>open_landing_page_inside_app</key>
-        <false/>
-        <key>jamie_url</key>
-        <string>your inapp server url</string>
-        <key>apx_open_url_internal</key>
-        <string>YES</string>
-    </dict>
-</dict>
-</plist>
+For a manually maintained iOS native project, add Push Notifications, Remote Notifications background mode, and (only if needed) Location Updates, then include an `AppoxeeConfig.plist` in the application target. Expo clients should use the config plugin above instead.
+
+Basic usage:
+
+```js
+import { Mapp } from 'react-native-mapp-plugin';
+
+Mapp.engage('SDK_KEY', 'FCM_PROJECT_ID', 'EMC', 'APP_ID', 'TENANT_ID');
 ```
 
-#### Android
-
-1. Open up `android/app/src/main/java/[...]/MainActivity.java`
-  - Add `import com.reactlibrary.RNMappPluginPackage;` to the imports at the top of the file
-  - Add `new RNMappPluginPackage()` to the list returned by the `getPackages()` method
-2. Append the following lines to `android/settings.gradle`:
-  	```
-  	include ':react-native-mapp-plugin'
-  	project(':react-native-mapp-plugin').projectDir = new File(rootProject.projectDir, 	'../node_modules/react-native-mapp-plugin/android')
-  	```
-3. Insert the following lines inside the dependencies block in `android/app/build.gradle`:
-  	```
-      compile project(':react-native-mapp-plugin')
-  	```
-
-## Usage
-```javascript
-import Mapp from 'react-native-mapp-plugin';
-
-// TODO: What to do with the module?
-Mapp;
-```
-  
+See the [Mapp integration documentation](https://mapp-wiki.atlassian.net/wiki/spaces/MIC/pages/1154875400/React+Native+Integration+for+Mapp+Cloud) for the full JavaScript API and native Mapp configuration values.

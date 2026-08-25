@@ -43,6 +43,11 @@ NSString *const MappRNInappMessage = @"com.mapp.inapp_message";
 
 -(void)startObserving {
     hasListeners = YES;
+    NSArray *events = [self.pendingEvents copy];
+    [self.pendingEvents removeAllObjects];
+    for (NSDictionary *event in events) {
+        [super sendEventWithName:event[@"name"] body:event[@"body"]];
+    }
 }
 
 -(void)stopObserving {
@@ -50,7 +55,22 @@ NSString *const MappRNInappMessage = @"com.mapp.inapp_message";
 }
 
 - (NSArray<NSString *> *)supportedEvents {
-    return @[MappRNInitEvent, MappRNInboxMessageReceived, MappRNInboxMessagesReceived, MappRNLocationEnter, MappRNCustomLinkReceived, MappRNDeepLinkReceived, MappRNRichMessage,MappRNPushMessage, MappErrorMessage,MappRNInappMessage];
+    return @[MappRNInitEvent, MappRNInboxMessageReceived, MappRNInboxMessagesReceived, MappRNLocationEnter, MappRNLocationExit, MappRNCustomLinkReceived, MappRNDeepLinkReceived, MappRNRichMessage,MappRNPushMessage, MappErrorMessage,MappRNInappMessage];
+}
+
+- (void)sendEventWithName:(NSString *)name body:(id)body {
+    if (hasListeners) {
+        [super sendEventWithName:name body:body];
+        return;
+    }
+    if (!self.pendingEvents) {
+        self.pendingEvents = [NSMutableArray array];
+    }
+    // Bound the cold-start queue so repeated background callbacks cannot grow it forever.
+    if (self.pendingEvents.count >= 50) {
+        [self.pendingEvents removeObjectAtIndex:0];
+    }
+    [self.pendingEvents addObject:@{ @"name": name, @"body": body ?: [NSNull null] }];
 }
 
 - (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary<NSKeyValueChangeKey,id> *)change context:(void *)context {
@@ -223,5 +243,4 @@ NSString *const MappRNInappMessage = @"com.mapp.inapp_message";
     return [dateFormatter stringFromDate:date];
 }
 @end
-
 

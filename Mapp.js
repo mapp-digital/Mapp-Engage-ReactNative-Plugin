@@ -108,11 +108,8 @@ export class Mapp {
   }
 
   /**
-   * Engage
-   *
-   * @return {Promise.<string>} A promise with the result.
+   * @deprecated Use engage(sdkKey, googleProjectId, server, appID, tenantID).
    */
-
   static engage2() {
     if (Platform.OS == "android") {
       return RNMappPluginModule.engage2();
@@ -131,10 +128,6 @@ export class Mapp {
     appID: string,
     tenantID: string
   ) {
-    if (Platform.OS == "ios") {
-      RNMappPluginModule.autoengage(server);
-      return RNMappPluginModule.engageInapp(server);
-    }
     return RNMappPluginModule.engage(
       sdkKey,
       googleProjectId,
@@ -335,10 +328,16 @@ export class Mapp {
     return RNMappPluginModule.stopGeofencing();
   }
 
+  /**
+   * @deprecated Use startGeofencing(), which returns the native operation result.
+   */
   static startGeoFencing() {
     return RNMappPluginModule.startGeoFencing();
   }
 
+  /**
+   * @deprecated Use stopGeofencing(), which returns the native operation result.
+   */
   static stopGeoFencing() {
     return RNMappPluginModule.stopGeoFencing();
   }

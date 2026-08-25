@@ -14,6 +14,7 @@ export interface Spec extends TurboModule {
   setAlias(alias: string): Promise<boolean>;
   setAliasWithResend(alias: string, resendCustomAttributes: boolean): Promise<boolean>;
   getAlias(): Promise<string>;
+  /** @deprecated Use engage(...). */
   engage2(): void;
   engage(sdkKey: string, googleProjectId: string, server: string, appID: string, tenantID: string): void;
   engageTestServer(cepURl: string, sdkKey: string, googleProjectId: string, server: string, appID: string, tenantID: string): void;
@@ -38,7 +39,9 @@ export interface Spec extends TurboModule {
   removeBadgeNumber(): void;
   startGeofencing(): Promise<string>;
   stopGeofencing(): Promise<string>;
+  /** @deprecated Use startGeofencing(). */
   startGeoFencing(): void;
+  /** @deprecated Use stopGeofencing(). */
   stopGeoFencing(): void;
   fetchLatestInboxMessage(): Promise<Object>;
   fetchInboxMessage(): Promise<Array<Object>>;

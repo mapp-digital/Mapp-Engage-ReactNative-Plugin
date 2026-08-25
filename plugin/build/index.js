@@ -1,0 +1,24 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.validateAndNormalizeProps = exports.writeAppoxeeConfig = exports.buildAppoxeeConfig = exports.withMappEngageIos = exports.withMappEngageAndroid = exports.withMappEngage = void 0;
+const config_plugins_1 = require("@expo/config-plugins");
+const android_1 = require("./android");
+const ios_1 = require("./ios");
+const validation_1 = require("./validation");
+const pkg = require('../../package.json');
+const plugin = (config, props) => {
+    const normalized = (0, validation_1.validateAndNormalizeProps)(config, props);
+    config = (0, android_1.withMappEngageAndroid)(config, normalized.android);
+    config = (0, ios_1.withMappEngageIos)(config, normalized.ios);
+    return config;
+};
+exports.withMappEngage = (0, config_plugins_1.createRunOncePlugin)(plugin, 'react-native-mapp-plugin', pkg.version);
+var android_2 = require("./android");
+Object.defineProperty(exports, "withMappEngageAndroid", { enumerable: true, get: function () { return android_2.withMappEngageAndroid; } });
+var ios_2 = require("./ios");
+Object.defineProperty(exports, "withMappEngageIos", { enumerable: true, get: function () { return ios_2.withMappEngageIos; } });
+Object.defineProperty(exports, "buildAppoxeeConfig", { enumerable: true, get: function () { return ios_2.buildAppoxeeConfig; } });
+Object.defineProperty(exports, "writeAppoxeeConfig", { enumerable: true, get: function () { return ios_2.writeAppoxeeConfig; } });
+var validation_2 = require("./validation");
+Object.defineProperty(exports, "validateAndNormalizeProps", { enumerable: true, get: function () { return validation_2.validateAndNormalizeProps; } });
+exports.default = exports.withMappEngage;

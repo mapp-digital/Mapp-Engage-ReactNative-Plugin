@@ -1,8 +1,19 @@
 #import "RNMappPluginModule.h"
 #import "RNMappEventEmmiter.h"
+#if RCT_NEW_ARCH_ENABLED
+#import <ReactCommon/RCTTurboModule.h>
+#endif
 
 
 @implementation RNMappPluginModule
+
+#if RCT_NEW_ARCH_ENABLED
+- (std::shared_ptr<facebook::react::TurboModule>)getTurboModule:
+    (const facebook::react::ObjCTurboModule::InitParams &)params
+{
+    return std::make_shared<facebook::react::NativeRNMappPluginModuleSpecJSI>(params);
+}
+#endif
 
 
 - (void)setBridge:(RCTBridge *)bridge {
@@ -35,20 +46,87 @@ RCT_EXPORT_METHOD(removeListeners:(NSInteger)count) {
     [[RNMappEventEmmiter shared] removeListeners:count];
 }
 
-#pragma mark Exported methods - Notifications
-
-RCT_EXPORT_METHOD(engage: (NSString *)sdkKey projectId: (NSString *)projectId cepUrl:(NSString *)cepUrl appID:(NSString *)appID tenantID:(NSString *)tenantID) {
-    SERVER serv = [self getServerKeyFor:cepUrl];
-    [[Appoxee shared] engageWithLaunchOptions:nil andDelegate:[RNMappEventEmmiter shared] andSDKID:sdkKey with: serv];
+// Cross-platform TurboModule methods that need iOS-specific behavior or have no
+// meaningful iOS equivalent. Keeping them here makes the generated spec safe to
+// invoke under the New Architecture instead of relying on legacy interop.
+RCT_EXPORT_METHOD(requestGeofenceLocationPermission:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject) {
+    CLAuthorizationStatus status = [CLLocationManager authorizationStatus];
+    if (status == kCLAuthorizationStatusNotDetermined) {
+        [[[CLLocationManager alloc] init] requestAlwaysAuthorization];
+    }
+    resolve(@(status == kCLAuthorizationStatusAuthorizedAlways));
 }
 
-RCT_REMAP_METHOD(autoengage,engage:(NSString *) server) {
+RCT_EXPORT_METHOD(requestPostNotificationPermission:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject) {
+    [[UNUserNotificationCenter currentNotificationCenter]
+        requestAuthorizationWithOptions:(UNAuthorizationOptionAlert | UNAuthorizationOptionBadge | UNAuthorizationOptionSound)
+        completionHandler:^(BOOL granted, NSError *error) {
+            if (error) reject(@"NOTIFICATION_PERMISSION_ERROR", @"Unable to request notification permission", error);
+            else resolve(@(granted));
+        }];
+}
+
+RCT_EXPORT_METHOD(setRemoteMessage:(NSString *)msgJson resolve:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject) {
+    // iOS delivery is handled by APNs/Appoxee auto-integration, not FCM RemoteMessage JSON.
+    resolve(@NO);
+}
+
+RCT_EXPORT_METHOD(isPushFromMapp:(NSString *)msgJson resolve:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject) {
+    resolve(@NO);
+}
+
+RCT_EXPORT_METHOD(getToken:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject) {
+    reject(@"APNS_TOKEN_UNAVAILABLE", @"Mapp auto-integration owns the native APNs token on iOS", nil);
+}
+
+RCT_EXPORT_METHOD(engage2) {}
+
+RCT_EXPORT_METHOD(engageTestServer:(NSString *)cepUrl sdkKey:(NSString *)sdkKey googleProjectId:(NSString *)projectId server:(NSString *)server appID:(NSString *)appID tenantID:(NSString *)tenantID) {
+    [self engage:sdkKey googleProjectId:projectId server:server appID:appID tenantID:tenantID];
+}
+
+RCT_EXPORT_METHOD(onInitCompletedListener:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject) {
+    resolve(@([[Appoxee shared] isReady]));
+}
+
+RCT_EXPORT_METHOD(setAttributeBoolean:(NSString *)key value:(BOOL)value) {
+    [[Appoxee shared] setNumberValue:@(value) forKey:key withCompletionHandler:nil];
+}
+
+RCT_EXPORT_METHOD(removeAttribute:(NSString *)attribute) {
+    // The vendored iOS SDK has no single-field removal API.
+}
+
+RCT_EXPORT_METHOD(getDeviceDmcInfo:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject) {
+    [self getDeviceInfo:resolve reject:reject];
+}
+
+RCT_EXPORT_METHOD(lockScreenOrientation:(NSInteger)orientation) {}
+
+RCT_EXPORT_METHOD(startGeofencing:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject) {
+    [[AppoxeeLocationManager shared] enableLocationMonitoring];
+    resolve(@"started");
+}
+
+RCT_EXPORT_METHOD(stopGeofencing:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject) {
+    [[AppoxeeLocationManager shared] disableLocationMonitoring];
+    resolve(@"stopped");
+}
+
+RCT_EXPORT_METHOD(triggerStatistic:(NSInteger)templateId originalEventId:(NSString *)originalEventId trackingKey:(NSString *)trackingKey displayMillis:(NSInteger)displayMillis reason:(NSString *)reason link:(NSString *)link) {}
+RCT_EXPORT_METHOD(addAndroidListener:(NSString *)eventName) {}
+RCT_EXPORT_METHOD(removeAndroidListeners:(NSInteger)count) {}
+
+#pragma mark Exported methods - Notifications
+
+RCT_EXPORT_METHOD(engage: (NSString *)sdkKey googleProjectId: (NSString *)projectId server:(NSString *)server appID:(NSString *)appID tenantID:(NSString *)tenantID) {
     SERVER serv = [self getServerKeyFor:server];
     [[Appoxee shared] engageAndAutoIntegrateWithLaunchOptions:nil andDelegate:[RNMappEventEmmiter shared] with:serv];
     [[Appoxee shared] addObserver: [RNMappEventEmmiter shared] forKeyPath:@"isReady" options:NSKeyValueObservingOptionNew context:nil];
+    [[AppoxeeInapp shared] engageWithDelegate:[RNMappEventEmmiter shared] with:[self getInappServerKeyFor:server]];
 }
 
-RCT_EXPORT_METHOD(getAlias:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject) {
+RCT_EXPORT_METHOD(getAlias:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject) {
     [[Appoxee shared] getDeviceAliasWithCompletionHandler:^(NSError * _Nullable appoxeeError, id  _Nullable data) {
         if (appoxeeError == nil && data != nil) {
             resolve(data);
@@ -58,24 +136,34 @@ RCT_EXPORT_METHOD(getAlias:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseR
     }];
 }
 
-RCT_EXPORT_METHOD(setAlias:(NSString *) alias) {
+RCT_EXPORT_METHOD(setAlias:(NSString *) alias resolve:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject) {
     [[Appoxee shared] setDeviceAlias:alias withCompletionHandler:^(NSError * _Nullable appoxeeError, id  _Nullable data) {
         if (appoxeeError != nil) {
-            NSLog(@"%@", appoxeeError.debugDescription);
+            reject(@"SET_ALIAS_ERROR", @"Failed to set alias", appoxeeError);
+        } else {
+            resolve(@YES);
         }
     }];
 }
 
-RCT_EXPORT_METHOD(setAliasWithResend:(NSString *) alias withResendAttributes:(BOOL) resendAttributes) {
+RCT_EXPORT_METHOD(setAliasWithResend:(NSString *) alias resendCustomAttributes:(BOOL) resendAttributes resolve:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject) {
     [[Appoxee shared] setDeviceAlias:alias withResendAttributes:resendAttributes withCompletionHandler:^(NSError * _Nullable appoxeeError, id  _Nullable data) {
         if (appoxeeError != nil) {
-            NSLog(@"%@", appoxeeError.debugDescription);
+            reject(@"SET_ALIAS_ERROR", @"Failed to set alias", appoxeeError);
+        } else {
+            resolve(@YES);
         }
     }];
 }
 
-RCT_EXPORT_METHOD(setToken:(NSString *) token) {
-    [[Appoxee shared] didRegisterForRemoteNotificationsWithDeviceToken:[[NSData alloc] initWithBase64EncodedString:token options:NSUTF8StringEncoding]];
+RCT_EXPORT_METHOD(setToken:(NSString *) token resolve:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject) {
+    NSData *deviceToken = [[NSData alloc] initWithBase64EncodedString:token options:0];
+    if (!deviceToken) {
+        reject(@"INVALID_APNS_TOKEN", @"setToken expects a base64-encoded native APNs device token, not an Expo push token", nil);
+        return;
+    }
+    [[Appoxee shared] didRegisterForRemoteNotificationsWithDeviceToken:deviceToken];
+    resolve(@YES);
 }
 
 RCT_EXPORT_METHOD(removeDeviceAlias) {
@@ -90,11 +178,11 @@ RCT_EXPORT_METHOD(logOut: (BOOL) pushEnabled) {
     [[Appoxee shared] logoutWithOptin:pushEnabled];
 }
 
-RCT_EXPORT_METHOD(isReady:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject) {
+RCT_EXPORT_METHOD(isReady:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject) {
     resolve(@([[Appoxee shared] isReady]));
 }
 
-RCT_EXPORT_METHOD(isPushEnabled:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject) {
+RCT_EXPORT_METHOD(isPushEnabled:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject) {
     [[Appoxee shared] isPushEnabled:^(NSError * _Nullable appoxeeError, id  _Nullable data) {
         if (appoxeeError == nil) {
             resolve(data);
@@ -132,15 +220,17 @@ RCT_EXPORT_METHOD(incrementNumericKey: (NSString *) key value: (NSNumber *) numb
     }];
 }
 
-RCT_EXPORT_METHOD(setAttributes: (NSDictionary *)attributes)  {
+RCT_EXPORT_METHOD(setAttributes: (NSDictionary *)attributes resolve:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject)  {
     [[Appoxee shared] setCustomAttributtes:attributes withCompletionHandler:^(NSError * _Nullable appoxeeError, id  _Nullable data) {
         if (appoxeeError) {
-            NSLog(@"%@", appoxeeError.debugDescription);
+            reject(@"SET_ATTRIBUTES_ERROR", @"Failed to set attributes", appoxeeError);
+        } else {
+            resolve(@YES);
         }
     }];
 }
 
-RCT_EXPORT_METHOD(getAttributes: (NSArray *)attributes and:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject)  {
+RCT_EXPORT_METHOD(getAttributes: (NSArray *)attributes resolve:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject)  {
     [[Appoxee shared] getCustomAttributes:attributes withCompletionHandler:^(NSError * _Nullable appoxeeError, id  _Nullable data) {
         if (appoxeeError) {
             NSLog(@"%@", appoxeeError.debugDescription);
@@ -157,8 +247,8 @@ RCT_EXPORT_METHOD(setAttribute: (NSString *)key value: (NSString *) value)  {
     }];
 }
 
-RCT_EXPORT_METHOD(setAttributeInt: (NSString *)key value: (NSNumber *) value) {
-    [[Appoxee shared] setNumberValue:value forKey:key withCompletionHandler:^(NSError * _Nullable appoxeeError, id  _Nullable data) {
+RCT_EXPORT_METHOD(setAttributeInt: (NSString *)key value: (NSInteger) value) {
+    [[Appoxee shared] setNumberValue:@(value) forKey:key withCompletionHandler:^(NSError * _Nullable appoxeeError, id  _Nullable data) {
         if(appoxeeError != nil) {
             NSLog(@"%@", appoxeeError.debugDescription);
         }
@@ -181,7 +271,7 @@ RCT_EXPORT_METHOD(addTag: (NSString *) tag) {
     }];
 }
 
-RCT_EXPORT_METHOD(getTags:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject) {
+RCT_EXPORT_METHOD(getTags:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject) {
     [[Appoxee shared] fetchDeviceTags:^(NSError * _Nullable appoxeeError, id  _Nullable data) {
         if (!appoxeeError && [data isKindOfClass:[NSArray class]]) {
             NSArray *deviceTags = (NSArray *)data;
@@ -192,7 +282,7 @@ RCT_EXPORT_METHOD(getTags:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRe
     }];
 }
 
-RCT_EXPORT_METHOD(getDeviceInfo:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject) {
+RCT_EXPORT_METHOD(getDeviceInfo:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject) {
     [[Appoxee shared] deviceInformationwithCompletionHandler:^(NSError * _Nullable appoxeeError, id  _Nullable data) {
         if (!appoxeeError && [data isKindOfClass:[APXClientDevice class]]) {
             APXClientDevice *device = (APXClientDevice *)data;
@@ -204,7 +294,7 @@ RCT_EXPORT_METHOD(getDeviceInfo:(RCTPromiseResolveBlock)resolve rejecter:(RCTPro
     }];
 }
 
-RCT_EXPORT_METHOD(getAttributeStringValue: (NSString *) key resolver:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject) {
+RCT_EXPORT_METHOD(getAttributeStringValue: (NSString *) key resolve:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject) {
     [[Appoxee shared] fetchCustomFieldByKey:key withCompletionHandler:^(NSError * _Nullable appoxeeError, id  _Nullable data) {
         NSLog(@"%@", data);
         if (!appoxeeError && [data isKindOfClass:[NSDictionary class]]) {
@@ -245,23 +335,18 @@ RCT_EXPORT_METHOD(clearNotifications) {
     [[UNUserNotificationCenter currentNotificationCenter] removeAllDeliveredNotifications];
 }
 
-RCT_EXPORT_METHOD(clearNotification: (NSNumber *) index ){
-    [[UNUserNotificationCenter currentNotificationCenter] removeDeliveredNotificationsWithIdentifiers: @[[index stringValue]]];
+RCT_EXPORT_METHOD(clearNotification: (NSInteger) index ){
+    [[UNUserNotificationCenter currentNotificationCenter] removeDeliveredNotificationsWithIdentifiers: @[[NSString stringWithFormat:@"%ld", (long)index]]];
 }
 
 #pragma mark Exported methods - Inapp
 
-RCT_REMAP_METHOD(engageInapp,engageInapp:(NSString *) server) {
-    INAPPSERVER serv = [self getInappServerKeyFor:server];
-    [[AppoxeeInapp shared] engageWithDelegate:[RNMappEventEmmiter shared] with:serv];
-}
-
-RCT_EXPORT_METHOD(fetchInboxMessage: (RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject) {
+RCT_EXPORT_METHOD(fetchInboxMessage: (RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject) {
     [[AppoxeeInapp shared] fetchAPXInBoxMessages];
     resolve(@"Fetching, set event listener for iOS");
 }
 
-RCT_EXPORT_METHOD(fetchLatestInboxMessage: (RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject) {
+RCT_EXPORT_METHOD(fetchLatestInboxMessage: (RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject) {
     [[AppoxeeInapp shared] fetchAPXInBoxMessages];
     resolve(@"Fetching, set event listener for iOS");
 }
@@ -270,28 +355,28 @@ RCT_EXPORT_METHOD(triggerInApp: (NSString *) event) {
     [[AppoxeeInapp shared] reportInteractionEventWithName:event andAttributes:nil];
 }
 
-RCT_EXPORT_METHOD(inAppMarkAsRead: (NSNumber * _Nonnull) templateId event: (NSString * _Nonnull) eventId) {
-    APXInBoxMessage *message = [[RNMappEventEmmiter shared] getMessageWith:templateId event:eventId];
+RCT_EXPORT_METHOD(inAppMarkAsRead: (NSInteger) templateId eventId: (NSString * _Nonnull) eventId) {
+    APXInBoxMessage *message = [[RNMappEventEmmiter shared] getMessageWith:@(templateId) event:eventId];
     if (message) {
         [message markAsRead];
     }
 }
 
-RCT_EXPORT_METHOD(inAppMarkAsUnRead: (NSNumber * _Nonnull) templateId event: (NSString * _Nonnull) eventId) {
-    APXInBoxMessage *message = [[RNMappEventEmmiter shared] getMessageWith:templateId event:eventId];
+RCT_EXPORT_METHOD(inAppMarkAsUnRead: (NSInteger) templateId eventId: (NSString * _Nonnull) eventId) {
+    APXInBoxMessage *message = [[RNMappEventEmmiter shared] getMessageWith:@(templateId) event:eventId];
     if (message) {
         [message markAsUnread];
     }
 }
 
-RCT_EXPORT_METHOD(inAppMarkAsDeleted: (NSNumber * _Nonnull) templateId event: (NSString * _Nonnull) eventId) {
-    APXInBoxMessage *message = [[RNMappEventEmmiter shared] getMessageWith:templateId event:eventId];
+RCT_EXPORT_METHOD(inAppMarkAsDeleted: (NSInteger) templateId eventId: (NSString * _Nonnull) eventId) {
+    APXInBoxMessage *message = [[RNMappEventEmmiter shared] getMessageWith:@(templateId) event:eventId];
     if (message) {
         [message markAsDeleted];
     }
 }
 
-RCT_EXPORT_METHOD(isDeviceRegistered:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject) {
+RCT_EXPORT_METHOD(isDeviceRegistered:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject) {
     resolve(@([[Appoxee shared] isReady]));
 }
 
@@ -371,4 +456,3 @@ RCT_EXPORT_METHOD(stopGeoFencing) {
 
 
 @end
-

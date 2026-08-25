@@ -11,8 +11,6 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Build;
-import android.os.Handler;
-import android.os.Looper;
 import android.util.DisplayMetrics;
 import android.provider.Settings;
 
@@ -24,6 +22,7 @@ import androidx.core.content.ContextCompat;
 import com.appoxee.Appoxee;
 import com.appoxee.internal.model.response.DevicePayload;
 import com.appoxee.shared.InboxMessage;
+import com.appoxee.shared.MessageStatus;
 import com.appoxee.sdk.BuildConfig;
 import com.appoxee.shared.AppoxeeObserver;
 import com.appoxee.shared.AppoxeeOptions;
@@ -80,12 +79,15 @@ public class RNMappPluginModule extends NativeRNMappPluginModuleSpec implements 
 
     public static final String NAME = "RNMappPluginModule";
     private static final int POST_NOTIFICATION_PERMISSION_REQUEST_CODE = 1001;
+    private static final int GEOFENCE_PERMISSION_REQUEST_CODE = 2001;
     private final ReactApplicationContext reactContext;
     private Map<Callback, String> mFeedSubscriberMap = new ConcurrentHashMap<>();
     private Map<Callback, Boolean> mCallbackWasCalledMap = new ConcurrentHashMap<>();
     private final Map<Integer, Promise> notificationPermissionPromises = new ConcurrentHashMap<>();
+    private final Map<Integer, Promise> geofencePermissionPromises = new ConcurrentHashMap<>();
     private Application application = null;
     private int nextNotificationPermissionRequestCode = POST_NOTIFICATION_PERMISSION_REQUEST_CODE;
+    private int nextGeofencePermissionRequestCode = GEOFENCE_PERMISSION_REQUEST_CODE;
 
     public RNMappPluginModule(ReactApplicationContext reactContext) {
         super(reactContext);
@@ -128,10 +130,32 @@ public class RNMappPluginModule extends NativeRNMappPluginModuleSpec implements 
             promise.resolve(true);
             return;
         }
-        int fineLocation = ContextCompat.checkSelfPermission(reactContext, Manifest.permission.ACCESS_FINE_LOCATION);
-        int backgroundLocation = ContextCompat.checkSelfPermission(reactContext, Manifest.permission.ACCESS_BACKGROUND_LOCATION);
-        promise.resolve(fineLocation == PackageManager.PERMISSION_GRANTED
-                && backgroundLocation == PackageManager.PERMISSION_GRANTED);
+        if (hasFineLocationPermission() && hasBackgroundLocationPermission()) {
+            promise.resolve(true);
+            return;
+        }
+        Activity activity = getCurrentActivity();
+        if (!(activity instanceof PermissionAwareActivity)) {
+            promise.resolve(false);
+            return;
+        }
+        int requestCode = nextGeofencePermissionRequestCode++;
+        geofencePermissionPromises.put(requestCode, promise);
+        String[] permissions = hasFineLocationPermission()
+                ? new String[]{Manifest.permission.ACCESS_BACKGROUND_LOCATION}
+                : new String[]{Manifest.permission.ACCESS_FINE_LOCATION};
+        ((PermissionAwareActivity) activity).requestPermissions(permissions, requestCode, this);
+    }
+
+    private boolean hasFineLocationPermission() {
+        return ContextCompat.checkSelfPermission(reactContext, Manifest.permission.ACCESS_FINE_LOCATION)
+                == PackageManager.PERMISSION_GRANTED;
+    }
+
+    private boolean hasBackgroundLocationPermission() {
+        return Build.VERSION.SDK_INT < Build.VERSION_CODES.Q
+                || ContextCompat.checkSelfPermission(reactContext, Manifest.permission.ACCESS_BACKGROUND_LOCATION)
+                == PackageManager.PERMISSION_GRANTED;
     }
 
     @ReactMethod
@@ -168,6 +192,31 @@ public class RNMappPluginModule extends NativeRNMappPluginModuleSpec implements 
 
     @Override
     public boolean onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        Promise geofencePromise = geofencePermissionPromises.remove(requestCode);
+        if (geofencePromise != null) {
+            boolean granted = grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED;
+            if (!granted) {
+                geofencePromise.resolve(false);
+                return true;
+            }
+            if (!hasBackgroundLocationPermission()) {
+                Activity activity = getCurrentActivity();
+                if (!(activity instanceof PermissionAwareActivity)) {
+                    geofencePromise.resolve(false);
+                    return true;
+                }
+                int backgroundRequestCode = nextGeofencePermissionRequestCode++;
+                geofencePermissionPromises.put(backgroundRequestCode, geofencePromise);
+                ((PermissionAwareActivity) activity).requestPermissions(
+                        new String[]{Manifest.permission.ACCESS_BACKGROUND_LOCATION},
+                        backgroundRequestCode,
+                        this
+                );
+                return true;
+            }
+            geofencePromise.resolve(hasFineLocationPermission());
+            return true;
+        }
         Promise promise = notificationPermissionPromises.remove(requestCode);
         if (promise == null) {
             return false;
@@ -287,9 +336,22 @@ public class RNMappPluginModule extends NativeRNMappPluginModuleSpec implements 
         FirebaseMessaging.getInstance().getToken().addOnCompleteListener(new OnCompleteListener<String>() {
             @Override
             public void onComplete(@NonNull Task<String> task) {
-                promise.resolve(task.getResult());
+                settleTokenTask(task, promise);
             }
         });
+    }
+
+    static void settleTokenTask(@NonNull Task<String> task, @NonNull Promise promise) {
+        if (task.isSuccessful()) {
+            promise.resolve(task.getResult());
+            return;
+        }
+
+        Exception exception = task.getException();
+        String message = exception != null && exception.getMessage() != null
+                ? exception.getMessage()
+                : "FCM registration failed";
+        promise.reject("FCM_REGISTRATION_FAILED", message, exception);
     }
 
     // -------------------------------------------------------------------------
@@ -318,7 +380,7 @@ public class RNMappPluginModule extends NativeRNMappPluginModuleSpec implements 
     @ReactMethod
     @Deprecated(forRemoval = true)
     public void engage2() {
-        Appoxee.engage(application,null);
+        MappEngagementDispatcher.engageAsync(Objects.requireNonNull(application), null, null);
     }
 
     @ReactMethod
@@ -326,9 +388,7 @@ public class RNMappPluginModule extends NativeRNMappPluginModuleSpec implements 
         AppoxeeOptions opt = createOptions(server, sdkKey, appID, tenantID);
         opt.setNotificationMode(NotificationMode.BACKGROUND_AND_FOREGROUND);
 
-        new Handler(Looper.getMainLooper()).post(() -> {
-            Appoxee.engage(Objects.requireNonNull(application), opt);
-
+        MappEngagementDispatcher.engageAsync(Objects.requireNonNull(application), opt, () -> {
             Appoxee.instance().subscribe(new AppoxeeObserver() {
                 @Override
                 public void onReadyStatusChanged(boolean status, MappResult<DevicePayload> result) {
@@ -344,9 +404,7 @@ public class RNMappPluginModule extends NativeRNMappPluginModuleSpec implements 
                                  String appID, String tenantID) {
         AppoxeeOptions opt = createOptions(server, sdkKey, appID, tenantID);
 
-        new Handler(Looper.getMainLooper()).post(() -> {
-            Appoxee.engage(Objects.requireNonNull(application), opt);
-
+        MappEngagementDispatcher.engageAsync(Objects.requireNonNull(application), opt, () -> {
             Appoxee.instance().subscribe(new AppoxeeObserver() {
                 @Override
                 public void onReadyStatusChanged(boolean status, MappResult<DevicePayload> result) {
@@ -738,33 +796,41 @@ public class RNMappPluginModule extends NativeRNMappPluginModuleSpec implements 
         });
     }
 
+    @ReactMethod
+    public void inAppMarkAsRead(double templateId, String eventId) {
+        updateInboxMessageStatus((long) templateId, MessageStatus.READ);
+    }
+
+    @ReactMethod
+    public void inAppMarkAsUnRead(double templateId, String eventId) {
+        updateInboxMessageStatus((long) templateId, MessageStatus.UNREAD);
+    }
+
+    @ReactMethod
+    public void inAppMarkAsDeleted(double templateId, String eventId) {
+        updateInboxMessageStatus((long) templateId, MessageStatus.DELETED);
+    }
+
+    /**
+     * Mapp Engage v7 updates inbox state using the SDK's InboxMessage object,
+     * so fetch the message by template ID before sending the status update.
+     * The legacy eventId argument is not required by the v7 API.
+     */
+    private void updateInboxMessageStatus(long templateId, MessageStatus status) {
+        final Appoxee appoxee = Appoxee.instance();
+        appoxee.fetchInboxMessage(templateId).enqueue(fetchResult -> {
+            if (fetchResult == null || !fetchResult.isSuccess() || fetchResult.getData() == null) {
+                return;
+            }
+
+            appoxee.updateInboxMessageStatus(fetchResult.getData(), status).enqueue(updateResult -> {
+            });
+        });
+    }
+
     /**
      * Stubbed: InApp statistics internal classes were removed in v7.
      * The @ReactMethod signature is preserved to avoid breaking the JS public API.
-     */
-    @ReactMethod
-    public void inAppMarkAsRead(double templateId, String eventId) {
-        // no-op in v7
-    }
-
-    /**
-     * @see #inAppMarkAsRead
-     */
-    @ReactMethod
-    public void inAppMarkAsUnRead(double templateId, String eventId) {
-        // no-op in v7
-    }
-
-    /**
-     * @see #inAppMarkAsRead
-     */
-    @ReactMethod
-    public void inAppMarkAsDeleted(double templateId, String eventId) {
-        // no-op in v7
-    }
-
-    /**
-     * @see #inAppMarkAsRead
      */
     @ReactMethod
     public void triggerStatistic(double templateId, String originalEventId,
