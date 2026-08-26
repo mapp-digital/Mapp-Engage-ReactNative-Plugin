@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.validateAndNormalizeProps = exports.writeAppoxeeConfig = exports.buildAppoxeeConfig = exports.withMappEngageIos = exports.withMappEngageAndroid = exports.withMappEngage = void 0;
+exports.validateAndNormalizeProps = exports.writeNotificationServiceFiles = exports.buildNotificationServiceInfoPlist = exports.writeAppoxeeConfig = exports.buildAppoxeeConfig = exports.withMappEngageIos = exports.withMappEngageAndroid = exports.withMappEngage = void 0;
 const config_plugins_1 = require("@expo/config-plugins");
 const android_1 = require("./android");
 const ios_1 = require("./ios");
@@ -19,6 +19,8 @@ var ios_2 = require("./ios");
 Object.defineProperty(exports, "withMappEngageIos", { enumerable: true, get: function () { return ios_2.withMappEngageIos; } });
 Object.defineProperty(exports, "buildAppoxeeConfig", { enumerable: true, get: function () { return ios_2.buildAppoxeeConfig; } });
 Object.defineProperty(exports, "writeAppoxeeConfig", { enumerable: true, get: function () { return ios_2.writeAppoxeeConfig; } });
+Object.defineProperty(exports, "buildNotificationServiceInfoPlist", { enumerable: true, get: function () { return ios_2.buildNotificationServiceInfoPlist; } });
+Object.defineProperty(exports, "writeNotificationServiceFiles", { enumerable: true, get: function () { return ios_2.writeNotificationServiceFiles; } });
 var validation_2 = require("./validation");
 Object.defineProperty(exports, "validateAndNormalizeProps", { enumerable: true, get: function () { return validation_2.validateAndNormalizeProps; } });
 exports.default = exports.withMappEngage;

@@ -16,6 +16,8 @@
 - Android/Expo: The config plugin now writes required permissions, the Mapp messaging service, and the push receiver through `withAndroidManifest`; Firebase configuration remains customer-owned through `expo.android.googleServicesFile`.
 - Android: Exported Expo SDK 57 compatibility constraints stabilize WorkManager, Lifecycle, AndroidX Core, Play Services Location, and Kotlin stdlib for API 36/AGP 8.12/Kotlin 2.1.20 builds.
 - Android: Coroutines remain aligned at 1.11.0 to preserve the Mapp 7.1.2 native in-app dismissal ABI.
+- iOS/Expo: The config plugin now creates and embeds a standalone Notification Service Extension for Mapp rich-push media from `ios_apx_media`, with EAS app-extension metadata and no App Group or extra Pod.
+- iOS/Expo: Verified that Expo SDK 57 CocoaPods autolinking discovers `RNMappPlugin.podspec` and processes `RNMappPlugin` under the New Architecture.
 
 ***Compatibility***
 

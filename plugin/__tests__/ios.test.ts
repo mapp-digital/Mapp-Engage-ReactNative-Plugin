@@ -2,7 +2,12 @@ import fs from 'fs';
 import os from 'os';
 import path from 'path';
 import plist from '@expo/plist';
-import { buildAppoxeeConfig, writeAppoxeeConfig } from '../src/ios';
+import {
+  buildAppoxeeConfig,
+  buildNotificationServiceInfoPlist,
+  writeAppoxeeConfig,
+  writeNotificationServiceFiles,
+} from '../src/ios';
 
 const options = {
   appId: 'app',
@@ -39,5 +44,32 @@ describe('iOS Appoxee configuration', () => {
     const parsed = plist.parse(await fs.promises.readFile(output, 'utf8')) as any;
     expect(parsed.inapp.media_timeout).toBe(7);
     expect((await fs.promises.readdir(root))).toEqual(['AppoxeeConfig.plist']);
+  });
+
+  it('generates the notification service extension plist', () => {
+    expect(buildNotificationServiceInfoPlist()).toEqual({
+      NSExtension: {
+        NSExtensionPointIdentifier: 'com.apple.usernotifications.service',
+        NSExtensionPrincipalClass: '$(PRODUCT_MODULE_NAME).NotificationService',
+      },
+    });
+  });
+
+  it('writes idempotent rich-push extension files that consume ios_apx_media', async () => {
+    const root = await fs.promises.mkdtemp(path.join(os.tmpdir(), 'mapp-plugin-nse-'));
+    const output = await writeNotificationServiceFiles(root);
+    await writeNotificationServiceFiles(root);
+
+    expect(output.map(file => path.relative(root, file))).toEqual([
+      'MappNotificationService/Info.plist',
+      'MappNotificationService/NotificationService.swift',
+    ]);
+    const source = await fs.promises.readFile(output[1], 'utf8');
+    expect(source).toContain('userInfo["ios_apx_media"]');
+    expect(source).toContain('UNNotificationAttachment');
+    expect(source).toContain('serviceExtensionTimeWillExpire');
+    const infoPlist = plist.parse(await fs.promises.readFile(output[0], 'utf8')) as any;
+    expect(infoPlist.NSExtension.NSExtensionPointIdentifier)
+      .toBe('com.apple.usernotifications.service');
   });
 });

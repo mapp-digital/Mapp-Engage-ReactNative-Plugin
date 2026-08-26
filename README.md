@@ -115,6 +115,12 @@ Use `pushHandling: "custom"` when another integration, such as a client-owned `F
 
 Set `enableGeofencing` on each platform that needs it. Android then adds fine/background location permissions and `Mapp.requestGeofenceLocationPermission()` requests foreground permission before background permission. On iOS, also supply non-empty `locationWhenInUsePermission` and `locationAlwaysPermission` messages. Only request location access when your user-facing feature and store policy justify it.
 
+### iOS rich push
+
+The Expo config plugin creates a `MappNotificationService` Notification Service Extension with the bundle identifier `<expo.ios.bundleIdentifier>.mappnotificationservice`. The extension reads the public Mapp `ios_apx_media` payload key, downloads the media, and attaches it to the notification. It targets iOS 10 and does not require an App Group, an additional CocoaPod, or React Native code.
+
+The extension is also declared in Expo's experimental EAS app-extension metadata so EAS can prepare its signing credentials. Regenerate the iOS project after changing the application bundle identifier.
+
 ### Tested compatibility
 
 | Component | Tested baseline |
@@ -145,7 +151,7 @@ cd ios && pod install
 
 Modern React Native autolinking discovers the Android package and CocoaPod automatically. Do not run `react-native link`, edit `settings.gradle`, or add `compile project(...)`.
 
-No `MainActivity` or `MainApplication` edit is required. The native module is registered by autolinking. In Expo projects, the config plugin applies Android permissions, the Mapp messaging service, and the push receiver during prebuild without modifying consumer Gradle files. React Native CLI projects receive the same declarations through the library manifest merge.
+No `MainActivity` or `MainApplication` edit is required. The native module is registered by autolinking. In Expo projects, the config plugin applies Android permissions, the Mapp messaging service, and the push receiver during prebuild without modifying consumer Gradle files. React Native CLI projects receive the same declarations through the library manifest merge. On iOS, CocoaPods discovers `RNMappPlugin.podspec` automatically; do not add the pod manually.
 
 For a manually maintained iOS native project, add Push Notifications, Remote Notifications background mode, and (only if needed) Location Updates, then include an `AppoxeeConfig.plist` in the application target. Expo clients should use the config plugin above instead.
 
