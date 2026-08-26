@@ -59,6 +59,8 @@ Configure the installed package by name in `app.json` (values shown are examples
 
 The Android package must match the Firebase Android application in `google-services.json`. For iOS, configure an APNs-enabled App ID, matching bundle identifier, and Apple/EAS signing credentials. Values embedded in app config and native resources are public application configuration; do not put service-account keys or signing secrets there.
 
+The Firebase file is customer-owned configuration. Point Expo's built-in `expo.android.googleServicesFile` field at it; this plugin does not copy, generate, or modify `google-services.json`.
+
 Generate and run development builds:
 
 ```bash
@@ -142,6 +144,8 @@ cd ios && pod install
 ```
 
 Modern React Native autolinking discovers the Android package and CocoaPod automatically. Do not run `react-native link`, edit `settings.gradle`, or add `compile project(...)`.
+
+No `MainActivity` or `MainApplication` edit is required. The native module is registered by autolinking. In Expo projects, the config plugin applies Android permissions, the Mapp messaging service, and the push receiver during prebuild without modifying consumer Gradle files. React Native CLI projects receive the same declarations through the library manifest merge.
 
 For a manually maintained iOS native project, add Push Notifications, Remote Notifications background mode, and (only if needed) Location Updates, then include an `AppoxeeConfig.plist` in the application target. Expo clients should use the config plugin above instead.
 
