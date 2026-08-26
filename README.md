@@ -117,7 +117,7 @@ Set `enableGeofencing` on each platform that needs it. Android then adds fine/ba
 
 ### iOS rich push
 
-The Expo config plugin creates a `MappNotificationService` Notification Service Extension with the bundle identifier `<expo.ios.bundleIdentifier>.mappnotificationservice`. The extension reads the public Mapp `ios_apx_media` payload key, downloads the media, and attaches it to the notification. It targets iOS 10 and does not require an App Group, an additional CocoaPod, or React Native code.
+The Expo config plugin creates a `MappNotificationService` Notification Service Extension with the bundle identifier `<expo.ios.bundleIdentifier>.mappnotificationservice`. The extension reads the public Mapp `ios_apx_media` payload key, downloads the media, and attaches it to the notification. It follows the app minimum deployment target and is set to iOS 15+, uses an App Group shared with the main app, and does not require an additional CocoaPod or React Native code.
 
 The extension is also declared in Expo's experimental EAS app-extension metadata so EAS can prepare its signing credentials. Regenerate the iOS project after changing the application bundle identifier.
 
