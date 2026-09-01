@@ -22,14 +22,40 @@ final class MappEngagementDispatcher {
 
     private MappEngagementDispatcher() {}
 
+    interface EngagementCallback {
+        void onSuccess();
+        void onFailure(@NonNull Exception error);
+    }
+
     static void engageAsync(
             @NonNull Application application,
             @Nullable AppoxeeOptions options,
             @Nullable Runnable afterEngage
     ) {
+        engageAsync(application, options, afterEngage, null);
+    }
+
+    static void engageAsync(
+            @NonNull Application application,
+            @Nullable AppoxeeOptions options,
+            @Nullable Runnable afterEngage,
+            @Nullable EngagementCallback callback
+    ) {
         Runnable operation = () -> {
-            if (engageNow(application, options) && afterEngage != null) {
-                afterEngage.run();
+            try {
+                Appoxee.engage(application, options);
+                if (afterEngage != null) {
+                    afterEngage.run();
+                }
+            } catch (Exception error) {
+                Log.e(TAG, "Mapp initialization failed", error);
+                if (callback != null) {
+                    callback.onFailure(error);
+                }
+                return;
+            }
+            if (callback != null) {
+                callback.onSuccess();
             }
         };
         if (Looper.myLooper() == Looper.getMainLooper()) {
@@ -37,7 +63,13 @@ final class MappEngagementDispatcher {
             return;
         }
         if (!new Handler(Looper.getMainLooper()).post(operation)) {
-            Log.e(TAG, "Unable to post Mapp initialization to the main looper");
+            IllegalStateException error = new IllegalStateException(
+                    "Unable to post Mapp initialization to the main looper"
+            );
+            Log.e(TAG, error.getMessage(), error);
+            if (callback != null) {
+                callback.onFailure(error);
+            }
         }
     }
 
@@ -94,7 +126,7 @@ final class MappEngagementDispatcher {
         try {
             Appoxee.engage(application, options);
             return true;
-        } catch (RuntimeException error) {
+        } catch (Exception error) {
             Log.e(TAG, "Mapp initialization failed", error);
             return false;
         }

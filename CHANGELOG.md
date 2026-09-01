@@ -10,6 +10,7 @@
 
 ***Bug Fixes***
 
+- `Mapp.engage(...)` is now awaitable so singleton-dependent calls can safely run after native initialization; engagement failures reject instead of being logged silently.
 - Android: Failed Firebase token registration now rejects with `FCM_REGISTRATION_FAILED` instead of crashing while reading a failed task result.
 - Android: All Mapp engage calls run on the main looper. Background Firebase callbacks wait for a bounded engage attempt and safely return failure after SDK errors, timeout, or interruption.
 - Android/Expo: Mapp and custom push ownership now remove the SDK v7 Firebase service and remain idempotent when prebuild runs repeatedly or changes mode.

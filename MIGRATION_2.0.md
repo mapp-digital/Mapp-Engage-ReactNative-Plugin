@@ -31,7 +31,7 @@ Read [Breaking changes in 2.0.0](BREAKING_CHANGES.md) first to determine which c
 | `Mapp.inAppMarkAsRead(templateId, eventId)` | Android no-op. | Android fetches the Mapp Engage 7.1.2 inbox message and updates it to `READ`. |
 | `Mapp.inAppMarkAsUnRead(templateId, eventId)` | Android no-op. | Android fetches the inbox message and updates it to `UNREAD`. |
 | `Mapp.inAppMarkAsDeleted(templateId, eventId)` | Android no-op. | Android fetches the inbox message and updates it to `DELETED`. |
-| `Mapp.engage(...)` | iOS JavaScript called the private native `autoengage` and `engageInapp` methods separately. | All platforms use the public native `engage` entry point. On iOS it still initializes both push and in-app, using `AppoxeeConfig.plist` as the credential source of truth. |
+| `Mapp.engage(...)` | iOS JavaScript called the private native `autoengage` and `engageInapp` methods separately, and Android engagement returned before its main-thread task completed. | All platforms use an awaitable native engagement entry point. Await it before calling singleton-dependent APIs. On iOS it still initializes both push and in-app, using `AppoxeeConfig.plist` as the credential source of truth. |
 | iOS event listeners | Events emitted before a JavaScript listener was attached were dropped. | Up to 50 cold-start events are buffered and delivered after a listener attaches. Consumers should tolerate receiving an initial queued event. |
 
 For the Android inbox methods, `eventId` remains accepted for source compatibility but Mapp Engage 7.1.2 identifies and fetches the message using `templateId`.

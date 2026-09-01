@@ -88,8 +88,10 @@ const subscription = events.addListener('com.mapp.deep_link_received', event => 
   // Route the deep link.
 });
 
-Mapp.engage('ANDROID_SDK_KEY', 'FCM_PROJECT_ID', 'EMC', 'APP_ID', 'TENANT_ID');
+await Mapp.engage('ANDROID_SDK_KEY', 'FCM_PROJECT_ID', 'EMC', 'APP_ID', 'TENANT_ID');
 ```
+
+Always await `Mapp.engage(...)` before calling APIs that use the native Mapp singleton. The promise resolves after native engagement and bridge setup complete; use `Mapp.onInitCompletedListener()` or `Mapp.isReady()` when a feature specifically requires the SDK's later ready state.
 
 ### Android push ownership
 
@@ -160,7 +162,7 @@ Basic usage:
 ```js
 import { Mapp } from 'react-native-mapp-plugin';
 
-Mapp.engage('SDK_KEY', 'FCM_PROJECT_ID', 'EMC', 'APP_ID', 'TENANT_ID');
+await Mapp.engage('SDK_KEY', 'FCM_PROJECT_ID', 'EMC', 'APP_ID', 'TENANT_ID');
 ```
 
 See the [Mapp integration documentation](https://mapp-wiki.atlassian.net/wiki/spaces/MIC/pages/1154875400/React+Native+Integration+for+Mapp+Cloud) for the full JavaScript API and native Mapp configuration values.

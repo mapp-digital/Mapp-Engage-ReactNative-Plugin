@@ -105,8 +105,10 @@ describe("getAlias", () => {
 // ---------------------------------------------------------------------------
 
 describe("engage (Android)", () => {
-  test("passes all 5 params to native engage", () => {
-    Mapp.engage("sdkKey", "projectId", "L3", "appId", "tenantId");
+  test("returns the awaitable native engagement and passes all 5 params", async () => {
+    native.engage.mockResolvedValueOnce(true);
+    await expect(Mapp.engage("sdkKey", "projectId", "L3", "appId", "tenantId"))
+      .resolves.toBe(true);
     expect(native.engage).toHaveBeenCalledWith(
       "sdkKey", "projectId", "L3", "appId", "tenantId"
     );
@@ -118,8 +120,10 @@ describe("engage (Android)", () => {
 describe("engage (iOS)", () => {
   beforeEach(() => { platform.OS = "ios"; });
 
-  test("uses the generated TurboModule engage method; native iOS reads credentials from the generated plist", () => {
-    Mapp.engage("sdkKey", "projectId", "L3", "appId", "tenantId");
+  test("uses the awaitable TurboModule method; native iOS reads credentials from the generated plist", async () => {
+    native.engage.mockResolvedValueOnce(true);
+    await expect(Mapp.engage("sdkKey", "projectId", "L3", "appId", "tenantId"))
+      .resolves.toBe(true);
     expect(native.engage).toHaveBeenCalledWith("sdkKey", "projectId", "L3", "appId", "tenantId");
     expect(native.autoengage).not.toHaveBeenCalled();
     expect(native.engageInapp).not.toHaveBeenCalled();

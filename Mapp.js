@@ -127,7 +127,7 @@ export class Mapp {
     server: string,
     appID: string,
     tenantID: string
-  ) {
+  ): Promise<boolean> {
     return RNMappPluginModule.engage(
       sdkKey,
       googleProjectId,

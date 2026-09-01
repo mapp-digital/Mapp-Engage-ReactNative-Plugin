@@ -17,6 +17,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
+import org.mockito.InOrder;
 import org.mockito.MockedStatic;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.RuntimeEnvironment;
@@ -69,6 +70,7 @@ public class RNMappPluginModuleTest {
     private RNMappPluginModule module;
     private Appoxee mockAppoxeeInstance;
     private MockedStatic<Appoxee> mockedAppoxee;
+    private Promise engagePromise;
 
     @Before
     public void setUp() {
@@ -78,6 +80,7 @@ public class RNMappPluginModuleTest {
         when(reactContext.getApplicationContext()).thenReturn(app);
 
         module = new RNMappPluginModule(reactContext);
+        engagePromise = mock(Promise.class);
 
         // Mock the Appoxee interface instance returned by Appoxee.instance()
         mockAppoxeeInstance = mock(Appoxee.class);
@@ -103,12 +106,56 @@ public class RNMappPluginModuleTest {
             return null;
         });
 
-        module.engage("myKey", "projectId", "L3", "appId", "tenantId");
+        module.engage("myKey", "projectId", "L3", "appId", "tenantId", engagePromise);
         Shadows.shadowOf(Looper.getMainLooper()).idle();
 
         mockedAppoxee.verify(() ->
                 Appoxee.engage(eq(RuntimeEnvironment.getApplication()), any(AppoxeeOptions.class))
         );
+    }
+
+    @Test
+    public void engage_resolvesAfterEngageAndSingletonSetup() {
+        Promise promise = mock(Promise.class);
+
+        module.engage("myKey", "projectId", "L3", "appId", "tenantId", promise);
+        Shadows.shadowOf(Looper.getMainLooper()).idle();
+
+        mockedAppoxee.verify(() ->
+                Appoxee.engage(eq(RuntimeEnvironment.getApplication()), any(AppoxeeOptions.class))
+        );
+        InOrder completionOrder = org.mockito.Mockito.inOrder(mockAppoxeeInstance, promise);
+        completionOrder.verify(mockAppoxeeInstance).setPushBroadcast(MyPushBroadcastReceiver.class);
+        completionOrder.verify(promise).resolve(true);
+        verify(promise, never()).reject(anyString(), anyString(), any(Throwable.class));
+    }
+
+    @Test
+    public void engage_rejectsSdkFailureInsteadOfResolving() {
+        Promise promise = mock(Promise.class);
+        IllegalStateException failure = new IllegalStateException("engage failed");
+        mockedAppoxee.when(() -> Appoxee.engage(any(), any())).thenThrow(failure);
+
+        module.engage("myKey", "projectId", "L3", "appId", "tenantId", promise);
+        Shadows.shadowOf(Looper.getMainLooper()).idle();
+
+        verify(promise).reject("MAPP_ENGAGE_FAILED", "Mapp initialization failed", failure);
+        verify(promise, never()).resolve(any());
+        verify(mockAppoxeeInstance, never()).setPushBroadcast(any());
+    }
+
+    @Test
+    public void engage_rejectsInvalidConfigurationBeforeCallingSdk() {
+        Promise promise = mock(Promise.class);
+
+        module.engage("myKey", "projectId", "BOGUS", "appId", "tenantId", promise);
+
+        verify(promise).reject(
+                eq("MAPP_ENGAGE_INVALID_CONFIGURATION"),
+                anyString(),
+                any(IllegalArgumentException.class)
+        );
+        mockedAppoxee.verify(() -> Appoxee.engage(any(), any()), never());
     }
 
     @Test
@@ -128,7 +175,7 @@ public class RNMappPluginModuleTest {
 
     @Test
     public void engage_passesCorrectServerToSdk() {
-        module.engage("myKey", "projectId", "L3", "appId", "tenantId");
+        module.engage("myKey", "projectId", "L3", "appId", "tenantId", engagePromise);
         Shadows.shadowOf(Looper.getMainLooper()).idle();
 
         mockedAppoxee.verify(() ->
@@ -140,7 +187,7 @@ public class RNMappPluginModuleTest {
 
     @Test
     public void engage_passesCorrectSdkKeyToSdk() {
-        module.engage("myKey", "projectId", "L3", "appId", "tenantId");
+        module.engage("myKey", "projectId", "L3", "appId", "tenantId", engagePromise);
         Shadows.shadowOf(Looper.getMainLooper()).idle();
 
         mockedAppoxee.verify(() ->
@@ -152,7 +199,7 @@ public class RNMappPluginModuleTest {
 
     @Test
     public void engage_passesCorrectAppIdAndTenantIdToSdk() {
-        module.engage("myKey", "projectId", "L3", "appId", "tenantId");
+        module.engage("myKey", "projectId", "L3", "appId", "tenantId", engagePromise);
         Shadows.shadowOf(Looper.getMainLooper()).idle();
 
         mockedAppoxee.verify(() ->
@@ -164,7 +211,7 @@ public class RNMappPluginModuleTest {
 
     @Test
     public void engage_setsBackgroundAndForegroundNotificationMode() {
-        module.engage("myKey", "projectId", "L3", "appId", "tenantId");
+        module.engage("myKey", "projectId", "L3", "appId", "tenantId", engagePromise);
         Shadows.shadowOf(Looper.getMainLooper()).idle();
 
         mockedAppoxee.verify(() ->
@@ -176,7 +223,7 @@ public class RNMappPluginModuleTest {
 
     @Test
     public void engage_legacyAlias_L3US_resolvesToL3_US() {
-        module.engage("myKey", "projectId", "L3US", "appId", "tenantId");
+        module.engage("myKey", "projectId", "L3US", "appId", "tenantId", engagePromise);
         Shadows.shadowOf(Looper.getMainLooper()).idle();
 
         mockedAppoxee.verify(() ->
@@ -188,7 +235,7 @@ public class RNMappPluginModuleTest {
 
     @Test
     public void engage_legacyAlias_TEST55_resolvesToTEST_55() {
-        module.engage("myKey", "projectId", "TEST55", "appId", "tenantId");
+        module.engage("myKey", "projectId", "TEST55", "appId", "tenantId", engagePromise);
         Shadows.shadowOf(Looper.getMainLooper()).idle();
 
         mockedAppoxee.verify(() ->
@@ -200,7 +247,7 @@ public class RNMappPluginModuleTest {
 
     @Test
     public void engage_legacyAlias_TEST61_resolvesToTEST_61() {
-        module.engage("myKey", "projectId", "TEST61", "appId", "tenantId");
+        module.engage("myKey", "projectId", "TEST61", "appId", "tenantId", engagePromise);
         Shadows.shadowOf(Looper.getMainLooper()).idle();
 
         mockedAppoxee.verify(() ->
@@ -212,7 +259,7 @@ public class RNMappPluginModuleTest {
 
     @Test
     public void engage_legacyAlias_EMCUS_resolvesToEMC_US() {
-        module.engage("myKey", "projectId", "EMCUS", "appId", "tenantId");
+        module.engage("myKey", "projectId", "EMCUS", "appId", "tenantId", engagePromise);
         Shadows.shadowOf(Looper.getMainLooper()).idle();
 
         mockedAppoxee.verify(() ->
@@ -220,11 +267,6 @@ public class RNMappPluginModuleTest {
                         opt.getServer() == AppoxeeOptions.Server.EMC_US
                 ))
         );
-    }
-
-    @Test(expected = IllegalArgumentException.class)
-    public void engage_invalidServer_throwsBeforeCallingSDK() {
-        module.engage("myKey", "projectId", "BOGUS", "appId", "tenantId");
     }
 
     // =========================================================================

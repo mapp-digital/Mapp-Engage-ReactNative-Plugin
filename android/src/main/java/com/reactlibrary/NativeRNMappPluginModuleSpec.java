@@ -76,7 +76,7 @@ public abstract class NativeRNMappPluginModuleSpec extends ReactContextBaseJavaM
 
   @ReactMethod
   @DoNotStrip
-  public abstract void engage(String sdkKey, String googleProjectId, String server, String appID, String tenantID);
+  public abstract void engage(String sdkKey, String googleProjectId, String server, String appID, String tenantID, Promise promise);
 
   @ReactMethod
   @DoNotStrip
