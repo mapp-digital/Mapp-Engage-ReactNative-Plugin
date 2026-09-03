@@ -163,10 +163,22 @@ export class Mapp {
    * @return {Promise.<boolean>} A promise with the result.
    */
   static onInitCompletedListener(): Promise<boolean> {
-    if (Platform.OS == "android") {
+    if (Platform.OS === "android") {
       return RNMappPluginModule.onInitCompletedListener();
     }
-    return null;
+
+    return RNMappPluginModule.isReady().then((ready) => {
+      if (ready) {
+        return true;
+      }
+
+      return new Promise((resolve) => {
+        const subscription = EventEmitter.addListener(IOS_INIT, () => {
+          subscription.remove();
+          resolve(true);
+        });
+      });
+    });
   }
 
   /**

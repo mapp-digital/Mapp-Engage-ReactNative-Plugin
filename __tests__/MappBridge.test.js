@@ -11,6 +11,7 @@
 const rn = require("react-native");
 const native = rn._mockNativeModule;
 const platform = rn._mockPlatform;
+const eventEmitter = rn._mockEventEmitter;
 
 // Mapp.js uses `module.exports = Mapp` (CommonJS) with Flow types stripped by Babel
 const Mapp = require("../Mapp");
@@ -20,6 +21,7 @@ beforeEach(() => {
   Object.values(native).forEach((fn) => {
     if (typeof fn === "function" && fn.mockClear) fn.mockClear();
   });
+  eventEmitter.addListener.mockClear();
   platform.OS = "android";
 });
 
@@ -170,9 +172,26 @@ describe("onInitCompletedListener (Android)", () => {
 describe("onInitCompletedListener (iOS)", () => {
   beforeEach(() => { platform.OS = "ios"; });
 
-  test("returns null without calling native", () => {
+  test("resolves immediately when the SDK is already ready", async () => {
+    native.isReady.mockResolvedValue(true);
+
+    await expect(Mapp.onInitCompletedListener()).resolves.toBe(true);
+    expect(eventEmitter.addListener).not.toHaveBeenCalled();
+  });
+
+  test("waits for the native init event when the SDK is not ready", async () => {
+    native.isReady.mockResolvedValue(false);
+
     const result = Mapp.onInitCompletedListener();
-    expect(result).toBeNull();
+    await Promise.resolve();
+
+    expect(eventEmitter.addListener).toHaveBeenCalledWith(
+      "com.mapp.init",
+      expect.any(Function)
+    );
+
+    eventEmitter.addListener.mock.calls[0][1]();
+    await expect(result).resolves.toBe(true);
     expect(native.onInitCompletedListener).not.toHaveBeenCalled();
   });
 });

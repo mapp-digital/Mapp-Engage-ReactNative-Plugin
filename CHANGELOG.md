@@ -1,3 +1,18 @@
+## Version 2.0.1 (Unpublished)
+
+***Bug Fixes***
+
+- iOS: `Mapp.onInitCompletedListener()` now returns a `Promise<boolean>` instead of `null`.
+- iOS: When the SDK is already initialized, `Mapp.onInitCompletedListener()` resolves immediately with `true`.
+- iOS: When the SDK is still initializing, `Mapp.onInitCompletedListener()` waits for the existing `com.mapp.init` native event and removes its one-time listener after resolving.
+- Android: Preserved the existing native `AppoxeeObserver` implementation and behavior of `Mapp.onInitCompletedListener()`.
+- Android/iOS: Preserved the public `Mapp.onInitCompletedListener(): Promise<boolean>` API while providing consistent initialization-waiting behavior on both platforms.
+
+***Tests***
+
+- Added bridge coverage for both iOS readiness paths: already initialized and waiting for the native initialization event.
+- Updated platform-dispatch coverage to verify that Android continues to use the native listener and iOS uses its existing initialization event.
+
 ## Version 2.0.0 (2026/09/03)
 
 ***Breaking Changes***
