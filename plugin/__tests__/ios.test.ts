@@ -57,14 +57,16 @@ describe('iOS Appoxee configuration', () => {
 
   it('writes idempotent rich-push extension files that consume ios_apx_media', async () => {
     const root = await fs.promises.mkdtemp(path.join(os.tmpdir(), 'mapp-plugin-nse-'));
-    const output = await writeNotificationServiceFiles(root);
-    await writeNotificationServiceFiles(root);
+    const bundleIdentifier = 'com.example.mappapp';
+    const output = await writeNotificationServiceFiles(root, bundleIdentifier);
+    await writeNotificationServiceFiles(root, bundleIdentifier);
 
     expect(output.map(file => path.relative(root, file))).toEqual([
       'MappNotificationService/Info.plist',
+      'MappNotificationService/MappNotificationService.entitlements',
       'MappNotificationService/NotificationService.swift',
     ]);
-    const source = await fs.promises.readFile(output[1], 'utf8');
+    const source = await fs.promises.readFile(output[2], 'utf8');
     expect(source).toContain('userInfo["ios_apx_media"]');
     expect(source).toContain('UNNotificationAttachment');
     expect(source).toContain('UNUserNotificationCenter.current().getNotificationCategories');
@@ -73,5 +75,8 @@ describe('iOS Appoxee configuration', () => {
     const infoPlist = plist.parse(await fs.promises.readFile(output[0], 'utf8')) as any;
     expect(infoPlist.NSExtension.NSExtensionPointIdentifier)
       .toBe('com.apple.usernotifications.service');
+    const entitlements = plist.parse(await fs.promises.readFile(output[1], 'utf8')) as any;
+    expect(entitlements['com.apple.security.application-groups'])
+      .toEqual([`group.${bundleIdentifier}`]);
   });
 });
