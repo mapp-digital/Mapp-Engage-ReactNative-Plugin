@@ -2,12 +2,24 @@
 #import "RNMappEventEmmiter.h"
 #if RCT_NEW_ARCH_ENABLED
 #import <ReactCommon/RCTTurboModule.h>
+#if __has_include(<RNMappPluginSpec/RNMappPluginSpec.h>)
+#import <RNMappPluginSpec/RNMappPluginSpec.h>
+#define RNMAPP_HAS_TURBO_MODULE_SPEC 1
+#elif __has_include(<RNMappPlugin/RNMappPlugin.h>)
+#import <RNMappPlugin/RNMappPlugin.h>
+#define RNMAPP_HAS_TURBO_MODULE_SPEC 1
+#elif __has_include("RNMappPlugin.h")
+#import "RNMappPlugin.h"
+#define RNMAPP_HAS_TURBO_MODULE_SPEC 1
+#else
+#define RNMAPP_HAS_TURBO_MODULE_SPEC 0
+#endif
 #endif
 
 
 @implementation RNMappPluginModule
 
-#if RCT_NEW_ARCH_ENABLED
+#if RCT_NEW_ARCH_ENABLED && RNMAPP_HAS_TURBO_MODULE_SPEC
 - (std::shared_ptr<facebook::react::TurboModule>)getTurboModule:
     (const facebook::react::ObjCTurboModule::InitParams &)params
 {
