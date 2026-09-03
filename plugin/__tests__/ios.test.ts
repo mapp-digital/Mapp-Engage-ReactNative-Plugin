@@ -67,6 +67,8 @@ describe('iOS Appoxee configuration', () => {
     const source = await fs.promises.readFile(output[1], 'utf8');
     expect(source).toContain('userInfo["ios_apx_media"]');
     expect(source).toContain('UNNotificationAttachment');
+    expect(source).toContain('UNUserNotificationCenter.current().getNotificationCategories');
+    expect(source).toContain('categoryIdentifier');
     expect(source).toContain('serviceExtensionTimeWillExpire');
     const infoPlist = plist.parse(await fs.promises.readFile(output[0], 'utf8')) as any;
     expect(infoPlist.NSExtension.NSExtensionPointIdentifier)
