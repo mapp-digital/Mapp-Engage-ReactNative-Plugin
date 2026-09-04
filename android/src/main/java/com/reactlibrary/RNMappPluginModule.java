@@ -322,21 +322,42 @@ public class RNMappPluginModule extends NativeRNMappPluginModuleSpec implements 
     }
 
     @ReactMethod
-    public void engage(String sdkKey, String googleProjectId, String server, String appID, String tenantID) {
-        AppoxeeOptions opt = createOptions(server, sdkKey, appID, tenantID);
-        opt.setNotificationMode(NotificationMode.BACKGROUND_AND_FOREGROUND);
+    public void engage(String sdkKey, String googleProjectId, String server, String appID,
+                       String tenantID, Promise promise) {
+        final AppoxeeOptions opt;
+        try {
+            opt = createOptions(server, sdkKey, appID, tenantID);
+            opt.setNotificationMode(NotificationMode.BACKGROUND_AND_FOREGROUND);
+        } catch (RuntimeException error) {
+            promise.reject("MAPP_ENGAGE_INVALID_CONFIGURATION", error.getMessage(), error);
+            return;
+        }
 
-        new Handler(Looper.getMainLooper()).post(() -> {
-            Appoxee.engage(Objects.requireNonNull(application), opt);
+        Runnable operation = () -> {
+            try {
+                Appoxee.engage(Objects.requireNonNull(application), opt);
 
-            Appoxee.instance().subscribe(new AppoxeeObserver() {
-                @Override
-                public void onReadyStatusChanged(boolean status, MappResult<DevicePayload> result) {
-                }
-            });
+                Appoxee.instance().subscribe(new AppoxeeObserver() {
+                    @Override
+                    public void onReadyStatusChanged(boolean status, MappResult<DevicePayload> result) {
+                    }
+                });
 
-            Appoxee.instance().setPushBroadcast(MyPushBroadcastReceiver.class);
-        });
+                Appoxee.instance().setPushBroadcast(MyPushBroadcastReceiver.class);
+                promise.resolve(true);
+            } catch (Exception error) {
+                promise.reject("MAPP_ENGAGE_FAILED", "Mapp initialization failed", error);
+            }
+        };
+
+        if (Looper.myLooper() == Looper.getMainLooper()) {
+            operation.run();
+        } else if (!new Handler(Looper.getMainLooper()).post(operation)) {
+            promise.reject(
+                    "MAPP_ENGAGE_FAILED",
+                    "Unable to post Mapp initialization to the main looper"
+            );
+        }
     }
 
     @ReactMethod

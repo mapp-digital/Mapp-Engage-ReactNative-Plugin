@@ -2,6 +2,7 @@
 
 ***Bug Fixes***
 
+- Android/iOS: `Mapp.engage(...)` is now awaitable, allowing singleton-dependent calls to run only after native engagement completes. Engagement failures reject the promise.
 - iOS: `Mapp.onInitCompletedListener()` now returns a `Promise<boolean>` instead of `null`.
 - iOS: The promise resolves immediately when the SDK is already ready, or waits for the existing `com.mapp.init` event while initialization is in progress.
 - Android: Preserved the existing native `AppoxeeObserver` implementation and behavior.

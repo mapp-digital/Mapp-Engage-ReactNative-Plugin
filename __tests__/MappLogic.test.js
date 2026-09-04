@@ -85,13 +85,13 @@ describe("convertEventEnum", () => {
 // ---------------------------------------------------------------------------
 
 describe("Mapp.js platform dispatch", () => {
-  test("engage() calls autoengage and engageInapp on iOS", () => {
-    expect(mappSource).toMatch(/Platform\.OS\s*==\s*["']ios["']/);
-    expect(mappSource).toMatch(/RNMappPluginModule\.autoengage/);
-    expect(mappSource).toMatch(/RNMappPluginModule\.engageInapp/);
+  test("engage() uses the generated awaitable cross-platform method", () => {
+    expect(mappSource).toMatch(/RNMappPluginModule\.engage\s*\(/);
+    expect(mappSource).not.toMatch(/RNMappPluginModule\.autoengage/);
+    expect(mappSource).not.toMatch(/RNMappPluginModule\.engageInapp/);
   });
 
-  test("engage() calls RNMappPluginModule.engage on Android path", () => {
+  test("engage() calls RNMappPluginModule.engage", () => {
     expect(mappSource).toMatch(/RNMappPluginModule\.engage\s*\(/);
   });
 

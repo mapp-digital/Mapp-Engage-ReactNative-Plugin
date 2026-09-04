@@ -87,7 +87,9 @@ cd ios && pod install
 ```javascript
 import Mapp from 'react-native-mapp-plugin';
 
-// TODO: What to do with the module?
-Mapp;
+await Mapp.engage('SDK_KEY', 'FCM_PROJECT_ID', 'EMC', 'APP_ID', 'TENANT_ID');
+await Mapp.onInitCompletedListener();
 ```
+
+Always await `Mapp.engage(...)` before calling APIs that use the native Mapp singleton. The promise resolves after native engagement and bridge setup complete.
   

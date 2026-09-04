@@ -15,7 +15,7 @@ export interface Spec extends TurboModule {
   setAliasWithResend(alias: string, resendCustomAttributes: boolean): Promise<boolean>;
   getAlias(): Promise<string>;
   engage2(): void;
-  engage(sdkKey: string, googleProjectId: string, server: string, appID: string, tenantID: string): void;
+  engage(sdkKey: string, googleProjectId: string, server: string, appID: string, tenantID: string): Promise<boolean>;
   engageTestServer(cepURl: string, sdkKey: string, googleProjectId: string, server: string, appID: string, tenantID: string): void;
   onInitCompletedListener(): Promise<boolean>;
   isReady(): Promise<boolean>;

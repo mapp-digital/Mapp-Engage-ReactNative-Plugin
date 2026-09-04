@@ -78,7 +78,7 @@ public class RNMappPluginModuleApiSignatureTest {
         // --- Engage / init ---
         assertMethod("engage2");
         assertMethod("engage",
-                String.class, String.class, String.class, String.class, String.class);
+                String.class, String.class, String.class, String.class, String.class, Promise.class);
         assertMethod("engageTestServer",
                 String.class, String.class, String.class, String.class, String.class, String.class);
         assertMethod("onInitCompletedListener", Promise.class);

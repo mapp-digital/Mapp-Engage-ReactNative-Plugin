@@ -37,9 +37,23 @@ RCT_EXPORT_METHOD(removeListeners:(NSInteger)count) {
 
 #pragma mark Exported methods - Notifications
 
-RCT_EXPORT_METHOD(engage: (NSString *)sdkKey projectId: (NSString *)projectId cepUrl:(NSString *)cepUrl appID:(NSString *)appID tenantID:(NSString *)tenantID) {
-    SERVER serv = [self getServerKeyFor:cepUrl];
-    [[Appoxee shared] engageWithLaunchOptions:nil andDelegate:[RNMappEventEmmiter shared] andSDKID:sdkKey with: serv];
+RCT_EXPORT_METHOD(engage:(NSString *)sdkKey
+                  googleProjectId:(NSString *)projectId
+                  server:(NSString *)server
+                  appID:(NSString *)appID
+                  tenantID:(NSString *)tenantID
+                  resolve:(RCTPromiseResolveBlock)resolve
+                  reject:(RCTPromiseRejectBlock)reject) {
+    @try {
+        SERVER serv = [self getServerKeyFor:server];
+        [[Appoxee shared] engageAndAutoIntegrateWithLaunchOptions:nil andDelegate:[RNMappEventEmmiter shared] with:serv];
+        [[Appoxee shared] addObserver:[RNMappEventEmmiter shared] forKeyPath:@"isReady" options:NSKeyValueObservingOptionNew context:nil];
+        [[AppoxeeInapp shared] engageWithDelegate:[RNMappEventEmmiter shared] with:[self getInappServerKeyFor:server]];
+        resolve(@YES);
+    } @catch (NSException *exception) {
+        NSString *message = exception.reason ?: @"Mapp initialization failed";
+        reject(@"MAPP_ENGAGE_FAILED", message, nil);
+    }
 }
 
 RCT_REMAP_METHOD(autoengage,engage:(NSString *) server) {
@@ -371,4 +385,3 @@ RCT_EXPORT_METHOD(stopGeoFencing) {
 
 
 @end
-
