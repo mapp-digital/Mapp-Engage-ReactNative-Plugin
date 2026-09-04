@@ -154,12 +154,12 @@ private:
     static_assert(
       bridging::getParameterCount(&T::engage) == 6,
       "Expected engage(...) to have 6 parameters");
-    bridging::callFromJs<void>(rt, &T::engage,  static_cast<NativeRNMappPluginModuleCxxSpec*>(&turboModule)->jsInvoker_, static_cast<T*>(&turboModule),
+    return bridging::callFromJs<jsi::Value>(rt, &T::engage,  static_cast<NativeRNMappPluginModuleCxxSpec*>(&turboModule)->jsInvoker_, static_cast<T*>(&turboModule),
       count <= 0 ? throw jsi::JSError(rt, "Expected argument in position 0 to be passed") : args[0].asString(rt),
       count <= 1 ? throw jsi::JSError(rt, "Expected argument in position 1 to be passed") : args[1].asString(rt),
       count <= 2 ? throw jsi::JSError(rt, "Expected argument in position 2 to be passed") : args[2].asString(rt),
       count <= 3 ? throw jsi::JSError(rt, "Expected argument in position 3 to be passed") : args[3].asString(rt),
-      count <= 4 ? throw jsi::JSError(rt, "Expected argument in position 4 to be passed") : args[4].asString(rt));return jsi::Value::undefined();
+      count <= 4 ? throw jsi::JSError(rt, "Expected argument in position 4 to be passed") : args[4].asString(rt));
   }
 
   static jsi::Value __engageTestServer(jsi::Runtime &rt, TurboModule &turboModule, const jsi::Value* args, size_t count) {

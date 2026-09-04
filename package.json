@@ -99,7 +99,12 @@
     ],
     "transform": {
       "^.+\\.js$": "babel-jest",
-      "^.+\\.ts$": ["ts-jest", { "tsconfig": "plugin/tsconfig.json" }]
+      "^.+\\.ts$": [
+        "ts-jest",
+        {
+          "tsconfig": "plugin/tsconfig.json"
+        }
+      ]
     },
     "moduleNameMapper": {
       "^react-native$": "<rootDir>/__mocks__/react-native.js"

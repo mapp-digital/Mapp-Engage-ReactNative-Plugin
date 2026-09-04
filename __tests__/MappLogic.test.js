@@ -85,13 +85,13 @@ describe("convertEventEnum", () => {
 // ---------------------------------------------------------------------------
 
 describe("Mapp.js platform dispatch", () => {
-  test("engage() uses the generated cross-platform TurboModule method", () => {
+  test("engage() uses the generated awaitable cross-platform TurboModule method", () => {
     expect(mappSource).toMatch(/RNMappPluginModule\.engage\(/);
     expect(mappSource).not.toMatch(/RNMappPluginModule\.autoengage/);
     expect(mappSource).not.toMatch(/RNMappPluginModule\.engageInapp/);
   });
 
-  test("engage() calls RNMappPluginModule.engage on Android path", () => {
+  test("engage() calls RNMappPluginModule.engage", () => {
     expect(mappSource).toMatch(/RNMappPluginModule\.engage\s*\(/);
   });
 

@@ -384,19 +384,42 @@ public class RNMappPluginModule extends NativeRNMappPluginModuleSpec implements 
     }
 
     @ReactMethod
-    public void engage(String sdkKey, String googleProjectId, String server, String appID, String tenantID) {
-        AppoxeeOptions opt = createOptions(server, sdkKey, appID, tenantID);
-        opt.setNotificationMode(NotificationMode.BACKGROUND_AND_FOREGROUND);
+    public void engage(String sdkKey, String googleProjectId, String server, String appID,
+                       String tenantID, Promise promise) {
+        final AppoxeeOptions opt;
+        try {
+            opt = createOptions(server, sdkKey, appID, tenantID);
+            opt.setNotificationMode(NotificationMode.BACKGROUND_AND_FOREGROUND);
+        } catch (RuntimeException error) {
+            promise.reject("MAPP_ENGAGE_INVALID_CONFIGURATION", error.getMessage(), error);
+            return;
+        }
 
-        MappEngagementDispatcher.engageAsync(Objects.requireNonNull(application), opt, () -> {
-            Appoxee.instance().subscribe(new AppoxeeObserver() {
-                @Override
-                public void onReadyStatusChanged(boolean status, MappResult<DevicePayload> result) {
+        MappEngagementDispatcher.engageAsync(
+                Objects.requireNonNull(application),
+                opt,
+                this::configureAfterEngage,
+                new MappEngagementDispatcher.EngagementCallback() {
+                    @Override
+                    public void onSuccess() {
+                        promise.resolve(true);
+                    }
+
+                    @Override
+                    public void onFailure(@NonNull Exception error) {
+                        promise.reject("MAPP_ENGAGE_FAILED", "Mapp initialization failed", error);
+                    }
                 }
-            });
+        );
+    }
 
-            Appoxee.instance().setPushBroadcast(MyPushBroadcastReceiver.class);
+    private void configureAfterEngage() {
+        Appoxee.instance().subscribe(new AppoxeeObserver() {
+            @Override
+            public void onReadyStatusChanged(boolean status, MappResult<DevicePayload> result) {
+            }
         });
+        Appoxee.instance().setPushBroadcast(MyPushBroadcastReceiver.class);
     }
 
     @ReactMethod

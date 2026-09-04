@@ -16,7 +16,7 @@ export interface Spec extends TurboModule {
   getAlias(): Promise<string>;
   /** @deprecated Use engage(...). */
   engage2(): void;
-  engage(sdkKey: string, googleProjectId: string, server: string, appID: string, tenantID: string): void;
+  engage(sdkKey: string, googleProjectId: string, server: string, appID: string, tenantID: string): Promise<boolean>;
   engageTestServer(cepURl: string, sdkKey: string, googleProjectId: string, server: string, appID: string, tenantID: string): void;
   onInitCompletedListener(): Promise<boolean>;
   isReady(): Promise<boolean>;
