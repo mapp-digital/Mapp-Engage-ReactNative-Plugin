@@ -109,4 +109,5 @@ module.exports = {
   // Export for direct use in tests
   _mockNativeModule: mockNativeModule,
   _mockPlatform: mockPlatform,
+  _mockEventEmitter: mockEventEmitter,
 };

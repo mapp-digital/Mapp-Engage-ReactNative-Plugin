@@ -104,12 +104,14 @@ describe("Mapp.js platform dispatch", () => {
     expect(engageTestServerBlock[0]).toMatch(/Platform\.OS\s*==\s*["']android["']/);
   });
 
-  test("onInitCompletedListener() is guarded to Android only", () => {
+  test("onInitCompletedListener() waits for the iOS init event", () => {
     const block = mappSource.match(
       /static\s+onInitCompletedListener[\s\S]*?(?=\n\s{2}static|\n\s{2}\/\*\*)/
     );
     expect(block).not.toBeNull();
-    expect(block[0]).toMatch(/Platform\.OS\s*==\s*["']android["']/);
+    expect(block[0]).toMatch(/Platform\.OS\s*===\s*["']android["']/);
+    expect(block[0]).toMatch(/RNMappPluginModule\.isReady\(\)/);
+    expect(block[0]).toMatch(/EventEmitter\.addListener\(IOS_INIT/);
   });
 
   test("setRemoteMessage() serialises argument with JSON.stringify", () => {
