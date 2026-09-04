@@ -13,7 +13,6 @@ jobs:
       - uses: actions/setup-node@v6
         with:
           node-version: 22
-          cache: npm
       - run: npm install --no-audit --no-fund
       - run: npm run build:plugin
       - run: npm test -- --runInBand
@@ -26,7 +25,6 @@ jobs:
       - uses: actions/setup-node@v6
         with:
           node-version: 22
-          cache: npm
       - uses: actions/setup-java@v5
         with:
           distribution: temurin
