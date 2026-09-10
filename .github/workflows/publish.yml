@@ -12,9 +12,18 @@ on:
           - dry-run
           - publish
       tag:
-        description: "Optional tag override (example: v1.4.0). Leave empty to use v<package.json version>."
+        description: "Optional GitHub tag override (example: v1.4.0). Leave empty to use v<package.json version>."
         required: false
         type: string
+      npm_dist_tag:
+        description: "npm dist-tag. Use legacy for a 1.x release when latest is already 2.x."
+        required: true
+        default: latest
+        type: choice
+        options:
+          - latest
+          - legacy
+          - next
 
 jobs:
   publish:
@@ -54,6 +63,7 @@ jobs:
           echo "release_title=Mapp Engage RN - $VERSION" >> "$GITHUB_OUTPUT"
           echo "Using release tag: $TAG"
           echo "Using release title: Mapp Engage RN - $VERSION"
+          echo "Using npm dist-tag: ${{ inputs.npm_dist_tag }}"
 
       - name: Install dependencies
         run: npm install --no-audit --no-fund
@@ -66,13 +76,13 @@ jobs:
 
       - name: Publish to npm (dry-run)
         if: ${{ inputs.deployment_mode == 'dry-run' }}
-        run: npm publish --provenance --access public --dry-run
+        run: npm publish --provenance --access public --tag "${{ inputs.npm_dist_tag }}" --dry-run
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
       - name: Publish to npm
         if: ${{ inputs.deployment_mode == 'publish' }}
-        run: npm publish --provenance --access public
+        run: npm publish --provenance --access public --tag "${{ inputs.npm_dist_tag }}"
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
