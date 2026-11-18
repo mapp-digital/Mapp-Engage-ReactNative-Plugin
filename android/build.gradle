@@ -100,7 +100,7 @@ dependencies {
     api('com.google.android.gms:play-services-location:21.3.0')
     implementation 'androidx.media:media:1.8.0'
     implementation 'androidx.legacy:legacy-support-v13:1.0.0'
-    implementation("com.mapp.sdk:engage-android:7.1.2") {
+    implementation("com.mapp.sdk:engage-android:7.1.4") {
         exclude group: "androidx.lifecycle", module: "lifecycle-extensions"
     }
     testImplementation 'junit:junit:4.13.2'

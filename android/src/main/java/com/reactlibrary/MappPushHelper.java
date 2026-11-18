@@ -22,7 +22,7 @@ public final class MappPushHelper {
 
     private MappPushHelper() {}
 
-    /** Engage Mapp using AppoxeeConfig/native defaults if it has not been engaged yet. */
+    /** Reuse or engage Mapp on main and register its receiver, without requiring JavaScript. */
     public static boolean initialize(@NonNull Application application) {
         return MappEngagementDispatcher.engageBlocking(application, null);
     }

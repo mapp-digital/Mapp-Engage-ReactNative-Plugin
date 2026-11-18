@@ -1,3 +1,21 @@
+## Version 2.0.2 (Unreleased)
+
+***Dependency Updates***
+
+- Android: Updated Mapp Engage SDK from 7.1.2 to 7.1.4. New default notification channels use HIGH importance; existing v6/v7 channels and their user settings are preserved. Existing DEFAULT channels are not promoted automatically; users can enable popup banners in Android channel settings. HIGH remains subject to notification permission, Do Not Disturb and device settings. Dashboard channel IDs do not need to change. ([SDK-2246](https://mapp.atlassian.net/browse/SDK-2246))
+
+***Bug Fixes***
+
+- Android: With the updated native SDK, debuggable apps, including Expo development builds, receive full request/response diagnostics. Non-debuggable apps remain silent with `DEBUG` and receive only redacted diagnostics with `RELEASE`.
+- Android: All initialization paths now register the plugin push receiver, including background push/token handling and deprecated `engage2()`. Registration completes before initialization success is returned and does not require JavaScript to be running. ([SDK-2145](https://mapp.atlassian.net/browse/SDK-2145))
+- Android: The native SDK reuses its existing instance when engagement is repeated with the same configuration, including while initialization is still running. Retries and explicit configuration changes also use the same instance, retaining observer subscriptions and receiver registration. Channel changes cancel obsolete requests and discard queued pushes from the previous channel. The native SDK also registers its shared lifecycle listener once to prevent duplicate session reports. ([SDK-2146](https://mapp.atlassian.net/browse/SDK-2146))
+- Android: Background initialization requests that time out or are interrupted before starting are abandoned so they cannot later apply an obsolete configuration.
+- Android: SDK 7.1.4 makes push receiver registration immediately available while saving it, avoiding callbacks being skipped during persistence. ([SDK-2144](https://mapp.atlassian.net/browse/SDK-2144))
+
+***Tests***
+
+- Added plugin regression coverage for shared receiver setup, main-thread dispatch, failure handling, and abandoned background requests. Native SDK coverage checks stable instance identity across retries and reconfiguration, preserved subscriptions and receiver registration, obsolete request cancellation, queued push handling, one lifecycle registration, and one session report after repeated engagement.
+
 ## Version 2.0.1 (2026/09/04)
 
 ***Bug Fixes***

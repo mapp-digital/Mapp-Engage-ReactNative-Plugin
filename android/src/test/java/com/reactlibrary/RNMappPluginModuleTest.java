@@ -167,6 +167,7 @@ public class RNMappPluginModuleTest {
 
         module.engage2();
         Shadows.shadowOf(Looper.getMainLooper()).idle();
+        verify(mockAppoxeeInstance).setPushBroadcast(MyPushBroadcastReceiver.class);
 
         mockedAppoxee.verify(() ->
                 Appoxee.engage(eq(RuntimeEnvironment.getApplication()), eq(null))
@@ -282,6 +283,7 @@ public class RNMappPluginModuleTest {
 
         module.engageTestServer("cepUrl", "myKey", "projectId", "TEST", "appId", "tenantId");
         Shadows.shadowOf(Looper.getMainLooper()).idle();
+        verify(mockAppoxeeInstance).setPushBroadcast(MyPushBroadcastReceiver.class);
 
         mockedAppoxee.verify(() ->
                 Appoxee.engage(eq(RuntimeEnvironment.getApplication()), argThat(opt ->

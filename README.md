@@ -93,6 +93,8 @@ await Mapp.engage('ANDROID_SDK_KEY', 'FCM_PROJECT_ID', 'EMC', 'APP_ID', 'TENANT_
 
 Always await `Mapp.engage(...)` before calling APIs that use the native Mapp singleton. The promise resolves after native engagement and bridge setup complete; use `Mapp.onInitCompletedListener()` or `Mapp.isReady()` when a feature specifically requires the SDK's later ready state.
 
+On Android, the native SDK handles repeated engagement with the same configuration by reusing its current instance, including while initialization is still running. Explicit configuration changes are applied, and failed initialization can be retried. Background push and token callbacks reuse the current configuration and register the plugin receiver without starting JavaScript. The engagement promise still resolves before network initialization finishes.
+
 ### Android push ownership
 
 `pushHandling: "mapp"` is the default. It requires `expo.android.googleServicesFile` and retains `com.reactlibrary.MessageService` as the sole normal-priority Mapp FCM callback owner. The config plugin removes the Mapp SDK v7 service (`com.appoxee.shared.MappMessagingService`) from the merged app manifest.
@@ -112,6 +114,24 @@ Use `pushHandling: "custom"` when another integration, such as a client-owned `F
 ```
 
 `Mapp.setRemoteMessage(...)` remains available when JavaScript is guaranteed to be alive. The native helper is required for reliable background and terminated delivery. `expo-notifications` coexistence must use custom ownership and explicit native forwarding; successful manifest merging alone does not forward payloads.
+
+### Android notification channels in 2.0.2
+
+Plugin 2.0.2 uses Mapp Engage Android SDK 7.1.4. Rebuild the native app after updating the plugin; a JavaScript-only update cannot apply this fix.
+
+The native SDK selects the Android notification channel in this order:
+
+| Existing channels | Channel used |
+| --- | --- |
+| The v7 channel `${packageName}_CHANNEL_ID` exists | Keep that channel, including when a legacy channel also exists. |
+| Only the v6 default channel `channel_id_001` exists | Keep the legacy channel without creating a v7 replacement. |
+| Neither exists | Create `${packageName}_CHANNEL_ID` at `IMPORTANCE_HIGH`. |
+
+Existing channels are not renamed, deleted, replaced or reconfigured. Their importance, blocked state, sound, vibration, badges and other user settings are preserved. An existing v7 channel at DEFAULT remains at DEFAULT; users who want popup banners can enable them in that channel's Android notification settings. The SDK does not override muted or blocked channels.
+
+HIGH importance supports heads-up notifications, subject to notification permission, Do Not Disturb and device settings. It does not guarantee a popup on every device. Mapp dashboard channel IDs are separate from Android notification channels and do not need to change. This fix does not restore v6 custom-sound-channel routing.
+
+Channel selection stays in the native SDK and applies to both plugin-owned and custom-forwarded push handling. No new JavaScript configuration or application-side channel migration is required. On Android versions without notification channels, existing notification priority and mode behavior is retained.
 
 ### Geofencing
 
@@ -135,6 +155,8 @@ The extension is also declared in Expo's experimental EAS app-extension metadata
 | iOS deployment target | 16.4 (library minimum: 15.1) |
 | Mapp Android SDK | 7.1.2 |
 | Mapp iOS SDKs | Vendored xcframeworks in this package |
+
+This table records the previously tested baseline. Plugin 2.0.2 updates the Android SDK to 7.1.4; validation of that combination must be recorded separately before release.
 
 Mapp Engage Android 7.1.2 currently publishes Android dependencies newer than the Expo SDK 57 toolchain can consume. This release exports bounded compatibility constraints for AndroidX Core 1.18.0, WorkManager 2.10.5, Lifecycle 2.10.0, Play Services Location 21.3.0, and Kotlin stdlib 2.1.20. These pins can be removed after the Mapp Android publication adopts the Expo-compatible versions.
 

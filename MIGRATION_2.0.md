@@ -61,6 +61,20 @@ Applications that own a custom `FirebaseMessagingService` can now use `com.react
 
 `Mapp.setRemoteMessage(...)`, `Mapp.isPushFromMapp(...)`, and `Mapp.setToken(...)` remain supported when JavaScript is guaranteed to be running. They are not reliable replacements for native Firebase callbacks while the application is backgrounded or terminated.
 
+## Android fixes in 2.0.2
+
+Version 2.0.2 uses Mapp Engage Android SDK 7.1.4. Update the plugin and rebuild the app to include the native fixes; no JavaScript API changes are required.
+
+All Android initialization paths register the plugin push receiver before returning success, including background initialization without JavaScript. The native SDK reuses its current instance for repeated calls with the same configuration, including while initialization is running. Failed initialization can be retried, and an explicit configuration change is applied. Background calls without options keep the current configuration.
+
+The native SDK registers its shared activity lifecycle listener once, preventing repeated initialization from producing duplicate session reports. New default notification channels use HIGH importance. Existing v7 channels, or the v6 default channel when no v7 channel exists, are retained with their user settings. An existing channel's importance is not raised automatically.
+
+For a direct native v6 upgrade, the SDK keeps v6 channel if no v7 channel exists. If v7 channel already exists, that v7 channel wins even when the legacy channel has higher importance. No existing channel is deleted, replaced, renamed or reconfigured, so blocked state, sound, vibration, badges and other settings are preserved.
+
+An existing DEFAULT channel stays at DEFAULT. Users who want popup banners can enable them in that channel's Android notification settings. Newly created HIGH channels support heads-up notifications, subject to notification permission, Do Not Disturb and device settings; HIGH does not bypass those controls.
+
+Mapp dashboard channel IDs do not need to change. Keep using the existing push ownership and permission flow; no new JavaScript API or application-side channel migration is needed. Restoring v6 custom-sound-channel routing is outside this fix. See [Android notification channels](README.md#android-notification-channels-in-202) for the complete selection policy.
+
 ## Expo configuration
 
 Add the package to the Expo `plugins` array and supply the required iOS Mapp values. The default Android `pushHandling` mode is `"mapp"` and requires `expo.android.googleServicesFile`.

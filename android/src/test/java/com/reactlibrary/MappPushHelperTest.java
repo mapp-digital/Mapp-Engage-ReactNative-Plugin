@@ -42,11 +42,25 @@ public class MappPushHelperTest {
     private Application application;
     private MockedStatic<Appoxee> mockedAppoxee;
     private ExecutorService executor;
+    private Appoxee sdk;
+    private final java.util.concurrent.atomic.AtomicReference<Appoxee> installed =
+            new java.util.concurrent.atomic.AtomicReference<>();
 
     @Before
     public void setUp() {
         application = RuntimeEnvironment.getApplication();
+        sdk = mock(Appoxee.class);
+        installed.set(null);
         mockedAppoxee = mockStatic(Appoxee.class);
+        mockedAppoxee.when(Appoxee::instance).thenAnswer(invocation -> {
+            Appoxee instance = installed.get();
+            if (instance == null) throw new NullPointerException("not engaged");
+            return instance;
+        });
+        mockedAppoxee.when(() -> Appoxee.engage(any(), isNull())).thenAnswer(invocation -> {
+            installed.set(sdk);
+            return null;
+        });
         executor = Executors.newSingleThreadExecutor();
     }
 
@@ -63,12 +77,14 @@ public class MappPushHelperTest {
         AtomicBoolean invokedOnMain = new AtomicBoolean(false);
         mockedAppoxee.when(() -> Appoxee.engage(any(), isNull())).thenAnswer(invocation -> {
             invokedOnMain.set(Looper.myLooper() == Looper.getMainLooper());
+            installed.set(sdk);
             return null;
         });
 
         assertTrue(MappPushHelper.initialize(application));
 
         assertTrue(invokedOnMain.get());
+        org.mockito.Mockito.verify(sdk).setPushBroadcast(MyPushBroadcastReceiver.class);
     }
 
     @Test
@@ -83,6 +99,7 @@ public class MappPushHelperTest {
         }).when(handler).post(any(Runnable.class));
         mockedAppoxee.when(() -> Appoxee.engage(any(), isNull())).thenAnswer(invocation -> {
             assertEquals(Looper.getMainLooper(), Looper.myLooper());
+            installed.set(sdk);
             return null;
         });
 
@@ -93,6 +110,7 @@ public class MappPushHelperTest {
         Shadows.shadowOf(Looper.getMainLooper()).idle();
 
         assertTrue(initialized.get(1, TimeUnit.SECONDS));
+        org.mockito.Mockito.verify(sdk).setPushBroadcast(MyPushBroadcastReceiver.class);
     }
 
     @Test

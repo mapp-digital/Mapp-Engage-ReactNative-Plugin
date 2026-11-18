@@ -389,6 +389,7 @@ public class RNMappPluginModule extends NativeRNMappPluginModuleSpec implements 
         final AppoxeeOptions opt;
         try {
             opt = createOptions(server, sdkKey, appID, tenantID);
+            opt.setLogType(AppoxeeOptions.LogLevel.DEBUG);
             opt.setNotificationMode(NotificationMode.BACKGROUND_AND_FOREGROUND);
         } catch (RuntimeException error) {
             promise.reject("MAPP_ENGAGE_INVALID_CONFIGURATION", error.getMessage(), error);
@@ -398,7 +399,7 @@ public class RNMappPluginModule extends NativeRNMappPluginModuleSpec implements 
         MappEngagementDispatcher.engageAsync(
                 Objects.requireNonNull(application),
                 opt,
-                this::configureAfterEngage,
+                null,
                 new MappEngagementDispatcher.EngagementCallback() {
                     @Override
                     public void onSuccess() {
@@ -413,29 +414,12 @@ public class RNMappPluginModule extends NativeRNMappPluginModuleSpec implements 
         );
     }
 
-    private void configureAfterEngage() {
-        Appoxee.instance().subscribe(new AppoxeeObserver() {
-            @Override
-            public void onReadyStatusChanged(boolean status, MappResult<DevicePayload> result) {
-            }
-        });
-        Appoxee.instance().setPushBroadcast(MyPushBroadcastReceiver.class);
-    }
-
     @ReactMethod
     public void engageTestServer(String cepURl, String sdkKey, String googleProjectId, String server,
                                  String appID, String tenantID) {
         AppoxeeOptions opt = createOptions(server, sdkKey, appID, tenantID);
 
-        MappEngagementDispatcher.engageAsync(Objects.requireNonNull(application), opt, () -> {
-            Appoxee.instance().subscribe(new AppoxeeObserver() {
-                @Override
-                public void onReadyStatusChanged(boolean status, MappResult<DevicePayload> result) {
-                }
-            });
-
-            Appoxee.instance().setPushBroadcast(MyPushBroadcastReceiver.class);
-        });
+        MappEngagementDispatcher.engageAsync(Objects.requireNonNull(application), opt, null);
     }
 
     static AppoxeeOptions createOptions(String server, String sdkKey, String appID, String tenantID) {
