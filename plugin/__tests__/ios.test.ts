@@ -2,11 +2,13 @@ import fs from 'fs';
 import os from 'os';
 import path from 'path';
 import plist from '@expo/plist';
+import { ConfigPlugin, ExportedConfig, IOSConfig } from '@expo/config-plugins';
 import {
   buildAppoxeeConfig,
   buildNotificationServiceInfoPlist,
   writeAppoxeeConfig,
   writeNotificationServiceFiles,
+  withMappEngageIos,
 } from '../src/ios';
 
 const options = {
@@ -78,5 +80,148 @@ describe('iOS Appoxee configuration', () => {
     const entitlements = plist.parse(await fs.promises.readFile(output[1], 'utf8')) as any;
     expect(entitlements['com.apple.security.application-groups'])
       .toEqual([`group.${bundleIdentifier}`]);
+  });
+});
+
+describe('iOS notification service target metadata', () => {
+  const appConfig = {
+    name: 'TestApp',
+    slug: 'test-app',
+    version: '3.2.1',
+    ios: { bundleIdentifier: 'com.example.app', buildNumber: '42' },
+  };
+
+  function createProject(): any {
+    const project = require('xcode').project('TestApp.xcodeproj/project.pbxproj');
+    project.hash = {
+      project: {
+        rootObject: 'PROJECT',
+        objects: {
+          PBXProject: { PROJECT: { isa: 'PBXProject', mainGroup: 'ROOT', targets: [] } },
+          PBXGroup: { ROOT: { isa: 'PBXGroup', children: [], sourceTree: '"<group>"' } },
+          PBXNativeTarget: {},
+          PBXBuildFile: {},
+          PBXFileReference: {},
+          XCBuildConfiguration: {},
+          XCConfigurationList: {},
+          PBXContainerItemProxy: {},
+          PBXTargetDependency: {},
+        },
+      },
+    };
+    project.addPbxGroup([], 'Products');
+    const app = project.addTarget('TestApp', 'application', 'TestApp', appConfig.ios.bundleIdentifier);
+    app.pbxNativeTarget.name = 'TestApp';
+    app.pbxNativeTarget.dependencies = [];
+    project.addBuildPhase([], 'PBXResourcesBuildPhase', 'Resources', app.uuid);
+    const group = project.addPbxGroup([], 'TestApp', 'TestApp');
+    project.getPBXGroupByKey('ROOT').children.push({ value: group.uuid, comment: 'TestApp' });
+    return project;
+  }
+
+  async function applyPlugin(project: any, input: Parameters<ConfigPlugin>[0] = appConfig) {
+    const config: ExportedConfig = withMappEngageIos(structuredClone(input), options);
+    await config.mods!.ios!.xcodeproj!({
+      ...config,
+      modResults: project,
+      modRawConfig: input,
+      modRequest: {
+        projectName: 'TestApp',
+        projectRoot: os.tmpdir(),
+        platformProjectRoot: path.join(os.tmpdir(), 'ios'),
+        platform: 'ios',
+        modName: 'xcodeproj',
+        introspect: false,
+      },
+    });
+  }
+
+  function extensionConfigurations(project: any) {
+    const [, target] = IOSConfig.Target.findNativeTargetByName(project, 'MappNotificationService');
+    return IOSConfig.XcodeUtils.getBuildConfigurationsForListId(project, target.buildConfigurationList);
+  }
+
+  it('generates complete bundle metadata with matching app versions in Debug and Release', async () => {
+    const project = createProject();
+    await applyPlugin(project);
+    const configurations = extensionConfigurations(project);
+    expect(configurations.map(([, configuration]) => configuration.name)).toEqual(['Debug', 'Release']);
+    for (const [, { buildSettings }] of configurations) {
+      expect(buildSettings).toMatchObject({
+        GENERATE_INFOPLIST_FILE: 'YES',
+        PRODUCT_BUNDLE_IDENTIFIER: '"com.example.app.mappnotificationservice"',
+        MARKETING_VERSION: '3.2.1',
+        CURRENT_PROJECT_VERSION: '42',
+      });
+    }
+  });
+
+  it('repairs existing targets and updates versions without duplicating targets or changing signing', async () => {
+    const project = createProject();
+    await applyPlugin(project);
+    for (const [, { buildSettings }] of extensionConfigurations(project)) {
+      buildSettings.GENERATE_INFOPLIST_FILE = 'NO';
+      delete buildSettings.MARKETING_VERSION;
+      delete buildSettings.CURRENT_PROJECT_VERSION;
+      buildSettings.CODE_SIGN_STYLE = 'Manual';
+    }
+    const updatedConfig = {
+      ...appConfig,
+      version: '4.0.0',
+      ios: { bundleIdentifier: 'com.example.updated', buildNumber: '43' },
+    };
+    const appTarget = IOSConfig.XcodeUtils.getApplicationNativeTarget({
+      project,
+      projectName: 'TestApp',
+    });
+    for (const [, configuration] of IOSConfig.XcodeUtils.getBuildConfigurationsForListId(
+      project,
+      appTarget.target.buildConfigurationList
+    )) {
+      configuration.buildSettings.PRODUCT_BUNDLE_IDENTIFIER = '"com.example.updated"';
+    }
+    await applyPlugin(project, updatedConfig);
+    const firstResult = project.writeSync();
+    await applyPlugin(project, updatedConfig);
+    expect(project.writeSync()).toBe(firstResult);
+    expect(IOSConfig.Target.getNativeTargets(project)).toHaveLength(2);
+    for (const [, { buildSettings }] of extensionConfigurations(project)) {
+      expect(buildSettings).toMatchObject({
+        GENERATE_INFOPLIST_FILE: 'YES',
+        PRODUCT_BUNDLE_IDENTIFIER: '"com.example.updated.mappnotificationservice"',
+        MARKETING_VERSION: '4.0.0',
+        CURRENT_PROJECT_VERSION: '43',
+        CODE_SIGN_STYLE: 'Manual',
+      });
+    }
+  });
+
+  it('uses the matching app configuration bundle identifier for each extension configuration', async () => {
+    const project = createProject();
+    const appTarget = IOSConfig.XcodeUtils.getApplicationNativeTarget({
+      project,
+      projectName: 'TestApp',
+    });
+    const appConfigurations = IOSConfig.XcodeUtils.getBuildConfigurationsForListId(
+      project,
+      appTarget.target.buildConfigurationList
+    );
+    for (const [, configuration] of appConfigurations) {
+      configuration.buildSettings.PRODUCT_BUNDLE_IDENTIFIER =
+        configuration.name === 'Debug' ? '"com.example.app.debug"' : '"com.example.app"';
+    }
+
+    await applyPlugin(project);
+
+    const extensionConfigurationsByName = new Map(
+      extensionConfigurations(project).map(([, configuration]) => [
+        configuration.name,
+        configuration.buildSettings.PRODUCT_BUNDLE_IDENTIFIER,
+      ])
+    );
+    expect(extensionConfigurationsByName).toEqual(new Map([
+      ['Debug', '"com.example.app.debug.mappnotificationservice"'],
+      ['Release', '"com.example.app.mappnotificationservice"'],
+    ]));
   });
 });

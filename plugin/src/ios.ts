@@ -174,12 +174,12 @@ function addNotificationServiceToEasConfig(config: any, bundleIdentifier: string
   ];
 }
 
-function addNotificationServiceTarget(project: any, bundleIdentifier: string): void {
+function addNotificationServiceTarget(project: any, bundleIdentifier: string): string {
   const existingTarget = IOSConfig.Target.getNativeTargets(project).find(([, target]) => (
     IOSConfig.XcodeUtils.unquote(target.name) === notificationServiceTargetName
   ));
   if (existingTarget) {
-    return;
+    return existingTarget[1].buildConfigurationList;
   }
 
   project.hash.project.objects.PBXContainerItemProxy =
@@ -216,13 +216,13 @@ function addNotificationServiceTarget(project: any, bundleIdentifier: string): v
     const settings = buildConfiguration.buildSettings;
     settings.CODE_SIGN_STYLE = 'Automatic';
     settings.CODE_SIGN_ENTITLEMENTS = `"${notificationServiceTargetName}/${notificationServiceEntitlementsName}"`;
-    settings.GENERATE_INFOPLIST_FILE = 'NO';
     settings.INFOPLIST_FILE = `"${notificationServiceTargetName}/${notificationServiceInfoPlistName}"`;
     settings.IPHONEOS_DEPLOYMENT_TARGET = notificationServiceDeploymentTarget;
-    settings.PRODUCT_BUNDLE_IDENTIFIER = `"${bundleIdentifier}"`;
     settings.SWIFT_VERSION = '5.0';
     settings.TARGETED_DEVICE_FAMILY = '"1,2"';
   }
+
+  return target.pbxNativeTarget.buildConfigurationList;
 }
 
 function appendUnique(values: unknown, value: string): string[] {
@@ -287,7 +287,40 @@ export const withMappEngageIos: ConfigPlugin<NormalizedMappExpoPluginProps['ios'
         targetUuid: target.uuid,
       });
     }
-    addNotificationServiceTarget(project, notificationServiceBundleIdentifier);
+    const configurationList = addNotificationServiceTarget(project, notificationServiceBundleIdentifier);
+    const appTarget = IOSConfig.XcodeUtils.getApplicationNativeTarget({
+      project,
+      projectName: configWithProject.modRequest.projectName!,
+    });
+    const appConfigurations = IOSConfig.XcodeUtils.getBuildConfigurationsForListId(
+      project,
+      appTarget.target.buildConfigurationList
+    );
+    const appBundleIdentifiers = new Map(
+      appConfigurations.map(([, buildConfiguration]) => {
+        const appBundleIdentifier = buildConfiguration.buildSettings.PRODUCT_BUNDLE_IDENTIFIER;
+        return [
+          buildConfiguration.name,
+          appBundleIdentifier
+            ? IOSConfig.XcodeUtils.unquote(appBundleIdentifier)
+            : configWithProject.ios!.bundleIdentifier!,
+        ];
+      })
+    );
+    for (const [, buildConfiguration] of IOSConfig.XcodeUtils.getBuildConfigurationsForListId(
+      project,
+      configurationList
+    )) {
+      // Merge the extension plist with Xcode's required bundle metadata. Apply
+      // this to existing targets too, so non-clean prebuilds repair older projects.
+      const settings = buildConfiguration.buildSettings;
+      const appBundleIdentifier = appBundleIdentifiers.get(buildConfiguration.name)
+        ?? configWithProject.ios!.bundleIdentifier!;
+      settings.GENERATE_INFOPLIST_FILE = 'YES';
+      settings.PRODUCT_BUNDLE_IDENTIFIER = `"${appBundleIdentifier}.mappnotificationservice"`;
+      settings.MARKETING_VERSION = IOSConfig.Version.getVersion(configWithProject);
+      settings.CURRENT_PROJECT_VERSION = IOSConfig.Version.getBuildNumber(configWithProject);
+    }
     return configWithProject;
   });
 };

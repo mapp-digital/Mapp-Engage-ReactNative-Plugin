@@ -6,6 +6,8 @@
 
 ***Bug Fixes***
 
+- iOS/Expo: Generate the notification service extension’s required bundle metadata and synchronize its bundle identifier with each matching app build configuration, plus its version and build number with the app. Existing extension targets are repaired on subsequent prebuilds, preventing the embedded binary bundle identifier error without an app-local workaround.
+
 - Android: With the updated native SDK, debuggable apps, including Expo development builds, receive full request/response diagnostics. Non-debuggable apps remain silent with `DEBUG` and receive only redacted diagnostics with `RELEASE`.
 - Android: All initialization paths now register the plugin push receiver, including background push/token handling and deprecated `engage2()`. Registration completes before initialization success is returned and does not require JavaScript to be running. ([SDK-2145](https://mapp.atlassian.net/browse/SDK-2145))
 - Android: The native SDK reuses its existing instance when engagement is repeated with the same configuration, including while initialization is still running. Retries and explicit configuration changes also use the same instance, retaining observer subscriptions and receiver registration. Channel changes cancel obsolete requests and discard queued pushes from the previous channel. The native SDK also registers its shared lifecycle listener once to prevent duplicate session reports. ([SDK-2146](https://mapp.atlassian.net/browse/SDK-2146))
@@ -13,6 +15,8 @@
 - Android: SDK 7.1.4 makes push receiver registration immediately available while saving it, avoiding callbacks being skipped during persistence. ([SDK-2144](https://mapp.atlassian.net/browse/SDK-2144))
 
 ***Tests***
+
+- Added iOS config-plugin regression coverage for Debug/Release extension metadata, upgrades of existing targets, version changes, and idempotent prebuilds that preserve signing settings.
 
 - Added plugin regression coverage for shared receiver setup, main-thread dispatch, failure handling, and abandoned background requests. Native SDK coverage checks stable instance identity across retries and reconfiguration, preserved subscriptions and receiver registration, obsolete request cancellation, queued push handling, one lifecycle registration, and one session report after repeated engagement.
 
