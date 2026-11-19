@@ -55,7 +55,8 @@ public class MappEngagementDispatcherTest {
             if (installed.get() == null) throw new NullPointerException("not engaged");
             return installed.get();
         });
-        statics.when(() -> Appoxee.engage(any(), nullable(AppoxeeOptions.class)))
+        // Exclude null so restubbing does not execute this answer with matcher placeholders.
+        statics.when(() -> Appoxee.engage(any(Application.class), nullable(AppoxeeOptions.class)))
                 .thenAnswer(invocation -> {
                     assertEquals(Looper.getMainLooper(), Looper.myLooper());
                     attempts.add(invocation.getArgument(1));
