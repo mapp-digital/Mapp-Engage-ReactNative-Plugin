@@ -46,3 +46,9 @@ Runs all 53 tests across 5 test classes:
 - `GetRemoteMessageTest` — JSON → RemoteMessage parsing
 - `RNUtilsTest` — ReadableMap → JSONObject conversion
 - `PushNotificationEventTest` — push event name constant
+
+
+#### Verify Expo runtime dependencies
+```bash
+./gradlew verifyExpo57RuntimeDependencies --no-daemon --console=plain
+```
